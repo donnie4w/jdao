@@ -246,7 +246,9 @@ public class QueryDao implements BaseDao {
 						String firstLetter = columnName.substring(0, 1).toUpperCase();
 						String setMethodName = "set" + firstLetter + columnName.substring(1);
 						Method setMethod = clazz.getMethod(setMethodName, new Class[] { clazz.getDeclaredField(columnName).getType() });
-						setMethod.invoke(object, new Object[] { rs.getObject(i) });
+						if (rs.getObject(i) != null) {
+							setMethod.invoke(object, rs.getObject(i));
+						}
 					}
 					list.add(object);
 				}
@@ -366,8 +368,7 @@ public class QueryDao implements BaseDao {
 	 * @param format
 	 *            格式化
 	 * @param field
-	 *            查询字段 查询日期类型字段值，格式化后返回Date类型 format the Date value and return
-	 *            Date type
+	 *            查询字段 查询日期类型字段值，格式化后返回Date类型 format the Date value and return Date type
 	 */
 	public Date field2Date(String field, String format) throws ParseException {
 		return Util.dateFormat((Date) (valueMap.get(fieldFormat(field))), format);
@@ -377,8 +378,7 @@ public class QueryDao implements BaseDao {
 	 * @param format
 	 *            格式化
 	 * @param field
-	 *            查询字段 查询日期类型字段值，格式化后返回String类型 format the Date value and return
-	 *            String type
+	 *            查询字段 查询日期类型字段值，格式化后返回String类型 format the Date value and return String type
 	 */
 	public String field2DateString(String field, String format) throws ParseException {
 		return Util.date2String((Date) (valueMap.get(fieldFormat(field))), format);
@@ -423,8 +423,7 @@ public class QueryDao implements BaseDao {
 	}
 
 	/**
-	 * Flips this QueryDao. The limit is set to the current position and then
-	 * the position is set to zero.
+	 * Flips this QueryDao. The limit is set to the current position and then the position is set to zero.
 	 */
 	public void flip() {
 		pos.set(0);

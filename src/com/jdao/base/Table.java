@@ -15,7 +15,7 @@ import com.jdao.dbHandler.JdaoHandler;
  * @param <T>
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
  * @date 2013-1-10
- * @verion 1.0.8.1
+ * @verion 1.0.9
  */
 public class Table<T extends Table<?>> {
 	static final String AND = " and ";
