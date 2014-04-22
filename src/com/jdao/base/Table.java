@@ -176,11 +176,12 @@ public class Table<T extends Table<?>> {
 			for (String string : whereMap.keySet()) {
 				sbWhere.append(string);
 				Object o = whereMap.get(string);
-				if (o instanceof Array) {
-					getArrayObj(list, (Array) o);
-				} else {
-					list.add(whereMap.get(string));
-				}
+				if (o != null)
+					if (o instanceof Array) {
+						getArrayObj(list, (Array) o);
+					} else {
+						list.add(o);
+					}
 			}
 			sb.append(sbWhere.toString().replaceFirst(AND, " where "));
 		}
@@ -532,11 +533,12 @@ public class Table<T extends Table<?>> {
 			for (String str : whereMap.keySet()) {
 				sbWhere.append(str);
 				Object o = whereMap.get(str);
-				if (o instanceof Array) {
-					getArrayObj(list, (Array) o);
-				} else {
-					list.add(whereMap.get(str));
-				}
+				if (o != null)
+					if (o instanceof Array) {
+						getArrayObj(list, (Array) o);
+					} else {
+						list.add(o);
+					}
 			}
 			sb.append(sbWhere.toString().replaceFirst(AND, " where "));
 		}
@@ -573,11 +575,12 @@ public class Table<T extends Table<?>> {
 			for (String str : whereMap.keySet()) {
 				sbWhere.append(str);
 				Object o = whereMap.get(str);
-				if (o instanceof Array) {
-					getArrayObj(list, (Array) o);
-				} else {
-					list.add(whereMap.get(str));
-				}
+				if (o != null)
+					if (o instanceof Array) {
+						getArrayObj(list, (Array) o);
+					} else {
+						list.add(o);
+					}
 				// if (i < length) {
 				// sbWhere.append(",");
 				// }

@@ -23,46 +23,56 @@ public class Fields implements Field {
 		fieldName = name;
 	}
 
+	public Where parse(Object value, String _OPER) {
+		String f = "?";
+		Object v = value;
+		if (value instanceof Fields) {
+			f = ((Fields) value).getFieldName();
+			v = null;
+		}
+		return new Where(AND + fieldName + _OPER + f, v);
+	}
+
 	/**
 	 * = 等于
 	 */
 	public Where EQ(Object value) {
-		return new Where(AND + fieldName + EQ + "?", value);
+		return parse(value, EQ);
 	}
 
 	/**
 	 * >= 大于等于
 	 */
 	public Where GT(Object value) {
-		return new Where(AND + fieldName + GT + "?", value);
+		return parse(value, GT);
 	}
 
 	/**
 	 * <= 大于等于
 	 */
 	public Where GE(Object value) {
-		return new Where(AND + fieldName + GE + "?", value);
+		return parse(value, GE);
 	}
 
 	/**
 	 * < 小于等于
 	 */
 	public Where LE(Object value) {
-		return new Where(AND + fieldName + LE + "?", value);
+		return parse(value, LE);
 	}
 
 	/**
 	 * > 小于
 	 */
 	public Where LT(Object value) {
-		return new Where(AND + fieldName + LT + "?", value);
+		return  parse(value, LT);
 	}
 
 	/**
 	 * <> 不等于
 	 */
 	public Where NEQ(Object value) {
-		return new Where(AND + fieldName + NEQ + "?", value);
+		return parse(value, LT);
 	}
 
 	/**
@@ -226,5 +236,4 @@ public class Fields implements Field {
 	public int hashCode() {
 		return this.fieldName.hashCode() * 31;
 	}
-
 }

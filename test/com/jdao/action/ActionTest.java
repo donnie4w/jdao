@@ -20,7 +20,11 @@ import com.jdao.dbHandlerImpl.JdaoHandlerFactory;
  * @verion 1.0 数据增删改查 测试
  */
 public class ActionTest {
-	JdaoHandler jdao = JdaoHandlerFactory.getDBHandler4spring();
+	static JdaoHandler jdao = JdaoHandlerFactory.getDBHandler4spring();
+	static {
+		System.out.println("init");
+		DaoFactory.setJdaoHandler(jdao);
+	}
 
 	@Test
 	public void query1() throws Exception {
@@ -65,7 +69,7 @@ public class ActionTest {
 		Hstest t = new Hstest();
 		t.setCommentLine("cache=key");
 		// t.setJdaoHandler(jdao);
-//		t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
+		// t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
 		t.where(Hstest.ID.LE(10), Hstest.ID.GE(2));
 		t.group(Hstest.ID);
 		t.query(Hstest.ID, Hstest.ID.count().AS("idcount"));
@@ -83,7 +87,7 @@ public class ActionTest {
 		t2.where(Hstest.ID.LE(10), Hstest.ID.GE(2));
 		t2.group(Hstest.ID);
 		t2.query(Hstest.ID, Hstest.ID.count().AS("idcount"));
-		
+
 	}
 
 	/**
@@ -97,7 +101,7 @@ public class ActionTest {
 		// select sum(id) from hstest
 		Hstest t = new Hstest();
 		// t.setJdaoHandler(jdao);
-//		t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
+		// t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
 		System.out.println(t.queryForInt(Hstest.ID.count()));
 		System.out.println(t.queryForInt(Hstest.ID.sum()));
 	}
@@ -140,6 +144,20 @@ public class ActionTest {
 		QueryDao qd = t.query(Hstest.ID.round(0).AS("idRound"), Hstest.ROWNAME);
 		System.out.println(qd.fieldValue(1));
 		System.out.println(qd.fieldValue(2));
+	}
+
+	@Test
+	public void query7() throws Exception {
+		Hstest t = new Hstest();
+		t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
+		t.where(Hstest.VALUE.EQ(Hstest.ROWNAME));
+		List<Hstest> list = t.query();
+		System.out.println(list.size());
+		for (Hstest h : list) {
+			System.out.println(h.getId());
+			System.out.println(h.getValue());
+			System.out.println(h.getRowname());
+		}
 	}
 
 	/**
@@ -208,6 +226,19 @@ public class ActionTest {
 		System.out.println("update===" + updateCount);
 	}
 
+	@Test
+	public void update2() throws Exception {
+		// update hstest set rowname=?,value=? where id=? and value=rowname
+		Hstest t = new Hstest();
+		// t.setJdaoHandler(jdao);
+		t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
+		t.setRowname("wuxiaodong10");
+		t.setValue("wuxiaodong10");
+		t.where(Hstest.ID.EQ(10), Hstest.VALUE.EQ(Hstest.ROWNAME));
+		int updateCount = t.update();
+		System.out.println("update===" + updateCount);
+	}
+
 	/**
 	 * 数据删除测试
 	 * 
@@ -221,6 +252,18 @@ public class ActionTest {
 		// t.setJdaoHandler(jdao);
 		t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
 		t.where(Hstest.ID.EQ(1), Hstest.ROWNAME.EQ("donnie"));
+		int updateCount = t.delete();
+		System.out.println("delete===" + updateCount);
+	}
+
+	@Test
+	public void detele2() throws Exception {
+		// delete from hstest where id=? and rowname=value
+		Hstest t = new Hstest();
+		t.setLoggerOn(true);
+		// t.setJdaoHandler(jdao);
+		t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
+		t.where(Hstest.ID.EQ(2), Hstest.ROWNAME.EQ(Hstest.VALUE));
 		int updateCount = t.delete();
 		System.out.println("delete===" + updateCount);
 	}
