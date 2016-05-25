@@ -22,6 +22,7 @@ public class Log {
 			if (logger == null && isLog) {
 				logger = Logger.getLogger(clazz == null ? "" : clazz.getName());
 				Handler handler = new ConsoleHandler();
+				logger.setUseParentHandlers(false);
 				logger.setLevel(Level.ALL);
 				handler.setLevel(Level.ALL);
 				logger.addHandler(handler);

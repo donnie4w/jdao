@@ -31,8 +31,7 @@ public class CreateDaoUtil {
 	 *             通过jdbc连接数据库，根据参数 tableName(表名) 生成相应的 java源文件。 生成的java文件没有package ，所以 实际使用时，需在生成的文件中自行加上相应的包名。 destPath
 	 *             为java文件的目标地址。如果空值则生成的文件在根目录下(文件创建完成后会在控制台提示生成文件的绝对地址)。
 	 */
-	public static void createFile(String tablename, String destPath, Connection conn, String charset) throws UnsupportedEncodingException,
-			IOException, SQLException {
+	public static void createFile(String tablename, String destPath, Connection conn, String charset) throws UnsupportedEncodingException, IOException, SQLException {
 		createFile_(null, tablename, destPath, conn, charset, false);
 	}
 
@@ -46,8 +45,7 @@ public class CreateDaoUtil {
 	 * @throws SQLException
 	 *             如果文件存在测覆盖
 	 */
-	public static void createFileForce(String tablename, String destPath, Connection conn, String charset) throws UnsupportedEncodingException,
-			IOException, SQLException {
+	public static void createFileForce(String tablename, String destPath, Connection conn, String charset) throws UnsupportedEncodingException, IOException, SQLException {
 		createFile_(null, tablename, destPath, conn, charset, true);
 	}
 
@@ -61,8 +59,7 @@ public class CreateDaoUtil {
 	 * @throws IOException
 	 * @throws SQLException
 	 */
-	public static void createFile(String packageName, String tablename, String destPath, Connection conn, String charset)
-			throws UnsupportedEncodingException, IOException, SQLException {
+	public static void createFile(String packageName, String tablename, String destPath, Connection conn, String charset) throws UnsupportedEncodingException, IOException, SQLException {
 		createFile_(packageName, tablename, destPath, conn, charset, false);
 	}
 
@@ -76,13 +73,11 @@ public class CreateDaoUtil {
 	 * @throws IOException
 	 * @throws SQLException
 	 */
-	public static void createFileForce(String packageName, String tablename, String destPath, Connection conn, String charset)
-			throws UnsupportedEncodingException, IOException, SQLException {
+	public static void createFileForce(String packageName, String tablename, String destPath, Connection conn, String charset) throws UnsupportedEncodingException, IOException, SQLException {
 		createFile_(packageName, tablename, destPath, conn, charset, true);
 	}
 
-	private static void createFile_(String packageName, String tablename, String destPath, Connection conn, String charset, boolean isForce)
-			throws UnsupportedEncodingException, IOException, SQLException {
+	private static void createFile_(String packageName, String tablename, String destPath, Connection conn, String charset, boolean isForce) throws UnsupportedEncodingException, IOException, SQLException {
 		String curdir = destPath;
 		if (curdir == null || "".equals(curdir.trim()))
 			curdir = System.getProperty("user.dir");
@@ -140,9 +135,8 @@ public class CreateDaoUtil {
 				javaType = Types.BIGINT;
 			}
 			String type = type2String(javaType) + " ";
-
-			sb4Fields.append("\tpublic final static Fields ").append(fileName.toUpperCase() + " = ")
-					.append("new Fields(\"" + meta.getColumnName(i) + "\")").append(";").append("\n");
+			sb4Fields.append("\t/**").append(meta.getColumnLabel(i)).append("*/").append("\n");
+			sb4Fields.append("\tpublic final static Fields ").append(fileName.toUpperCase() + " = ").append("new Fields(\"`" + meta.getColumnName(i) + "`\")").append(";").append("\n");
 
 			sb4FieldArgs.append(fileName.toUpperCase());
 			if (i < meta.getColumnCount())
@@ -159,9 +153,7 @@ public class CreateDaoUtil {
 			sb4GetSet.append("\tpublic ").append(type).append("get").append(Utils.upperFirstChar(fileName)).append("(){").append("\n");
 			sb4GetSet.append("\t\treturn this.").append(fileName).append(";").append("\n");
 			sb4GetSet.append("\t}").append("\n\n");
-
-			sb4GetSet.append("\tpublic void ").append("set").append(Utils.upperFirstChar(fileName)).append("(").append(type).append(fileName)
-					.append("){").append("\n");
+			sb4GetSet.append("\tpublic void ").append("set").append(Utils.upperFirstChar(fileName)).append("(").append(type).append(fileName).append("){").append("\n");
 			sb4GetSet.append("\t\tfieldValueMap.put(" + fileName.toUpperCase() + ", " + fileName + ");").append("\n");
 			sb4GetSet.append("\t\t this.").append(fileName).append("=").append(fileName).append(";").append("\n");
 			sb4GetSet.append("\t}").append("\n");

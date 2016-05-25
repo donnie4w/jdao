@@ -16,7 +16,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import com.jdao.dbHandler.JdaoHandler;
+import com.jdao.exception.JdaoRunTimeException;
 
 /**
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
@@ -161,8 +163,7 @@ public class QueryDao implements BaseDao {
 	public QueryDao(String sql, Object... objects) throws SQLException {
 		this.sql = sql;
 		this.args = objects;
-		execute(this.jdao == null ? DaoFactory.jdaoMap.containsKey(QueryDao.class) ? DaoFactory.jdaoMap.get(QueryDao.class) : DaoFactory
-				.getJaoHandler() : this.jdao);
+		execute(this.jdao == null ? DaoFactory.jdaoMap.containsKey(QueryDao.class) ? DaoFactory.jdaoMap.get(QueryDao.class) : DaoFactory.getJaoHandler() : this.jdao);
 	}
 
 	protected QueryDao(Map<String, Class<?>> typeMap, Map<String, Object> valueMap) {
@@ -308,21 +309,21 @@ public class QueryDao implements BaseDao {
 	 * 返回字段类型 return the field's java type
 	 */
 	public Class<?> fieldType(String field) {
-		return typeMap.get(fieldFormat(field));
+		return typeMap != null ? typeMap.get(fieldFormat(field)) : null;
 	}
 
 	/**
 	 * 根据字段名field 返回字段的值 return the value of field
 	 */
 	public Object fieldValue(String field) {
-		return valueMap.get(fieldFormat(field));
+		return valueMap != null ? valueMap.get(fieldFormat(field)) : null;
 	}
 
 	/**
 	 * 根据字段查询先后的索引值index返回字段的值 return the value of field
 	 */
 	public Object fieldValue(int index) {
-		if (index > valueMap.size()) {
+		if (valueMap == null || index > valueMap.size()) {
 			return null;
 		}
 		if (valueObjects == null)
@@ -347,21 +348,32 @@ public class QueryDao implements BaseDao {
 	 * 将字段值转换为整型 field's value to int
 	 */
 	public int field2Int(String field) {
-		return Integer.parseInt(String.valueOf(valueMap.get(fieldFormat(field))));
+		if (valueMap != null) {
+			return Integer.parseInt(String.valueOf(valueMap.get(fieldFormat(field))));
+		} else {
+			throw new JdaoRunTimeException("field2Int error");
+		}
 	}
 
 	/**
 	 * 将字段值转换为字符串 field's value to String
 	 */
 	public String field2String(String field) {
-		return String.valueOf(valueMap.get(fieldFormat(field)));
+		if (valueMap != null) {
+			return String.valueOf(valueMap.get(fieldFormat(field)));
+		} else {
+			throw new JdaoRunTimeException("field2String error");
+		}
 	}
 
 	/**
 	 * 将字段值转换为BigDecimal类型 field's value to BigDecimal
 	 */
 	public BigDecimal field2BigDecimal(String field) {
-		return new BigDecimal(String.valueOf(valueMap.get(fieldFormat(field))));
+		if (valueMap != null)
+			return new BigDecimal(String.valueOf(valueMap.get(fieldFormat(field))));
+		else
+			throw new JdaoRunTimeException("field2BigDecimal error");
 	}
 
 	/**
@@ -371,7 +383,10 @@ public class QueryDao implements BaseDao {
 	 *            查询字段 查询日期类型字段值，格式化后返回Date类型 format the Date value and return Date type
 	 */
 	public Date field2Date(String field, String format) throws ParseException {
-		return Util.dateFormat((Date) (valueMap.get(fieldFormat(field))), format);
+		if (valueMap != null)
+			return Util.dateFormat((Date) (valueMap.get(fieldFormat(field))), format);
+		else
+			throw new JdaoRunTimeException("field2Date error");
 	}
 
 	/**
@@ -381,7 +396,10 @@ public class QueryDao implements BaseDao {
 	 *            查询字段 查询日期类型字段值，格式化后返回String类型 format the Date value and return String type
 	 */
 	public String field2DateString(String field, String format) throws ParseException {
-		return Util.date2String((Date) (valueMap.get(fieldFormat(field))), format);
+		if (valueMap != null)
+			return Util.date2String((Date) (valueMap.get(fieldFormat(field))), format);
+		else
+			throw new JdaoRunTimeException("field2DateString error");
 	}
 
 	/**

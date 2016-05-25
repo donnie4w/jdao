@@ -97,7 +97,7 @@ public class CreateDaoXmlUtil {
 			}
 			String fileName = Utils.delUnderline(columnName);
 
-			sb4Fields.append("\tpublic final static Fields ").append(fileName.toUpperCase() + " = ").append("new Fields(\"" + fileName + "\")")
+			sb4Fields.append("\tpublic final static Fields ").append(fileName.toUpperCase() + " = ").append("new Fields(\"`" + fileName + "`\")")
 					.append(";").append("\n");
 			sb4FieldArgs.append(fileName.toUpperCase());
 			if (i < lists.size())
