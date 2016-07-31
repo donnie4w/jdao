@@ -16,18 +16,19 @@ public class Where {
 
 	public Where(String expression, Object... value) {
 		this.expression = expression;
-		this.value = value;
+		if (value != null && value.length > 0)
+			this.value = value;
 	}
 
 	public OR OR(Where... wheres) {
 		if (wheres != null && wheres.length == 1) {
 			expression = expression + wheres[0].getExpression().replaceFirst(" and ", " or ");
-			value = new Array(value, wheres[0].getValue());
+			value = value != null ? new Array(value, wheres[0].getValue()) : null;
 		} else {
 			StringBuilder sb = new StringBuilder();
 			for (Where w : wheres) {
 				sb.append(w.getExpression());
-				value = new Array(value, w.getValue());
+				value = value != null ? new Array(value, w.getValue()) : null;
 			}
 			sb.append(") ");
 			expression = expression + sb.toString().replaceFirst(" and ", " or (");
@@ -38,7 +39,7 @@ public class Where {
 
 	public Where AND(OR or) {
 		expression = expression + or.getExpression().replaceFirst(" and ", " and (") + ")";
-		value = new Array(value, or.getValue());
+		value = value != null ? new Array(value, or.getValue()) : null;
 		return this;
 	}
 

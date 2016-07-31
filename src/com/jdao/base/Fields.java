@@ -72,7 +72,7 @@ public class Fields implements Field {
 	 * <> 不等于
 	 */
 	public Where NEQ(Object value) {
-		return parse(value, LT);
+		return parse(value, NEQ);
 	}
 
 	/**
@@ -128,7 +128,21 @@ public class Fields implements Field {
 		}
 		return new Where(AND + fieldName + " not in(" + sb.toString() + ") ", new Array(objects));
 	}
-
+	
+	/**
+	 * is null
+	 */
+	public Where ISNULL(){
+		return new Where(AND + fieldName + " is null ");
+	}
+	
+	/**
+	 * is not null
+	 */
+	public Where ISNONULL(){
+		return new Where(AND + fieldName + " is not null ");
+	}
+	
 	/**
 	 * order by ? asc 升序
 	 */
