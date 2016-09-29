@@ -1,5 +1,7 @@
 package com.jdao.base;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -10,6 +12,13 @@ public class Log {
 	private boolean isLog;
 	private Class<?> clazz;
 	Object o = new Object();
+	private static Handler handler = null;
+	private static Map<Handler, Byte> mapHandler = new ConcurrentHashMap<Handler, Byte>();
+
+	static {
+		handler = new ConsoleHandler();
+		handler.setLevel(Level.ALL);
+	}
 
 	private Log(boolean on, Class<?> clazz) {
 		isLog = on;
@@ -21,11 +30,14 @@ public class Log {
 		synchronized (o) {
 			if (logger == null && isLog) {
 				logger = Logger.getLogger(clazz == null ? "" : clazz.getName());
-				Handler handler = new ConsoleHandler();
 				logger.setUseParentHandlers(false);
 				logger.setLevel(Level.ALL);
-				handler.setLevel(Level.ALL);
-				logger.addHandler(handler);
+				synchronized (mapHandler.getClass()) {
+					if (!mapHandler.containsKey(handler)) {
+						mapHandler.put(handler, (byte) 0);
+						logger.addHandler(handler);
+					}
+				}
 			}
 		}
 	}

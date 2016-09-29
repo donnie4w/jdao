@@ -18,6 +18,9 @@ import com.jdao.dbHandler.JdaoHandler;
  * @verion 1.0.9
  */
 public class Table<T extends Table<?>> {
+	@SuppressWarnings("unused")
+	private static final String JdaoVersion = "1.1.1";
+
 	static final String AND = " and ";
 	private Log logger = Log.newInstance();
 	protected Map<String, Object> whereMap = new LinkedHashMap<String, Object>();
