@@ -1,8 +1,10 @@
 package com.jdao.dbHandler;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+
 import com.jdao.base.QueryDao;
 import com.jdao.base.Table;
 
@@ -11,7 +13,7 @@ import com.jdao.base.Table;
  * @date 2013-1-10
  * @verion 1.0
  */
-public interface JdaoHandler {
+public interface JdaoHandler extends Serializable{
 	/**
 	 * @return  返回连接
 	 */

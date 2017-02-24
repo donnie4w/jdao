@@ -1,5 +1,6 @@
 package com.jdao.base;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -17,12 +18,17 @@ import com.jdao.dbHandler.JdaoHandler;
  * @date 2013-1-10
  * @verion 1.0.9
  */
-public class Table<T extends Table<?>> {
+public  class Table<T extends Table<?>> implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@SuppressWarnings("unused")
 	private static final String JdaoVersion = "1.1.1";
 
 	static final String AND = " and ";
-	private Log logger = Log.newInstance();
+	private transient Log logger = Log.newInstance();
 	protected Map<String, Object> whereMap = new LinkedHashMap<String, Object>();
 	protected Map<String, Object> havingMap = new LinkedHashMap<String, Object>();
 	protected StringBuilder sortStr = new StringBuilder();
@@ -33,9 +39,9 @@ public class Table<T extends Table<?>> {
 	private Class<T> clazz = null;
 	private Map<Fields, List<Object>> mBatch = new HashMap<Fields, List<Object>>();
 	protected boolean isloggerOn = false;
-	private JdaoHandler jdao = null;
+	private transient JdaoHandler jdao = null;
 	protected Map<Fields, Object> fieldValueMap = null;
-	private FieldFilter fieldFilter;
+	private transient FieldFilter fieldFilter;
 	private boolean isCache = false;
 	private String domain = null;
 	private String node = null;

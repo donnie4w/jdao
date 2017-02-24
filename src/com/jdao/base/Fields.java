@@ -1,12 +1,18 @@
 package com.jdao.base;
 
+import java.io.Serializable;
+
 /**
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
  * @date 2013-1-10
  * @verion 1.0
  */
-public class Fields implements Field {
+public class Fields implements Field ,Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	static final String AND = " and ";
 	static final String EQ = "=";
 	static final String GT = ">";
