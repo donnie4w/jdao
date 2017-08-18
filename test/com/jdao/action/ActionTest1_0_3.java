@@ -44,19 +44,19 @@ public class ActionTest1_0_3 {
 
 	@Test
 	static void qureyDaoTest() throws SQLException {
-		QueryDao qd = new QueryDao("select id,rowname,value from hstest where id=?", 1);
+		QueryDao qd = new QueryDao("select id,rowname,value from hstest where id=?", 3);
 		System.out.println(qd.fieldValue("rowname"));
 	}
 	
 	@Test
 	static void qureyDaoTest2() throws Exception {
-		List<Hstest> list = QueryDao.queryForBeens(Hstest.class,"select id,rowname,value from hstest where id=?", 1);
+		List<Hstest> list = QueryDao.queryForBeens(Hstest.class,"select id,rowname,value from hstest where id=?", 10);
 		System.out.println(list.get(0).getValue());
 	}
 
 
 	public static void main(String[] args) throws Exception {
-		ActionTest1_0_3.daoTest();
+//		ActionTest1_0_3.daoTest();
 		ActionTest1_0_3.qureyDaoTest();
 		ActionTest1_0_3.qureyDaoTest2();
 	}
