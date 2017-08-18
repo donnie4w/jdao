@@ -3,43 +3,26 @@ package com.jdao.dbHandlerImpl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.sql.DataSource;
 import com.jdao.base.QueryDao;
 import com.jdao.base.Table;
 import com.jdao.dbHandler.JdaoHandler;
 import com.jdao.dbHandler.JdaoUtil;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /**
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
  * @date 2013-3-7
  * @verion 1.0.3
  */
-public class JdaoHandlerImplSingleTon implements JdaoHandler {
+public class JdaoHandlerImplSingleTon2 implements JdaoHandler {
 	private static final long serialVersionUID = 1L;
-	private final static Map<String, DataSource> dataSourceMap = new HashMap<String, DataSource>();
 	private DataSource dataSource;
 	private boolean transaction = false;
 	private Connection conn;
 
-	public JdaoHandlerImplSingleTon(DataSource dataSource) {
+	public JdaoHandlerImplSingleTon2(DataSource dataSource) {
 		this.dataSource = dataSource;
-	}
-
-	public JdaoHandlerImplSingleTon(String db) {
-		if (!dataSourceMap.containsKey(db)) {
-			synchronized (JdaoHandlerImplSingleTon.class) {
-				if (!dataSourceMap.containsKey(db)) {
-					dataSource = new ComboPooledDataSource(db);
-					dataSourceMap.put(db, dataSource);
-				}
-			}
-		} else {
-			dataSource = dataSourceMap.get(db);
-		}
 	}
 
 	public Connection getConnection() {

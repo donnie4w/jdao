@@ -19,11 +19,16 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
  * @verion 1.0 注意每次使用需创建实例
  */
 public class JdaoHandlerImpl implements JdaoHandler {
-
+	private static final long serialVersionUID = 1L;
 	private final static Map<String, DataSource> dataSourceMap = new HashMap<String, DataSource>();
 	private DataSource dataSource;
 	private Connection conn = null;
 	private boolean transaction = false;
+
+	public JdaoHandlerImpl(DataSource dataSource) {
+		this.dataSource = dataSource;
+		getConnection();
+	}
 
 	public JdaoHandlerImpl(String db) {
 		if (!dataSourceMap.containsKey(db)) {

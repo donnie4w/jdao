@@ -20,6 +20,7 @@ import com.jdao.dbHandler.JdaoUtil;
  */
 public class JdaoImpl4JdbcTemplate implements JdaoHandler {
 
+	private static final long serialVersionUID = 1L;
 	JdbcTemplate jdbcTemplate;
 
 	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
