@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -38,6 +39,8 @@ public class QueryDao implements BaseDao {
 	private final Object lock = new Object();
 	private JdaoHandler jdao;
 
+	private Log log = Log.newInstance(true, QueryDao.class);
+
 	/**
 	 * @param jdao
 	 * @param sql
@@ -63,7 +66,8 @@ public class QueryDao implements BaseDao {
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T> List<T> queryForBeens(JdaoHandler jdao, Class<T> clazz, String sql, Object... objects) throws Exception {
+	public static <T> List<T> queryForBeens(JdaoHandler jdao, Class<T> clazz, String sql, Object... objects)
+			throws Exception {
 		Connection con = null;
 		try {
 			con = jdao.getConnection();
@@ -85,7 +89,8 @@ public class QueryDao implements BaseDao {
 	 */
 	public static <T> List<T> queryForBeens(Class<T> clazz, String sql, Object... objects) throws Exception {
 		Connection con = null;
-		JdaoHandler jdao = DaoFactory.jdaoMap.containsKey(clazz) ? DaoFactory.jdaoMap.get(clazz) : DaoFactory.getJaoHandler();
+		JdaoHandler jdao = DaoFactory.jdaoMap.containsKey(clazz) ? DaoFactory.jdaoMap.get(clazz)
+				: DaoFactory.getJaoHandler();
 		try {
 			con = jdao.getConnection();
 			return execute4Been(con, clazz, sql, objects);
@@ -104,7 +109,8 @@ public class QueryDao implements BaseDao {
 	 * @return
 	 * @throws Exception
 	 */
-	public static List<Map<String, Object>> queryForMaps(JdaoHandler jdao, String sql, Object... objects) throws Exception {
+	public static List<Map<String, Object>> queryForMaps(JdaoHandler jdao, String sql, Object... objects)
+			throws Exception {
 		Connection con = null;
 		try {
 			con = jdao.getConnection();
@@ -142,6 +148,12 @@ public class QueryDao implements BaseDao {
 		this.jdao = jdaoHandler;
 	}
 
+	public void setLoggerOn(boolean b) {
+		if (b) {
+			log.log("[SELETE SQL][" + this.sql + "]" + (this.args == null||this.args.length==0 ? "" :  Arrays.toString(this.args) ));
+		}
+	}
+
 	/**
 	 * @param conn
 	 *            数据库连接
@@ -163,7 +175,10 @@ public class QueryDao implements BaseDao {
 	public QueryDao(String sql, Object... objects) throws SQLException {
 		this.sql = sql;
 		this.args = objects;
-		execute(this.jdao == null ? DaoFactory.jdaoMap.containsKey(QueryDao.class) ? DaoFactory.jdaoMap.get(QueryDao.class) : DaoFactory.getJaoHandler() : this.jdao);
+		execute(this.jdao == null
+				? DaoFactory.jdaoMap.containsKey(QueryDao.class) ? DaoFactory.jdaoMap.get(QueryDao.class)
+						: DaoFactory.getJaoHandler()
+				: this.jdao);
 	}
 
 	protected QueryDao(Map<String, Class<?>> typeMap, Map<String, Object> valueMap) {
@@ -228,7 +243,8 @@ public class QueryDao implements BaseDao {
 		}
 	}
 
-	private static <T> List<T> execute4Been(Connection conn, Class<T> clazz, String sql, Object... objects) throws Exception {
+	private static <T> List<T> execute4Been(Connection conn, Class<T> clazz, String sql, Object... objects)
+			throws Exception {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		List<T> list = new ArrayList<T>();
@@ -246,7 +262,8 @@ public class QueryDao implements BaseDao {
 						String columnName = rs.getMetaData().getColumnLabel(i);
 						String firstLetter = columnName.substring(0, 1).toUpperCase();
 						String setMethodName = "set" + firstLetter + columnName.substring(1);
-						Method setMethod = clazz.getMethod(setMethodName, new Class[] { clazz.getDeclaredField(columnName).getType() });
+						Method setMethod = clazz.getMethod(setMethodName,
+								new Class[] { clazz.getDeclaredField(columnName).getType() });
 						if (rs.getObject(i) != null) {
 							setMethod.invoke(object, rs.getObject(i));
 						}
@@ -266,7 +283,8 @@ public class QueryDao implements BaseDao {
 		return list;
 	}
 
-	private static List<Map<String, Object>> execute4Maps(Connection conn, String sql, Object... objects) throws Exception {
+	private static List<Map<String, Object>> execute4Maps(Connection conn, String sql, Object... objects)
+			throws Exception {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -380,7 +398,8 @@ public class QueryDao implements BaseDao {
 	 * @param format
 	 *            格式化
 	 * @param field
-	 *            查询字段 查询日期类型字段值，格式化后返回Date类型 format the Date value and return Date type
+	 *            查询字段 查询日期类型字段值，格式化后返回Date类型 format the Date value and return Date
+	 *            type
 	 */
 	public Date field2Date(String field, String format) throws ParseException {
 		if (valueMap != null)
@@ -393,7 +412,8 @@ public class QueryDao implements BaseDao {
 	 * @param format
 	 *            格式化
 	 * @param field
-	 *            查询字段 查询日期类型字段值，格式化后返回String类型 format the Date value and return String type
+	 *            查询字段 查询日期类型字段值，格式化后返回String类型 format the Date value and return
+	 *            String type
 	 */
 	public String field2DateString(String field, String format) throws ParseException {
 		if (valueMap != null)
@@ -441,7 +461,8 @@ public class QueryDao implements BaseDao {
 	}
 
 	/**
-	 * Flips this QueryDao. The limit is set to the current position and then the position is set to zero.
+	 * Flips this QueryDao. The limit is set to the current position and then the
+	 * position is set to zero.
 	 */
 	public void flip() {
 		pos.set(0);
