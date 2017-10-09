@@ -18,7 +18,7 @@ import com.jdao.dbHandler.JdaoHandler;
  * @date 2013-1-10
  * @verion 1.0.9
  */
-public  class Table<T extends Table<?>> implements Serializable {
+public class Table<T extends Table<?>> implements Serializable {
 	/**
 	 * 
 	 */
@@ -55,8 +55,11 @@ public  class Table<T extends Table<?>> implements Serializable {
 		this.TABLENAME = tablename;
 		this.clazz = claz;
 		fieldValueMap = new MyMap<Fields, Object>(clazz);
+		String pkgn = claz.getPackage().getName();
 		if (DaoFactory.jdaoMap.containsKey(claz)) {
 			this.jdao = DaoFactory.jdaoMap.get(claz);
+		} else if (pkgn!=null && DaoFactory.jdaoPackageMap.containsKey(pkgn)) {
+			this.jdao = DaoFactory.jdaoPackageMap.get(pkgn);
 		} else {
 			this.jdao = DaoFactory.getJaoHandler();
 		}
@@ -381,7 +384,8 @@ public  class Table<T extends Table<?>> implements Serializable {
 	}
 
 	/**
-	 * 仅适用于mysql ，插入并返回主鍵ID,调用的是mysql LAST_INSERT_ID() 函数； 注意：该方法调用了jdaoHandler的close()方法关闭了连接
+	 * 仅适用于mysql ，插入并返回主鍵ID,调用的是mysql LAST_INSERT_ID() 函数；
+	 * 注意：该方法调用了jdaoHandler的close()方法关闭了连接
 	 * 
 	 * @return int
 	 * @throws SQLException
@@ -396,7 +400,8 @@ public  class Table<T extends Table<?>> implements Serializable {
 	}
 
 	/**
-	 * 仅适用于mysql ，插入并返回主鍵ID,调用的是mysql LAST_INSERT_ID() 函数； 注意：该方法沒有调用了jdaoHandler的close()方法。 仅适用于jdaoHandler实例中使用的是同一个connnect的情况。
+	 * 仅适用于mysql ，插入并返回主鍵ID,调用的是mysql LAST_INSERT_ID() 函数；
+	 * 注意：该方法沒有调用了jdaoHandler的close()方法。 仅适用于jdaoHandler实例中使用的是同一个connnect的情况。
 	 * 
 	 * @return int
 	 * @throws SQLException

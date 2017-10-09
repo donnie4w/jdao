@@ -1,13 +1,8 @@
 package com.jdao.base;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 import com.jdao.dbHandler.JdaoHandler;
 
@@ -20,7 +15,7 @@ public class DaoFactory {
 	private static JdaoHandler jdao;
 	private static FieldFilter field;
 	public static Map<Class<?>, JdaoHandler> jdaoMap = new ConcurrentHashMap<Class<?>, JdaoHandler>();
-
+	public static Map<String, JdaoHandler> jdaoPackageMap = new ConcurrentHashMap<String, JdaoHandler>();
 	public static Map<Class<?>, FieldFilter> fieldMap = new ConcurrentHashMap<Class<?>, FieldFilter>();
 
 	private DaoFactory() {
@@ -104,39 +99,52 @@ public class DaoFactory {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 */
-	public static boolean dataSourceRegister4package(String packageName, JdaoHandler jdao) throws IOException, ClassNotFoundException {
-		String packagePath = packageName.replace('.', '/');
-		URL url = Thread.currentThread().getContextClassLoader().getResource(packagePath);
-		String protocol = url.getProtocol();
-		if ("file".equals(protocol)) {
-			File file = new File(url.getFile());
-			File[] filelist = file.listFiles();
-			for (File f : filelist) {
-				if (f.isFile() && f.getName().endsWith(".class") && !f.getName().contains("$")) {
-					String className = packageName + "." + f.getName().substring(0, f.getName().lastIndexOf("."));
-					Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
-					dataSourceForceRegister(clazz, jdao);
-				}
-			}
-		} else if ("jar".equals(protocol)) {
-			String[] jar = url.getPath().split("!");
-			String jarFilePath = jar[0].substring(jar[0].indexOf("/"));
-			@SuppressWarnings("resource")
-			JarFile jarFile = new JarFile(jarFilePath);
-			Enumeration<JarEntry> jarEntrys = jarFile.entries();
-			while (jarEntrys.hasMoreElements()) {
-				JarEntry jarEntry = jarEntrys.nextElement();
-				String entryName = jarEntry.getName();
-				if (entryName.endsWith(".class") && !entryName.contains("$") && !entryName.replaceFirst(packagePath + "/", "").contains("/")
-						&& entryName.startsWith(packagePath)) {
-					Class<?> clazz = Thread.currentThread().getContextClassLoader()
-							.loadClass(entryName.replaceAll("/", ".").replaceAll(".class", ""));
-					dataSourceForceRegister(clazz, jdao);
-				}
-			}
-		} else {
-			return false;
-		}
+	// public static boolean dataSourceRegister4package(String packageName,
+	// JdaoHandler jdao)
+	// throws IOException, ClassNotFoundException {
+	// String packagePath = packageName.replace('.', '/');
+	// URL url =
+	// Thread.currentThread().getContextClassLoader().getResource(packagePath);
+	// String protocol = url.getProtocol();
+	// if ("file".equals(protocol)) {
+	// File file = new File(url.getFile());
+	// File[] filelist = file.listFiles();
+	// for (File f : filelist) {
+	// if (f.isFile() && f.getName().endsWith(".class") &&
+	// !f.getName().contains("$")) {
+	// String className = packageName + "." + f.getName().substring(0,
+	// f.getName().lastIndexOf("."));
+	// Class<?> clazz =
+	// Thread.currentThread().getContextClassLoader().loadClass(className);
+	// dataSourceForceRegister(clazz, jdao);
+	// }
+	// }
+	// } else if ("jar".equals(protocol)) {
+	// String[] jar = url.getPath().split("!");
+	// String jarFilePath = jar[0].substring(jar[0].indexOf("/"));
+	// @SuppressWarnings("resource")
+	// JarFile jarFile = new JarFile(jarFilePath);
+	// Enumeration<JarEntry> jarEntrys = jarFile.entries();
+	// while (jarEntrys.hasMoreElements()) {
+	// JarEntry jarEntry = jarEntrys.nextElement();
+	// String entryName = jarEntry.getName();
+	// if (entryName.endsWith(".class") && !entryName.contains("$")
+	// && !entryName.replaceFirst(packagePath + "/", "").contains("/")
+	// && entryName.startsWith(packagePath)) {
+	// Class<?> clazz = Thread.currentThread().getContextClassLoader()
+	// .loadClass(entryName.replaceAll("/", ".").replaceAll(".class", ""));
+	// dataSourceForceRegister(clazz, jdao);
+	// }
+	// }
+	// } else {
+	// return false;
+	// }
+	// return true;
+	// }
+
+	public static boolean dataSourceRegister4package(String packageName, JdaoHandler jdao)
+			throws IOException, ClassNotFoundException {
+		jdaoPackageMap.put(packageName, jdao);
 		return true;
 	}
 
@@ -160,10 +168,9 @@ public class DaoFactory {
 
 	public static void main(String[] args) {
 		try {
-			DaoFactory.dataSourceRegister4package("junit.framework", null);
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+//			DaoFactory.dataSourceRegister4package("junit.framework", null);
+			System.out.println(DaoFactory.class.getName()+" | "+DaoFactory.class.getPackage().getName());
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
