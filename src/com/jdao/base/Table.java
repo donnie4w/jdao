@@ -25,7 +25,7 @@ public class Table<T extends Table<?>> implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@SuppressWarnings("unused")
-	private static final String JdaoVersion = "1.1.1";
+	private static final String JdaoVersion = "1.1.4";
 
 	static final String AND = " and ";
 	private transient Log logger = Log.newInstance();
