@@ -18,6 +18,8 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
  * @date 2013-1-13
  * @verion 1.0 注意每次使用需创建实例
  */
+
+@Deprecated
 public class JdaoHandlerImpl implements JdaoHandler {
 	private static final long serialVersionUID = 1L;
 	private final static Map<String, DataSource> dataSourceMap = new HashMap<String, DataSource>();

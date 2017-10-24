@@ -32,14 +32,51 @@ public class QueryDao implements BaseDao {
 	private Object[] args;
 	private List<QueryDao> queryDaoList = new ArrayList<QueryDao>();
 	private AtomicInteger pos = new AtomicInteger(0);
-
 	private Map<String, Class<?>> typeMap = null;
 	private Map<String, Object> valueMap = null;
 	private Object[] valueObjects = null;
 	private final Object lock = new Object();
 	private JdaoHandler jdao;
 
+	private int totalcount;
+
 	private Log log = Log.newInstance(true, QueryDao.class);
+
+	/**
+	 * @param 分页总条数
+	 */
+	public int getTotalcount() {
+		return totalcount;
+	}
+
+	/**
+	 * @param 分页总条数
+	 */
+	public QueryDao setTotalcount(int totalcount) {
+		this.totalcount = totalcount;
+		return this;
+	}
+
+	public QueryDao() {
+	}
+
+	public QueryDao(JdaoHandler jdao) {
+		this.jdao = jdao;
+	}
+
+	/**
+	 * @param sql
+	 * @return
+	 */
+	public QueryDao PageTurn(String sql, int start, int rownumber, Object... objects) throws SQLException {
+		try {
+			List<Map<String, Object>> list = queryForMaps(getjh(), "select count(1) c from (" + sql + ") A ", objects);
+			this.sql = sql + " limit " + start + " , " + rownumber;
+			return new QueryDao(getjh(), this.sql, objects).setTotalcount(Integer.parseInt(String.valueOf((list.get(0).get("c")))));
+		} catch (Exception e) {
+			throw new SQLException(e);
+		}
+	}
 
 	/**
 	 * @param jdao
@@ -66,8 +103,7 @@ public class QueryDao implements BaseDao {
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T> List<T> queryForBeens(JdaoHandler jdao, Class<T> clazz, String sql, Object... objects)
-			throws Exception {
+	public static <T> List<T> queryForBeens(JdaoHandler jdao, Class<T> clazz, String sql, Object... objects) throws Exception {
 		Connection con = null;
 		try {
 			con = jdao.getConnection();
@@ -89,8 +125,7 @@ public class QueryDao implements BaseDao {
 	 */
 	public static <T> List<T> queryForBeens(Class<T> clazz, String sql, Object... objects) throws Exception {
 		Connection con = null;
-		JdaoHandler jdao = DaoFactory.jdaoMap.containsKey(clazz) ? DaoFactory.jdaoMap.get(clazz)
-				: DaoFactory.getJaoHandler();
+		JdaoHandler jdao = DaoFactory.jdaoMap.containsKey(clazz) ? DaoFactory.jdaoMap.get(clazz) : DaoFactory.getJaoHandler();
 		try {
 			con = jdao.getConnection();
 			return execute4Been(con, clazz, sql, objects);
@@ -109,8 +144,7 @@ public class QueryDao implements BaseDao {
 	 * @return
 	 * @throws Exception
 	 */
-	public static List<Map<String, Object>> queryForMaps(JdaoHandler jdao, String sql, Object... objects)
-			throws Exception {
+	public static List<Map<String, Object>> queryForMaps(JdaoHandler jdao, String sql, Object... objects) throws Exception {
 		Connection con = null;
 		try {
 			con = jdao.getConnection();
@@ -150,7 +184,7 @@ public class QueryDao implements BaseDao {
 
 	public void setLoggerOn(boolean b) {
 		if (b) {
-			log.log("[SELETE SQL][" + this.sql + "]" + (this.args == null||this.args.length==0 ? "" :  Arrays.toString(this.args) ));
+			log.log("[SELETE SQL][" + this.sql + "]" + (this.args == null || this.args.length == 0 ? "" : Arrays.toString(this.args)));
 		}
 	}
 
@@ -175,13 +209,14 @@ public class QueryDao implements BaseDao {
 	public QueryDao(String sql, Object... objects) throws SQLException {
 		this.sql = sql;
 		this.args = objects;
-		execute(this.jdao == null
-				? DaoFactory.jdaoMap.containsKey(QueryDao.class) ? DaoFactory.jdaoMap.get(QueryDao.class)
-						: DaoFactory.getJaoHandler()
-				: this.jdao);
+		execute(getjh());
 	}
 
-	protected QueryDao(Map<String, Class<?>> typeMap, Map<String, Object> valueMap) {
+	private JdaoHandler getjh() {
+		return this.jdao == null ? DaoFactory.jdaoMap.containsKey(QueryDao.class) ? DaoFactory.jdaoMap.get(QueryDao.class) : DaoFactory.getJaoHandler() : this.jdao;
+	}
+
+	private QueryDao(Map<String, Class<?>> typeMap, Map<String, Object> valueMap) {
 		this.typeMap = typeMap;
 		this.valueMap = valueMap;
 	}
@@ -233,18 +268,11 @@ public class QueryDao implements BaseDao {
 				}
 			}
 		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-			} finally {
-				if (ps != null)
-					ps.close();
-			}
+			close(rs, ps);
 		}
 	}
 
-	private static <T> List<T> execute4Been(Connection conn, Class<T> clazz, String sql, Object... objects)
-			throws Exception {
+	private static <T> List<T> execute4Been(Connection conn, Class<T> clazz, String sql, Object... objects) throws Exception {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		List<T> list = new ArrayList<T>();
@@ -262,8 +290,7 @@ public class QueryDao implements BaseDao {
 						String columnName = rs.getMetaData().getColumnLabel(i);
 						String firstLetter = columnName.substring(0, 1).toUpperCase();
 						String setMethodName = "set" + firstLetter + columnName.substring(1);
-						Method setMethod = clazz.getMethod(setMethodName,
-								new Class[] { clazz.getDeclaredField(columnName).getType() });
+						Method setMethod = clazz.getMethod(setMethodName, new Class[] { clazz.getDeclaredField(columnName).getType() });
 						if (rs.getObject(i) != null) {
 							setMethod.invoke(object, rs.getObject(i));
 						}
@@ -272,19 +299,12 @@ public class QueryDao implements BaseDao {
 				}
 			}
 		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-			} finally {
-				if (ps != null)
-					ps.close();
-			}
+			close(rs, ps);
 		}
 		return list;
 	}
 
-	private static List<Map<String, Object>> execute4Maps(Connection conn, String sql, Object... objects)
-			throws Exception {
+	private static List<Map<String, Object>> execute4Maps(Connection conn, String sql, Object... objects) throws Exception {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -306,15 +326,21 @@ public class QueryDao implements BaseDao {
 				}
 			}
 		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-			} finally {
-				if (ps != null)
-					ps.close();
-			}
+			close(rs, ps);
 		}
 		return list;
+	}
+
+	private static void close(AutoCloseable... acs) throws SQLException {
+		for (AutoCloseable ac : acs) {
+			if (ac != null) {
+				try {
+					ac.close();
+				} catch (Exception e) {
+					throw new SQLException(e);
+				}
+			}
+		}
 	}
 
 	private String fieldFormat(String filedName) {
@@ -395,11 +421,20 @@ public class QueryDao implements BaseDao {
 	}
 
 	/**
+	 * 将字段值转换为BigDecimal类型 field's value to BigDecimal
+	 */
+	public BigDecimal field2BigDecimal(int idx) {
+		if (valueMap != null)
+			return new BigDecimal(String.valueOf(fieldValue(idx)));
+		else
+			throw new JdaoRunTimeException("field2BigDecimal error");
+	}
+
+	/**
 	 * @param format
 	 *            格式化
 	 * @param field
-	 *            查询字段 查询日期类型字段值，格式化后返回Date类型 format the Date value and return Date
-	 *            type
+	 *            查询字段 查询日期类型字段值，格式化后返回Date类型 format the Date value and return Date type
 	 */
 	public Date field2Date(String field, String format) throws ParseException {
 		if (valueMap != null)
@@ -412,8 +447,7 @@ public class QueryDao implements BaseDao {
 	 * @param format
 	 *            格式化
 	 * @param field
-	 *            查询字段 查询日期类型字段值，格式化后返回String类型 format the Date value and return
-	 *            String type
+	 *            查询字段 查询日期类型字段值，格式化后返回String类型 format the Date value and return String type
 	 */
 	public String field2DateString(String field, String format) throws ParseException {
 		if (valueMap != null)
@@ -461,8 +495,7 @@ public class QueryDao implements BaseDao {
 	}
 
 	/**
-	 * Flips this QueryDao. The limit is set to the current position and then the
-	 * position is set to zero.
+	 * Flips this QueryDao. The limit is set to the current position and then the position is set to zero.
 	 */
 	public void flip() {
 		pos.set(0);

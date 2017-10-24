@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import com.jdao.dbHandler.JdaoHandler;
 
 /**
@@ -19,13 +18,10 @@ import com.jdao.dbHandler.JdaoHandler;
  * @verion 1.0.9
  */
 public class Table<T extends Table<?>> implements Serializable {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	@SuppressWarnings("unused")
-	private static final String JdaoVersion = "1.1.4";
+	private static final String JdaoVersion = "1.1.5";
 
 	static final String AND = " and ";
 	private transient Log logger = Log.newInstance();
@@ -47,6 +43,18 @@ public class Table<T extends Table<?>> implements Serializable {
 	private String node = null;
 	private String commentLine = null;
 
+	private int totalcount;
+
+	private boolean pageTurn;
+
+	public boolean isPageTurn() {
+		return pageTurn;
+	}
+
+	public void setPageTurn(boolean pageTurn) {
+		this.pageTurn = pageTurn;
+	}
+
 	public void setJdaoHandler(JdaoHandler jdaoHandler) {
 		this.jdao = jdaoHandler;
 	}
@@ -58,7 +66,7 @@ public class Table<T extends Table<?>> implements Serializable {
 		String pkgn = claz.getPackage().getName();
 		if (DaoFactory.jdaoMap.containsKey(claz)) {
 			this.jdao = DaoFactory.jdaoMap.get(claz);
-		} else if (pkgn!=null && DaoFactory.jdaoPackageMap.containsKey(pkgn)) {
+		} else if (pkgn != null && DaoFactory.jdaoPackageMap.containsKey(pkgn)) {
 			this.jdao = DaoFactory.jdaoPackageMap.get(pkgn);
 		} else {
 			this.jdao = DaoFactory.getJaoHandler();
@@ -160,12 +168,14 @@ public class Table<T extends Table<?>> implements Serializable {
 	 * @param t
 	 */
 	public void limit(int f, int t) {
-		limitStr = new int[2];
-		limitStr[0] = f;
-		limitStr[1] = t;
+		limitStr = new int[] { f, t };
 	}
 
 	private SqlKV query_(Field... fields) throws SQLException {
+		return query_(true, fields);
+	}
+
+	private SqlKV query_(boolean isPageturn, Field... fields) throws SQLException {
 		final StringBuilder sb = new StringBuilder();
 		final List<Object> list = new ArrayList<Object>();
 		if (commentLine != null) {
@@ -217,7 +227,7 @@ public class Table<T extends Table<?>> implements Serializable {
 
 		if (sortStr.length() > 0)
 			sb.append(" order by ").append(sortStr);
-		if (limitStr != null) {
+		if (limitStr != null && isPageturn) {
 			sb.append(" limit ?,?");
 			list.add(limitStr[0]);
 			list.add(limitStr[1]);
@@ -271,6 +281,9 @@ public class Table<T extends Table<?>> implements Serializable {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<T> query(Fields... fields) throws Exception {
+		if (pageTurn) {
+			return queryForPage(fields);
+		}
 		SqlKV skv = query_(fields);
 		Object o = null;
 		if (isCache) {
@@ -280,15 +293,27 @@ public class Table<T extends Table<?>> implements Serializable {
 				return (List<T>) o;
 			}
 		}
-		if (skv.getArgs() == null) {
-			o = jdao.executeQuery(skv.getSql(), clazz);
-		} else {
-			o = jdao.executeQuery(clazz, skv.getSql(), skv.getArgs());
-		}
+		o = executeQuery(clazz, skv.getSql(), skv.getArgs());
 		if (isCache) {
 			Cache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv, node), o);
 		}
 		return (List<T>) o;
+	}
+
+	private List<T> queryForPage(Fields... fields) throws Exception {
+		SqlKV skv = query_(false, fields);
+		int totalcount = 0;
+		QueryDao qd = executeQuery("select count(1) c from (" + skv.getSql() + ") A", skv.getArgs());
+		totalcount = qd.queryDaoList().get(0).field2Int("c");
+		String sql = skv.getSql();
+		if (limitStr != null && limitStr.length > 0) {
+			sql = sql + " limit " + limitStr[0] + "," + limitStr[1];
+		}
+		List<T> list = executeQuery(clazz, sql, skv.getArgs());
+		for (T t : list) {
+			t.setTotalcount(totalcount);
+		}
+		return list;
 	}
 
 	/**
@@ -300,6 +325,9 @@ public class Table<T extends Table<?>> implements Serializable {
 	 */
 	@SuppressWarnings("unchecked")
 	public T queryById(Fields... fields) throws Exception {
+		if (pageTurn) {
+			return queryByIdForPage(fields);
+		}
 		SqlKV skv = query_(fields);
 		Object o = null;
 		if (isCache) {
@@ -309,7 +337,6 @@ public class Table<T extends Table<?>> implements Serializable {
 				return (T) o;
 			}
 		}
-
 		if (skv.getArgs() == null) {
 			o = jdao.executeQueryById(clazz, skv.getSql());
 		} else {
@@ -320,6 +347,20 @@ public class Table<T extends Table<?>> implements Serializable {
 			Cache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv, node), o);
 		}
 		return (T) o;
+	}
+
+	private T queryByIdForPage(Fields... fields) throws Exception {
+		SqlKV skv = query_(false, fields);
+		int totalcount = 0;
+		QueryDao qd = executeQuery("select count(1) cou from (" + skv.getSql() + ") A", skv.getArgs());
+		totalcount = qd.queryDaoList().get(0).field2Int("cou");
+		String sql = skv.getSql();
+		if (limitStr != null && limitStr.length > 0) {
+			sql = sql + " limit " + limitStr[0] + "," + limitStr[1];
+		}
+		T t = executeQueryById(sql, skv.getArgs());
+		t.setTotalcount(totalcount);
+		return t;
 	}
 
 	/**
@@ -362,6 +403,50 @@ public class Table<T extends Table<?>> implements Serializable {
 		return (QueryDao) o;
 	}
 
+	/**
+	 * 
+	 * @param fields
+	 *            查询字段，一般包含函数操作，如 count,sum等
+	 * @return QueryDao对象
+	 * @throws SQLException
+	 */
+	public QueryDao queryPage(Field... fields) throws SQLException {
+		SqlKV skv = query_(false, fields);
+		int totalcount = 0;
+		QueryDao qd = executeQuery("select count(1) cou from (" + skv.getSql() + ") A", skv.getArgs());
+		totalcount = qd.queryDaoList().get(0).field2Int("cou");
+		String sql = skv.getSql();
+		if (limitStr != null && limitStr.length > 0) {
+			sql = sql + " limit " + limitStr[0] + "," + limitStr[1];
+		}
+		qd = executeQuery(sql, skv.getArgs());
+		qd.setTotalcount(totalcount);
+		return qd;
+	}
+
+	private QueryDao executeQuery(String sql, Object... values) throws SQLException {
+		return jdao.executeQuery(sql, values);
+	}
+
+	private T executeQueryById(String sql, Object... values) throws SQLException {
+		try {
+			return jdao.executeQueryById(clazz, sql, values);
+		} catch (Exception e) {
+			throw new SQLException(e);
+		}
+	}
+
+	private List<T> executeQuery(Class<T> claz, String sql, Object... values) throws SQLException {
+		try {
+			if (values == null) {
+				return jdao.executeQuery(sql, claz);
+			}
+			return jdao.executeQuery(claz, sql, values);
+		} catch (Exception e) {
+			throw new SQLException(e);
+		}
+	}
+
 	private static void getArrayObj(List<Object> list, Array a) {
 		for (Object o : a.getArray()) {
 			if (o instanceof Array) {
@@ -384,8 +469,7 @@ public class Table<T extends Table<?>> implements Serializable {
 	}
 
 	/**
-	 * 仅适用于mysql ，插入并返回主鍵ID,调用的是mysql LAST_INSERT_ID() 函数；
-	 * 注意：该方法调用了jdaoHandler的close()方法关闭了连接
+	 * 仅适用于mysql ，插入并返回主鍵ID,调用的是mysql LAST_INSERT_ID() 函数； 注意：该方法调用了jdaoHandler的close()方法关闭了连接
 	 * 
 	 * @return int
 	 * @throws SQLException
@@ -400,8 +484,7 @@ public class Table<T extends Table<?>> implements Serializable {
 	}
 
 	/**
-	 * 仅适用于mysql ，插入并返回主鍵ID,调用的是mysql LAST_INSERT_ID() 函数；
-	 * 注意：该方法沒有调用了jdaoHandler的close()方法。 仅适用于jdaoHandler实例中使用的是同一个connnect的情况。
+	 * 仅适用于mysql ，插入并返回主鍵ID,调用的是mysql LAST_INSERT_ID() 函数； 注意：该方法沒有调用了jdaoHandler的close()方法。 仅适用于jdaoHandler实例中使用的是同一个connnect的情况。
 	 * 
 	 * @return int
 	 * @throws SQLException
@@ -687,6 +770,14 @@ public class Table<T extends Table<?>> implements Serializable {
 
 			return super.put(key, value);
 		}
+	}
+
+	public int getTotalcount() {
+		return totalcount;
+	}
+
+	public void setTotalcount(int totalcount) {
+		this.totalcount = totalcount;
 	}
 
 	public T useCache(String domain) {

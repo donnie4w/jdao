@@ -6,6 +6,7 @@ package com.jdao.base;
  * @verion 1.0
  */
 public class Sort implements Field {
+	private static final long serialVersionUID = 1L;
 	public String fieldName;
 
 	public Sort(String field) {

@@ -6,6 +6,7 @@ package com.jdao.base;
  * @verion 1.0
  */
 public class Func implements Field {
+	private static final long serialVersionUID = 1L;
 	public String fieldName;
 
 	public Func(String field) {
@@ -17,7 +18,7 @@ public class Func implements Field {
 	}
 
 	/**
-	 * =  等于
+	 * = 等于
 	 */
 	public Where EQ(Object value) {
 		return new Where(fieldName + "=?", value);
