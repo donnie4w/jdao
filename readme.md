@@ -98,4 +98,34 @@
 **四.对增删改SQL的操作**
 <br/>		JdaoHandler jdaohandler = JdaoHandlerFactory.getJdaoHandler(getDataSource());
 <br/>		jdaohandler.executeUpdate("insert into hstest (id,rowname,value) values(1,\"donnie\",\"wuxiaodong\")");
-		
+
+**五.DBUtils CRUD超级类 用于代替 QueryDao**
+<br/>  任何子类继承自DBUtils 都可以设置与其对应的数据源，同时支持sql编写，支持翻页
+<br/>  如：class RsTest extends DBUtils<RsTest> {}
+<br/>    //翻页
+<br/>	public static void testSelectListPage() throws Exception {
+<br/>		RsTest rt = new RsTest();
+<br/>		// 分页查询方法
+<br/>		rt.selectListPage(0, 20, "select * from hstest");
+<br/>		System.out.println(rt.rsList().size());
+<br/>		// selectListPage 会返回 totalcount
+<br/>		List<RsTest> list = rt.rsList();
+<br/>		for (RsTest r : list) {
+<br/>			System.out.println(r.getString("value"));
+<br/>		}
+<br/>	}
+<br/>
+<br/>	//单行返回
+<br/>	public static void testSelect() throws Exception {
+<br/>		RsTest rt = new RsTest();
+<br/>		rt.select("select * from hstest where id=?", 1);
+<br/>		System.out.println(rt.getString("value"));
+<br/>		rt.select("select * from hstest where id=?", 2);
+<br/>		System.out.println(rt.getString("value"));
+<br/>	}
+<br/>
+<br/>	//插入
+<br/>	public static void testInsert() throws Exception {
+<br/>		RsTest rt = new RsTest();
+<br/>		System.out.println(rt.execute("insert into hstest(`value`,`rowname`)values(?,?),(?,?) ", "wu1", "11", "wu2", "22"));
+<br/>	}
