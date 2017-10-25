@@ -129,3 +129,15 @@
 <br/>		RsTest rt = new RsTest();
 <br/>		System.out.println(rt.execute("insert into hstest(`value`,`rowname`)values(?,?),(?,?) ", "wu1", "11", "wu2", "22"));
 <br/>	}
+<br/>
+<br/>	//生成dao 的翻页测试类
+<br/>	public static void testHstest() throws Exception {
+<br/>		Hstest ht = new Hstest();
+<br/>		ht.setPageTurn(true);   //翻页
+<br/>		ht.where(Hstest.ID.GE(0));
+<br/>		List<Hstest> list = ht.query();
+<br/>		System.out.println("totalcount:" + list.get(0).getTotalcount());
+<br/>		for (Hstest h : list) {
+<br/>			System.out.println(h.getRowname() + " " + h.getValue());
+<br/>		}
+<br/>	}
