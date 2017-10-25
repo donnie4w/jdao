@@ -85,10 +85,28 @@ public class RsScanTest {
 		}
 	}
 
+	/**
+	 * 翻页多行返回
+	 * 
+	 * @throws Exception
+	 */
+	public static void testHstest() throws Exception {
+		Hstest ht = new Hstest();
+		ht.setPageTurn(true);
+		ht.where(Hstest.ID.GE(0));
+		List<Hstest> list = ht.query();
+		System.out.println("totalcount:" + list.get(0).getTotalcount());
+		for (Hstest h : list) {
+			System.out.println(h.getRowname() + " " + h.getValue());
+		}
+	}
+
 	public static void main(String[] args) throws Exception {
 		testSelect();
-		System.out.println("=================");
+		System.out.println("=================>1");
 		testSelectList();
+		System.out.println("=================>2");
+		testHstest();
 	}
 }
 
