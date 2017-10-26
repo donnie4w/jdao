@@ -68,10 +68,10 @@ public class QueryDao implements BaseDao {
 	 * @param sql
 	 * @return
 	 */
-	public QueryDao PageTurn(String sql, int start, int rownumber, Object... objects) throws SQLException {
+	public QueryDao PageTurn(String sql, int start, int rowNumber, Object... objects) throws SQLException {
 		try {
 			List<Map<String, Object>> list = queryForMaps(getjh(), "select count(1) c from (" + sql + ") A ", objects);
-			this.sql = sql + " limit " + start + " , " + rownumber;
+			this.sql = sql + " limit " + start + " , " + rowNumber;
 			return new QueryDao(getjh(), this.sql, objects).setTotalcount(Integer.parseInt(String.valueOf((list.get(0).get("c")))));
 		} catch (Exception e) {
 			throw new SQLException(e);

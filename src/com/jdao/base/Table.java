@@ -182,14 +182,21 @@ public class Table<T extends Table<?>> implements Serializable {
 			sb.append("/* ").append(commentLine).append(" */");
 		}
 		sb.append("select ");
+
 		int length = fields.length;
 		int i = 1;
+		StringBuilder fieldsSb = new StringBuilder();
 		for (Field hf : fields) {
-			sb.append(hf.getFieldName());
+			fieldsSb.append(hf.getFieldName());
 			if (i < length) {
-				sb.append(",");
+				fieldsSb.append(",");
 			}
 			i++;
+		}
+		if (fieldsSb.length() > 0) {
+			sb.append(fieldsSb.toString());
+		} else {
+			sb.append("*");
 		}
 		sb.append(" from ").append(TABLENAME);
 		length = whereMap.size();
@@ -352,8 +359,8 @@ public class Table<T extends Table<?>> implements Serializable {
 	private T queryByIdForPage(Fields... fields) throws Exception {
 		SqlKV skv = query_(false, fields);
 		int totalcount = 0;
-		QueryDao qd = executeQuery("select count(1) cou from (" + skv.getSql() + ") A", skv.getArgs());
-		totalcount = qd.queryDaoList().get(0).field2Int("cou");
+		QueryDao qd = executeQuery("select count(1) c from (" + skv.getSql() + ") A", skv.getArgs());
+		totalcount = qd.queryDaoList().get(0).field2Int("c");
 		String sql = skv.getSql();
 		if (limitStr != null && limitStr.length > 0) {
 			sql = sql + " limit " + limitStr[0] + "," + limitStr[1];
@@ -361,6 +368,21 @@ public class Table<T extends Table<?>> implements Serializable {
 		T t = executeQueryById(sql, skv.getArgs());
 		t.setTotalcount(totalcount);
 		return t;
+	}
+
+	public <K> PageDao<T> selectListPage(Fields... fields) throws Exception {
+		SqlKV skv = query_(false, fields);
+		QueryDao qd = executeQuery("select count(1) c from (" + skv.getSql() + ") A", skv.getArgs());
+		int totalcount = qd.queryDaoList().get(0).field2Int("c");
+		String sql = skv.getSql();
+		if (limitStr != null && limitStr.length > 0) {
+			sql = sql + " limit " + limitStr[0] + "," + limitStr[1];
+		}
+		List<T> list = (List<T>) executeQuery(clazz, sql, skv.getArgs());
+		PageDao<T> pd = new PageDao<T>();
+		pd.setList(list);
+		pd.setTotalcount(totalcount);
+		return pd;
 	}
 
 	/**
@@ -401,27 +423,6 @@ public class Table<T extends Table<?>> implements Serializable {
 			Cache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv, node), o);
 		}
 		return (QueryDao) o;
-	}
-
-	/**
-	 * 
-	 * @param fields
-	 *            查询字段，一般包含函数操作，如 count,sum等
-	 * @return QueryDao对象
-	 * @throws SQLException
-	 */
-	public QueryDao queryPage(Field... fields) throws SQLException {
-		SqlKV skv = query_(false, fields);
-		int totalcount = 0;
-		QueryDao qd = executeQuery("select count(1) cou from (" + skv.getSql() + ") A", skv.getArgs());
-		totalcount = qd.queryDaoList().get(0).field2Int("cou");
-		String sql = skv.getSql();
-		if (limitStr != null && limitStr.length > 0) {
-			sql = sql + " limit " + limitStr[0] + "," + limitStr[1];
-		}
-		qd = executeQuery(sql, skv.getArgs());
-		qd.setTotalcount(totalcount);
-		return qd;
 	}
 
 	private QueryDao executeQuery(String sql, Object... values) throws SQLException {
@@ -667,7 +668,6 @@ public class Table<T extends Table<?>> implements Serializable {
 		int length = whereMap.size();
 		if (length > 0) {
 			StringBuilder sbWhere = new StringBuilder();
-			// int i = 1;
 			List<Object> list = new ArrayList<Object>();
 			for (String str : whereMap.keySet()) {
 				sbWhere.append(str);
@@ -678,10 +678,6 @@ public class Table<T extends Table<?>> implements Serializable {
 					} else {
 						list.add(o);
 					}
-				// if (i < length) {
-				// sbWhere.append(",");
-				// }
-				// i++;
 			}
 			sb.append(sbWhere.toString().replaceFirst(AND, " where "));
 			String sql = sb.toString();
@@ -720,7 +716,6 @@ public class Table<T extends Table<?>> implements Serializable {
 
 	public void setFieldFilter(FieldFilter fieldFilter) {
 		this.fieldFilter = fieldFilter;
-		// this.fieldValueMap.setFieldFilter(fieldFilter);
 	}
 
 	/**
