@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 
 import com.alibaba.druid.pool.DruidDataSourceFactory;
 import com.jdao.base.DaoFactory;
+import com.jdao.base.PageDao;
 import com.jdao.base.DBUtils;
 import com.jdao.dbHandler.JdaoHandler;
 import com.jdao.dbHandler.JdaoHandlerFactory;
@@ -90,7 +91,7 @@ public class RsScanTest {
 	 * 
 	 * @throws Exception
 	 */
-	public static void testHstest() throws Exception {
+	public static void testPageTurn() throws Exception {
 		Hstest ht = new Hstest();
 		ht.setPageTurn(true);
 		ht.where(Hstest.ID.GE(0));
@@ -101,12 +102,30 @@ public class RsScanTest {
 		}
 	}
 
+	/**
+	 * 翻页多行返回
+	 * 
+	 * @throws Exception
+	 */
+	public static void testPageDao() throws Exception {
+		Hstest ht = new Hstest();
+		ht.where(Hstest.ID.GE(1));
+		PageDao<Hstest> pd = ht.selectListPage();
+		System.out.println("totalcount:" + pd.getTotalcount());
+		List<Hstest> list = pd.getList();
+		for (Hstest h : list) {
+			System.out.println(h.getRowname() + " " + h.getValue());
+		}
+	}
+
 	public static void main(String[] args) throws Exception {
 		testSelect();
 		System.out.println("=================>1");
 		testSelectList();
 		System.out.println("=================>2");
-		testHstest();
+		testPageTurn();
+		System.out.println("=================>3");
+		testPageDao();
 	}
 }
 
