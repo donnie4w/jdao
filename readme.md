@@ -131,12 +131,24 @@
 <br/>	}
 <br/>
 <br/>	//生成dao 的翻页测试类
-<br/>	public static void testHstest() throws Exception {
+<br/>	public static void testPageTurn() throws Exception {
 <br/>		Hstest ht = new Hstest();
 <br/>		ht.setPageTurn(true);   //翻页
 <br/>		ht.where(Hstest.ID.GE(0));
 <br/>		List<Hstest> list = ht.query();
 <br/>		System.out.println("totalcount:" + list.get(0).getTotalcount());
+<br/>		for (Hstest h : list) {
+<br/>			System.out.println(h.getRowname() + " " + h.getValue());
+<br/>		}
+<br/>	}
+<br/>
+<br/>	//PageDao类测试
+<br/>	public static void testPageDao() throws Exception {
+<br/>		Hstest ht = new Hstest();
+<br/>		ht.where(Hstest.ID.GE(1));
+<br/>		PageDao<Hstest> pd = ht.selectListPage();
+<br/>		System.out.println("totalcount:" + pd.getTotalcount());
+<br/>		List<Hstest> list = pd.getList();
 <br/>		for (Hstest h : list) {
 <br/>			System.out.println(h.getRowname() + " " + h.getValue());
 <br/>		}
