@@ -42,6 +42,7 @@ public class Table<T extends Table<?>> implements Serializable {
 	private String domain = null;
 	private String node = null;
 	private String commentLine = null;
+	private List<Where> whereList = new ArrayList<Where>();
 
 	private int totalcount;
 
@@ -114,8 +115,19 @@ public class Table<T extends Table<?>> implements Serializable {
 	 * 
 	 * @param wheres
 	 */
-	public void where(Where... wheres) {
+	public List<Where> where(Where... wheres) {
 		for (Where w : wheres) {
+			whereList.add(w);
+		}
+		return whereList;
+	}
+
+	public List<Where> where() {
+		return whereList;
+	}
+
+	private void parseWhere() {
+		for (Where w : whereList) {
 			whereMap.put(w.getExpression(), w.getValue());
 		}
 	}
@@ -176,6 +188,7 @@ public class Table<T extends Table<?>> implements Serializable {
 	}
 
 	private SqlKV query_(boolean isPageturn, Field... fields) throws SQLException {
+		parseWhere();
 		final StringBuilder sb = new StringBuilder();
 		final List<Object> list = new ArrayList<Object>();
 		if (commentLine != null) {
