@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import com.jdao.dbHandler.JdaoHandler;
 
 /**
@@ -34,6 +36,10 @@ public class DBUtils<T extends DBUtils<T>> implements Cloneable {
 
 	public void select(String sql, Object... objects) throws Exception {
 		qd = new QueryDao(getjh(), sql, objects);
+	}
+	
+	public DataSource getDataSource() {
+		return qd.getDataSource();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -123,15 +129,16 @@ public class DBUtils<T extends DBUtils<T>> implements Cloneable {
 	}
 
 	private JdaoHandler getjh() {
-		JdaoHandler jdao = null;
-		if (DaoFactory.jdaoMap.containsKey(this.getClass())) {
-			jdao = DaoFactory.jdaoMap.get(this.getClass());
-		} else if (DaoFactory.jdaoPackageMap.containsKey(this.getClass().getPackage().getName())) {
-			jdao = DaoFactory.jdaoPackageMap.get(this.getClass().getPackage().getName());
-		} else {
-			jdao = DaoFactory.getJaoHandler();
-		}
-		return jdao;
+		// JdaoHandler jdao = null;
+		// if (DaoFactory.jdaoMap.containsKey(this.getClass())) {
+		// jdao = DaoFactory.jdaoMap.get(this.getClass());
+		// } else if (DaoFactory.jdaoPackageMap.containsKey(this.getClass().getPackage().getName())) {
+		// jdao = DaoFactory.jdaoPackageMap.get(this.getClass().getPackage().getName());
+		// } else {
+		// jdao = DaoFactory.getJaoHandler();
+		// }
+		return DaoFactory.getJdaoHandler(this.getClass(), this.getClass().getPackage().getName());
+		// return jdao;
 	}
 
 	public int execute(String sql, Object... objects) throws SQLException {

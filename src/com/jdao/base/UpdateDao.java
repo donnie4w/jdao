@@ -11,7 +11,7 @@ public class UpdateDao {
 		Connection con = null;
 		JdaoHandler jdao = null;
 		try {
-		    jdao = DaoFactory.jdaoMap.containsKey(UpdateDao.class) ? DaoFactory.jdaoMap.get(UpdateDao.class) : DaoFactory.getJaoHandler();
+			jdao = DaoFactory.getJdaoHandler(UpdateDao.class);
 			con = jdao.getConnection();
 			execute_(con, sql, objects);
 		} finally {
@@ -23,7 +23,7 @@ public class UpdateDao {
 		Connection con = null;
 		try {
 			if (jdao == null) {
-				jdao = DaoFactory.jdaoMap.containsKey(UpdateDao.class) ? DaoFactory.jdaoMap.get(UpdateDao.class) : DaoFactory.getJaoHandler();
+				jdao = DaoFactory.getJdaoHandler(UpdateDao.class);
 			}
 			con = jdao.getConnection();
 			execute_(con, sql, objects);

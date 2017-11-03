@@ -25,6 +25,11 @@ public class JdaoHandlerImplSingleTon2 implements JdaoHandler {
 		this.dataSource = dataSource;
 	}
 
+	public DataSource getDataSource() {
+		return this.dataSource;
+	}
+
+	
 	public Connection getConnection() {
 		try {
 			return dataSource.getConnection();

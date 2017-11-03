@@ -26,6 +26,10 @@ public class JdaoHandlerImplSingleTon implements JdaoHandler {
 	private boolean transaction = false;
 	private Connection conn;
 
+	public DataSource getDataSource() {
+		return this.dataSource;
+	}
+
 	public JdaoHandlerImplSingleTon(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}

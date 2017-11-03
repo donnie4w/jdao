@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.sql.DataSource;
+
 import com.jdao.dbHandler.JdaoHandler;
 import com.jdao.exception.JdaoRunTimeException;
 
@@ -62,6 +64,10 @@ public class QueryDao implements BaseDao {
 
 	public QueryDao(JdaoHandler jdao) {
 		this.jdao = jdao;
+	}
+
+	public DataSource getDataSource() {
+		return this.jdao.getDataSource();
 	}
 
 	/**
@@ -114,7 +120,7 @@ public class QueryDao implements BaseDao {
 	}
 
 	/**
-	 * auther donnie wu
+	 * author donnie wu
 	 * 
 	 * @param <T>
 	 * @param clazz
@@ -125,7 +131,7 @@ public class QueryDao implements BaseDao {
 	 */
 	public static <T> List<T> queryForBeens(Class<T> clazz, String sql, Object... objects) throws Exception {
 		Connection con = null;
-		JdaoHandler jdao = DaoFactory.jdaoMap.containsKey(clazz) ? DaoFactory.jdaoMap.get(clazz) : DaoFactory.getJaoHandler();
+		JdaoHandler jdao = DaoFactory.getJdaoHandler(clazz, null);
 		try {
 			con = jdao.getConnection();
 			return execute4Been(con, clazz, sql, objects);
@@ -213,7 +219,7 @@ public class QueryDao implements BaseDao {
 	}
 
 	private JdaoHandler getjh() {
-		return this.jdao == null ? DaoFactory.jdaoMap.containsKey(QueryDao.class) ? DaoFactory.jdaoMap.get(QueryDao.class) : DaoFactory.getJaoHandler() : this.jdao;
+		return this.jdao == null ? DaoFactory.getJdaoHandler(QueryDao.class) : this.jdao;
 	}
 
 	private QueryDao(Map<String, Class<?>> typeMap, Map<String, Object> valueMap) {

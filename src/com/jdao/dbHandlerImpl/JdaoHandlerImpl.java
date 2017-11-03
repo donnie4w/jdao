@@ -32,6 +32,10 @@ public class JdaoHandlerImpl implements JdaoHandler {
 		getConnection();
 	}
 
+	public DataSource getDataSource() {
+		return this.dataSource;
+	}
+
 	public JdaoHandlerImpl(String db) {
 		if (!dataSourceMap.containsKey(db)) {
 			synchronized (JdaoHandlerImpl.class) {

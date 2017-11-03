@@ -65,13 +65,23 @@ public class Table<T extends Table<?>> implements Serializable {
 		this.clazz = claz;
 		fieldValueMap = new MyMap<Fields, Object>(clazz);
 		String pkgn = claz.getPackage().getName();
-		if (DaoFactory.jdaoMap.containsKey(claz)) {
-			this.jdao = DaoFactory.jdaoMap.get(claz);
-		} else if (pkgn != null && DaoFactory.jdaoPackageMap.containsKey(pkgn)) {
-			this.jdao = DaoFactory.jdaoPackageMap.get(pkgn);
-		} else {
-			this.jdao = DaoFactory.getJaoHandler();
-		}
+		// if (DaoFactory.jdaoMap.containsKey(claz)) {
+		// this.jdao = DaoFactory.jdaoMap.get(claz);
+		// } else if (pkgn != null && DaoFactory.jdaoPackageMap.containsKey(pkgn)) {
+		// this.jdao = DaoFactory.jdaoPackageMap.get(pkgn);
+		// } else {
+		// this.jdao = DaoFactory.getJaoHandler();
+		// }
+		getJdaoHandler(claz, pkgn);
+	}
+
+	public void getJdaoHandler(Class<?> clz, String packageName) {
+		// this.jdao = Jdao.getJdaoHandler(clazz);
+		// if (this.jdao == null && packageName != null)
+		// this.jdao = Jdao.getJdaoHandler(packageName);
+		// if (this.jdao == null)
+		// this.jdao = Jdao.getDefaultJdaoHandler();
+		this.jdao = DaoFactory.getJdaoHandler(clz, packageName);
 	}
 
 	public void setFields(Fields... fields) {
@@ -181,6 +191,14 @@ public class Table<T extends Table<?>> implements Serializable {
 	 */
 	public void limit(int f, int t) {
 		limitStr = new int[] { f, t };
+	}
+
+	/**
+	 * @param pageNumber
+	 * @param rows
+	 */
+	public void limitByPageNumber(int pageNumber, int rows) {
+		limit(pageNumber * rows, rows);
 	}
 
 	private SqlKV query_(Field... fields) throws SQLException {

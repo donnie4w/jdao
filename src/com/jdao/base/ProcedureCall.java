@@ -6,7 +6,10 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import com.jdao.dbHandler.JdaoHandler;
+import com.jdao.dbHandler.JdaoHandlerFactory;
 
 /**
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
@@ -36,11 +39,18 @@ public class ProcedureCall {
 		call(jdao);
 	}
 
+	public ProcedureCall(DataSource ds, String sql, Params... params) throws SQLException {
+		this.sql = sql;
+		this.params = params;
+		parseTypes();
+		call(JdaoHandlerFactory.getJdaoHandler(ds));
+	}
+
 	public ProcedureCall(String sql, Params... params) throws SQLException {
 		this.sql = sql;
 		this.params = params;
 		parseTypes();
-		call(DaoFactory.jdaoMap.containsKey(ProcedureCall.class) ? DaoFactory.jdaoMap.get(ProcedureCall.class) : DaoFactory.getJaoHandler());
+		call(DaoFactory.getJdaoHandler(ProcedureCall.class, null));
 	}
 
 	public Object fieldIndex(int i) {
