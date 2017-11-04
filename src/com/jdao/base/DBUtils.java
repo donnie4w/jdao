@@ -22,6 +22,7 @@ public class DBUtils<T extends DBUtils<T>> implements Cloneable {
 	QueryDao qd;
 	List<T> list;
 	int totalCount;
+	Transaction transaction;
 
 	public List<T> rsList() {
 		return list;
@@ -32,6 +33,15 @@ public class DBUtils<T extends DBUtils<T>> implements Cloneable {
 	}
 
 	public DBUtils() {
+	}
+
+	public Transaction setTransaction(Transaction transaction) {
+		this.transaction = transaction;
+		return transaction;
+	}
+
+	public void removeTransaction() {
+		this.transaction = null;
 	}
 
 	public void select(String sql, Object... objects) throws Exception {
@@ -128,17 +138,18 @@ public class DBUtils<T extends DBUtils<T>> implements Cloneable {
 		return qd.fieldValue(idx);
 	}
 
+	public JdaoHandler getJdaoHandler() {
+		return getjh();
+	}
+
 	private JdaoHandler getjh() {
-		// JdaoHandler jdao = null;
-		// if (DaoFactory.jdaoMap.containsKey(this.getClass())) {
-		// jdao = DaoFactory.jdaoMap.get(this.getClass());
-		// } else if (DaoFactory.jdaoPackageMap.containsKey(this.getClass().getPackage().getName())) {
-		// jdao = DaoFactory.jdaoPackageMap.get(this.getClass().getPackage().getName());
-		// } else {
-		// jdao = DaoFactory.getJaoHandler();
-		// }
-		return DaoFactory.getJdaoHandler(this.getClass(), this.getClass().getPackage().getName());
-		// return jdao;
+		JdaoHandler jh = null;
+		if (transaction == null) {
+			jh = DaoFactory.getJdaoHandler(this.getClass(), this.getClass().getPackage().getName());
+		} else {
+			jh = transaction.getJdaoHandler();
+		}
+		return jh;
 	}
 
 	public int execute(String sql, Object... objects) throws SQLException {

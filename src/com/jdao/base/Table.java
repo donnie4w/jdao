@@ -23,7 +23,7 @@ public class Table<T extends Table<?>> implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@SuppressWarnings("unused")
-	private static final String JdaoVersion = "1.1.5";
+	private static final String JdaoVersion = "1.1.6";
 
 	static final String AND = " and ";
 	private transient Log logger = Log.newInstance();
@@ -57,7 +57,7 @@ public class Table<T extends Table<?>> implements Serializable {
 	public void setPageTurn(boolean pageTurn) {
 		this.pageTurn = pageTurn;
 	}
-
+	
 	public void setJdaoHandler(JdaoHandler jdaoHandler) {
 		this.jdao = jdaoHandler;
 	}
@@ -66,7 +66,12 @@ public class Table<T extends Table<?>> implements Serializable {
 		return this.ds;
 	}
 
-	public void setDataSource(DataSource ds) {
+	public Transaction setTransaction(Transaction transaction) {
+		this.jdao = transaction.jh;
+		return transaction;
+	}
+
+	public void setDataSource(DataSource ds) throws SQLException {
 		this.ds = ds;
 		this.jdao = com.jdao.dbHandler.JdaoHandlerFactory.getJdaoHandler(ds);
 	}
@@ -76,22 +81,10 @@ public class Table<T extends Table<?>> implements Serializable {
 		this.clazz = claz;
 		fieldValueMap = new MyMap<Fields, Object>(clazz);
 		String pkgn = claz.getPackage().getName();
-		// if (DaoFactory.jdaoMap.containsKey(claz)) {
-		// this.jdao = DaoFactory.jdaoMap.get(claz);
-		// } else if (pkgn != null && DaoFactory.jdaoPackageMap.containsKey(pkgn)) {
-		// this.jdao = DaoFactory.jdaoPackageMap.get(pkgn);
-		// } else {
-		// this.jdao = DaoFactory.getJaoHandler();
-		// }
-		getJdaoHandler(claz, pkgn);
+		setJdaoHandler(claz, pkgn);
 	}
 
-	public void getJdaoHandler(Class<?> clz, String packageName) {
-		// this.jdao = Jdao.getJdaoHandler(clazz);
-		// if (this.jdao == null && packageName != null)
-		// this.jdao = Jdao.getJdaoHandler(packageName);
-		// if (this.jdao == null)
-		// this.jdao = Jdao.getDefaultJdaoHandler();
+	void setJdaoHandler(Class<?> clz, String packageName) {
 		this.jdao = DaoFactory.getJdaoHandler(clz, packageName);
 	}
 

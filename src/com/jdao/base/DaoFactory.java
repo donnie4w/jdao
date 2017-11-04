@@ -2,9 +2,7 @@ package com.jdao.base;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.sql.DataSource;
-
 import com.jdao.dbHandler.JdaoHandler;
 import com.jdao.dbHandler.JdaoHandlerFactory;
 

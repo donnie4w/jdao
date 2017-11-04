@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="gbk"?>
+<c3p0-config>
+	<default-config>
+		<property name="initialPoolSize">10</property>
+		<property name="checkoutTimeout">2000</property>
+		<property name="maxPoolSize">100</property>
+		<property name="minPoolSize">20</property>
+		<property name="automaticTestTable">store_test2</property>
+		<property name="checkoutTimeout">2000</property>
+		<property name="idleConnectionTestPeriod">60</property>
+		<property name="maxIdleTime">1800</property>
+		<property name="maxIdleTimeExcessConnections">60</property>
+		<property name="maxConnectionAge">60</property>
+		<property name="autoCommitOnClose">false</property>
+		<property name="acquireIncrement">5</property>
+		<property name="maxStatements">10</property>
+		<property name="maxStatementsPerConnection">10</property>
+		<property name="numHelperThreads">8</property>
+		<property name="maxAdministrativeTaskTime">4</property>
+		<property name="testConnectionOnCheckin">true</property>
+		<property name="testConnectionOnCheckout">false</property>
+		<property name="unreturnedConnectionTimeout">0</property>
+
+	</default-config>
+	<named-config name="golfplus2">
+		<property name="initialPoolSize">10</property>
+		<property name="checkoutTimeout">10000</property>
+		<property name="maxPoolSize">100</property>
+		<property name="minPoolSize">5</property>
+		<property name="driverClass">com.mysql.jdbc.Driver</property>
+		<property name="jdbcUrl">jdbc:mysql://121.199.75.173:6603/golftest?useUnicode=true&amp;characterEncoding=utf-8&amp;zeroDateTimeBehavior=convertToNull</property>
+		<property name="user">golftest</property>
+		<property name="password">golftest@bookingtee.com</property>
+		<property name="pwdEncrypt">0</property>
+		<property name="secretKey">DefaultListableBeanFactory</property>
+	</named-config>
+</c3p0-config>

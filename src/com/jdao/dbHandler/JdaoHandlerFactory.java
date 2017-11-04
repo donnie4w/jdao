@@ -1,6 +1,10 @@
 package com.jdao.dbHandler;
 
+import java.sql.SQLException;
+
 import javax.sql.DataSource;
+
+import com.jdao.base.JdaoRuntimeException;
 import com.jdao.dbHandlerImpl.JdaoHandlerDefaultImpl;
 
 /**
@@ -24,6 +28,10 @@ public class JdaoHandlerFactory {
 	// }
 
 	public static JdaoHandler getJdaoHandler(DataSource dataSource) {
-		return new JdaoHandlerDefaultImpl(dataSource);
+		try {
+			return new JdaoHandlerDefaultImpl(dataSource);
+		} catch (SQLException e) {
+			throw new JdaoRuntimeException(e);
+		}
 	}
 }
