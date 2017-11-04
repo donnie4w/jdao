@@ -3,19 +3,16 @@ package com.jdao.action;
 import org.junit.Test;
 import com.jdao.base.DaoFactory;
 import com.jdao.base.StoreModel;
-import com.jdao.dao.Hstest;
-import com.jdao.dbHandler.JdaoHandler;
-import com.jdao.dbHandlerImpl.JdaoHandlerFactory;
 
 /**
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
  * @verion 1.0.7 1_0_7 版本的缓存功能测试,增加缓存node节点，让操作粒度更细
  */
+@Deprecated
 public class ActionTest1_0_7 {
-	static JdaoHandler jdao = JdaoHandlerFactory.getDBHandler4c3p0SingleTon();
 	static {
+		DaoFactory.setDefaultDataSource(DataSourceTest.getByDruid());
 		// 给每个dao(包括QueryDao查询类)注册不同的过滤器操作对象。
-		DaoFactory.dataSourceRegister(Hstest.class, jdao);
 		// 新功能:设置缓存 ：域名:test 过期时间:10000毫秒 存储模式:STRONG
 		DaoFactory.getCache().setDomain("test").setExpire(20000).setStoreModel(StoreModel.STRONG).build();
 	}

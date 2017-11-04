@@ -10,20 +10,18 @@ import org.junit.Test;
 import com.jdao.base.DaoFactory;
 import com.jdao.base.QueryDao;
 import com.jdao.base.StoreModel;
-import com.jdao.dao.Hstest;
 import com.jdao.dbHandler.JdaoHandler;
-import com.jdao.dbHandlerImpl.JdaoHandlerFactory;
 
 /**
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
  * @date 2013-1-10
  * @verion 1.0 数据增删改查 测试
  */
+@Deprecated
 public class ActionTest1_0_8 {
-	static JdaoHandler jdao = JdaoHandlerFactory.getDBHandler4spring();
 	static {
 		System.out.println("init");
-		DaoFactory.setJdaoHandler(jdao);
+		DaoFactory.setDefaultDataSource(DataSourceTest.getByDruid());
 	}
 
 	@Test
@@ -34,7 +32,6 @@ public class ActionTest1_0_8 {
 		// limit 1,10
 		Hstest t = new Hstest();
 		// t.setJdaoHandler(jdao);
-		t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
 		t.where(Hstest.ID.LE(10), Hstest.ID.GE(2), Hstest.ROWNAME.LIKE("wuxiaodong"));
 		t.group(Hstest.ID);
 		t.sort(Hstest.ID.asc(), Hstest.ROWNAME.desc());
@@ -50,7 +47,6 @@ public class ActionTest1_0_8 {
 		// limit 1,10
 		Hstest t = new Hstest();
 		// t.setJdaoHandler(jdao);
-		t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
 		t.where(Hstest.ID.BETWEEN(1, 3000));
 		t.group(Hstest.VALUE);
 		t.having(Hstest.ID.count().GT(3));
@@ -111,7 +107,6 @@ public class ActionTest1_0_8 {
 		// select count(id) as cun from hstest where id between 2 and 10;
 		Hstest t = new Hstest();
 		// t.setJdaoHandler(jdao);
-		t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
 		t.where(Hstest.ID.BETWEEN(2, 10));
 		t.query();
 	}
@@ -122,7 +117,6 @@ public class ActionTest1_0_8 {
 		// id=20;
 		Hstest t = new Hstest();
 		// t.setJdaoHandler(jdao);
-		t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
 		t.where(Hstest.ID.BETWEEN(2, 10).OR(Hstest.ID.EQ(20)));
 		QueryDao qd = t.query(Hstest.ID.count().AS("cun"));
 		System.out.println(qd.fieldValue("cun"));
@@ -138,7 +132,6 @@ public class ActionTest1_0_8 {
 		// and id <200)
 		Hstest t = new Hstest();
 		// t.setJdaoHandler(jdao);
-		t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
 		t.where(Hstest.ID.LE(10).AND(Hstest.ID.GE(2).OR(Hstest.ID.GT(100), Hstest.ID.LT(200))));
 		t.limit(0, 1);
 		QueryDao qd = t.query(Hstest.ID.round(0).AS("idRound"), Hstest.ROWNAME);
@@ -149,7 +142,6 @@ public class ActionTest1_0_8 {
 	@Test
 	public void query7() throws Exception {
 		Hstest t = new Hstest();
-		t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
 		t.where(Hstest.VALUE.EQ(Hstest.ROWNAME));
 		List<Hstest> list = t.query();
 		System.out.println(list.size());
@@ -170,7 +162,6 @@ public class ActionTest1_0_8 {
 		// insert into hstest (id,rowname,value) values(?,?,?)
 		Hstest t = new Hstest();
 		// t.setJdaoHandler(jdao);
-		t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
 		t.setId(1);
 		t.setRowname("donnie");
 		t.setValue("wuxiaodong");
@@ -188,7 +179,6 @@ public class ActionTest1_0_8 {
 		// insert into hstest (id,rowname,value) values(?,?,?)
 		Hstest t = new Hstest();
 		// t.setJdaoHandler(jdao);
-		t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
 		t.setId(1);
 		t.setRowname("donnie1");
 		t.setValue("wuxiaodong1");
@@ -218,7 +208,6 @@ public class ActionTest1_0_8 {
 		// update hstest set rowname=?,value=? where id=?
 		Hstest t = new Hstest();
 		// t.setJdaoHandler(jdao);
-		t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
 		t.setRowname("wuxiaodong");
 		t.setValue("wuxiaodong");
 		t.where(Hstest.ID.EQ(10));
@@ -231,7 +220,6 @@ public class ActionTest1_0_8 {
 		// update hstest set rowname=?,value=? where id=? and value=rowname
 		Hstest t = new Hstest();
 		// t.setJdaoHandler(jdao);
-		t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
 		t.setRowname("wuxiaodong10");
 		t.setValue("wuxiaodong10");
 		t.where(Hstest.ID.EQ(10), Hstest.VALUE.EQ(Hstest.ROWNAME));
@@ -250,7 +238,6 @@ public class ActionTest1_0_8 {
 		Hstest t = new Hstest();
 		t.setLoggerOn(true);
 		// t.setJdaoHandler(jdao);
-		t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
 		t.where(Hstest.ID.EQ(1), Hstest.ROWNAME.EQ("donnie"));
 		int updateCount = t.delete();
 		System.out.println("delete===" + updateCount);
@@ -262,7 +249,6 @@ public class ActionTest1_0_8 {
 		Hstest t = new Hstest();
 		t.setLoggerOn(true);
 		// t.setJdaoHandler(jdao);
-		t.setJdaoHandler(JdaoHandlerFactory.getDBHandler4c3p0());
 		t.where(Hstest.ID.EQ(2), Hstest.ROWNAME.EQ(Hstest.VALUE));
 		int updateCount = t.delete();
 		System.out.println("delete===" + updateCount);
@@ -278,7 +264,7 @@ public class ActionTest1_0_8 {
 
 		// QueryDao qd = new QueryDao(jdao,
 		// "select id,rowname,value from hstest limit ?,?", 0, 10);
-		QueryDao qd = new QueryDao(JdaoHandlerFactory.getDBHandler4c3p0(), "select id,rowname,value from hstest limit ?,?", 0, 10);
+		QueryDao qd = new QueryDao("select id,rowname,value from hstest limit ?,?", 0, 10);
 		System.out.println(qd.fieldType("rowname"));
 		System.out.println(qd.fieldValue("rowname"));
 		System.out.println(qd.field2Int("id"));
@@ -318,9 +304,14 @@ public class ActionTest1_0_8 {
 		}
 	}
 
+	public JdaoHandler getJdaoHandler() {
+		return com.jdao.dbHandler.JdaoHandlerFactory.getJdaoHandler(DataSourceTest.getByDruid());
+	}
+
 	@Test
 	public void QueryDao4Been() throws Exception {
-		List<Hstest> list = QueryDao.queryForBeens(JdaoHandlerFactory.getDBHandler4c3p0(), Hstest.class, "select id,rowname,value from hstest limit ?,?", 0, 10);
+
+		List<Hstest> list = QueryDao.queryForBeens(getJdaoHandler(), Hstest.class, "select id,rowname,value from hstest limit ?,?", 0, 10);
 		for (Hstest h : list) {
 			System.out.println(h.getId() + " " + h.getRowname() + " " + h.getValue());
 		}
@@ -328,18 +319,16 @@ public class ActionTest1_0_8 {
 
 	@Test
 	public void QueryDao4Map() throws Exception {
-		List<Map<String, Object>> list = QueryDao.queryForMaps(JdaoHandlerFactory.getDBHandler4c3p0(), "select id,rowname,value from hstest limit ?,?", 0, 10);
+		List<Map<String, Object>> list = QueryDao.queryForMaps(getJdaoHandler(), "select id,rowname,value from hstest limit ?,?", 0, 10);
 		for (Map<String, Object> m : list) {
 			System.out.println(m.get("id") + " " + m.get("rowname") + " " + m.get("value"));
 		}
 	}
 
 	public static void main(String[] args) throws Exception {
-		JdaoHandler jdao = JdaoHandlerFactory.getDBHandler4c3p0SingleTon();
-		DaoFactory.jdaoMap.put(Hstest.class, jdao);
 		Hstest tt = new Hstest();
 		tt.setLoggerOn(true);
-		tt.where(Hstest.ID.NOTIN(1, 100, 111), Hstest.VALUE.LIKE("wuxiaodong"),Hstest.VALUE.ISNONULL());
+		tt.where(Hstest.ID.NOTIN(1, 100, 111), Hstest.VALUE.LIKE("wuxiaodong"), Hstest.VALUE.ISNONULL());
 		tt.group(Hstest.ID);
 		tt.sort(Hstest.ID.desc(), Hstest.ROWNAME.desc());
 		tt.limit(0, 10);

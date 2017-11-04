@@ -3,15 +3,14 @@ package com.jdao.action;
 import java.sql.SQLException;
 
 import org.junit.Test;
-import com.jdao.dao.Hstest;
 import com.jdao.dbHandler.JdaoHandler;
-import com.jdao.dbHandlerImpl.JdaoHandlerFactory;
 
 /**
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
  * @date 2013-1-13
  * @verion 1.0 事务测试
  */
+@Deprecated
 public class ActionTest3 {
 
 	@Test
@@ -39,7 +38,7 @@ public class ActionTest3 {
 		t.setRowname("donnie3");
 		t.setValue("wuxiaodong3");
 		t.addBatch();
-		//制作一个重复主键异常
+		// 制作一个重复主键异常
 		// t.setId(3);
 		t.setId(4);
 		t.setRowname("donnie4");
@@ -71,7 +70,7 @@ public class ActionTest3 {
 	 */
 	@Test
 	public void transactionTest() throws SQLException {
-		JdaoHandler jdao = JdaoHandlerFactory.getDBHandler4c3p0();
+		JdaoHandler jdao = com.jdao.dbHandler.JdaoHandlerFactory.getJdaoHandler(DataSourceTest.getByDruid());
 		// 开启事务
 		try {
 			jdao.setAutoCommit(false);

@@ -5,18 +5,16 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-
-import com.jdao.dao.Hstest;
 import com.jdao.dbHandler.JdaoHandler;
-import com.jdao.dbHandlerImpl.JdaoHandlerFactory;
 
 /**
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
  * @date 2013-1-10
- * @verion 1.0 事务测试  jdbcTemplate 事务
+ * @verion 1.0 事务测试 jdbcTemplate 事务
  */
+@Deprecated
 public class ActionTest2 {
-	JdaoHandler jdao = JdaoHandlerFactory.getDBHandler4spring();
+	JdaoHandler jdao = com.jdao.dbHandler.JdaoHandlerFactory.getJdaoHandler(DataSourceTest.getByDruid());
 
 	@Test
 	public void insertBetch() throws Exception {
@@ -70,23 +68,23 @@ public class ActionTest2 {
 	/**
 	 * jdbcTemplate 事务测试 auther donnie wu
 	 */
-	@Test
-	public void transactionTest() {
-		DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-		def.setName(ActionTest2.class.getName());
-		def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		def.setIsolationLevel(TransactionDefinition.ISOLATION_DEFAULT);
-		PlatformTransactionManager ptm = JdaoHandlerFactory.getTransactionManager();
-		TransactionStatus status = ptm.getTransaction(def);
-		try {
-			insertBetch();
-			insertBetch2();
-			ptm.commit(status);
-		} catch (Exception e) {
-			ptm.rollback(status);
-			e.printStackTrace();
-		}
-	}
+	// @Test
+	// public void transactionTest() {
+	// DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+	// def.setName(ActionTest2.class.getName());
+	// def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+	// def.setIsolationLevel(TransactionDefinition.ISOLATION_DEFAULT);
+	// PlatformTransactionManager ptm = JdaoHandlerFactory.getTransactionManager();
+	// TransactionStatus status = ptm.getTransaction(def);
+	// try {
+	// insertBetch();
+	// insertBetch2();
+	// ptm.commit(status);
+	// } catch (Exception e) {
+	// ptm.rollback(status);
+	// e.printStackTrace();
+	// }
+	// }
 
 	@Test
 	public void transactionTest2() {
@@ -99,7 +97,6 @@ public class ActionTest2 {
 
 	public static void main(String[] args) throws Exception {
 		ActionTest2 at2 = new ActionTest2();
-		at2.transactionTest();
 		at2.transactionTest2();
 	}
 }

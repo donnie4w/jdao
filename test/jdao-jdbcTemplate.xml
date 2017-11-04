@@ -21,7 +21,7 @@
 	<bean id="DataSource" parent="parentDataSource">
 		<property name="driver" value="com.mysql.jdbc.Driver" />
 		<property name="driverUrl"
-			value="jdbc:mysql://127.0.0.1:3306/wuxiaodong?user=root&amp;password=123456" />
+			value="jdbc:mysql://127.0.0.1:4406/wxd?user=root&amp;password=123456" />
 		<property name="user" value="root" />
 		<property name="password" value="123456" />
 	</bean>

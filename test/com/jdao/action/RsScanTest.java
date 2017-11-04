@@ -1,36 +1,20 @@
 package com.jdao.action;
 
 import java.util.List;
-import java.util.Properties;
-
-import javax.sql.DataSource;
-
-import com.alibaba.druid.pool.DruidDataSourceFactory;
 import com.jdao.base.DaoFactory;
-import com.jdao.base.PageDao;
 import com.jdao.base.DBUtils;
-import com.jdao.dbHandler.JdaoHandler;
-import com.jdao.dbHandler.JdaoHandlerFactory;
-import com.jdao.util.CreateDaoUtil;
 
+/**
+ * @Copyright (c) 2017, donnie4w@gmail.com All Rights Reserved.
+ * @Author: dong
+ * @Desc: DBUtil 测试
+ */
 public class RsScanTest {
-
-	public static DataSource getDataSource() throws Exception {
-		Properties p = new Properties();
-		p.load(ActionTest1_1_2.class.getClassLoader().getResourceAsStream("com/jdao/action/druid.properties"));
-		return DruidDataSourceFactory.createDataSource(p);
-	}
-
-	public static void createHstest() throws Exception {
-		CreateDaoUtil.createFile("com.jdao.action", "hstest", System.getProperty("user.dir") + "\\test\\com\\jdao\\action", getDataSource().getConnection(), "utf-8");
-	}
 
 	static {
 		try {
-			JdaoHandler jdaohandler = JdaoHandlerFactory.getJdaoHandler(getDataSource());
-			DaoFactory.setJdaoHandler(jdaohandler);
+			DaoFactory.setDefaultDataSource(DataSourceTest.getByDruid());
 			// 可以对不同DBUtils子类 设置不同的数据源
-			DaoFactory.dataSourceForceRegister(RsTest.class, jdaohandler);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -102,30 +86,12 @@ public class RsScanTest {
 		}
 	}
 
-	/**
-	 * 翻页多行返回
-	 * 
-	 * @throws Exception
-	 */
-	public static void testPageDao() throws Exception {
-		Hstest ht = new Hstest();
-		ht.where(Hstest.ID.GE(1));
-		PageDao<Hstest> pd = ht.selectListPage();
-		System.out.println("totalcount:" + pd.getTotalcount());
-		List<Hstest> list = pd.getList();
-		for (Hstest h : list) {
-			System.out.println(h.getRowname() + " " + h.getValue());
-		}
-	}
-
 	public static void main(String[] args) throws Exception {
 		testSelect();
 		System.out.println("=================>1");
 		testSelectList();
 		System.out.println("=================>2");
 		testPageTurn();
-		System.out.println("=================>3");
-		testPageDao();
 	}
 }
 
