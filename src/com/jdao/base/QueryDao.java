@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.sql.DataSource;
 
 import com.jdao.dbHandler.JdaoHandler;
-import com.jdao.exception.JdaoRunTimeException;
 
 /**
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
@@ -401,7 +400,7 @@ public class QueryDao implements BaseDao {
 		if (valueMap != null) {
 			return Integer.parseInt(String.valueOf(valueMap.get(fieldFormat(field))));
 		} else {
-			throw new JdaoRunTimeException("field2Int error");
+			throw new JdaoRuntimeException("field2Int error");
 		}
 	}
 
@@ -412,7 +411,7 @@ public class QueryDao implements BaseDao {
 		if (valueMap != null) {
 			return String.valueOf(valueMap.get(fieldFormat(field)));
 		} else {
-			throw new JdaoRunTimeException("field2String error");
+			throw new JdaoRuntimeException("field2String error");
 		}
 	}
 
@@ -423,7 +422,7 @@ public class QueryDao implements BaseDao {
 		if (valueMap != null)
 			return new BigDecimal(String.valueOf(valueMap.get(fieldFormat(field))));
 		else
-			throw new JdaoRunTimeException("field2BigDecimal error");
+			throw new JdaoRuntimeException("field2BigDecimal error");
 	}
 
 	/**
@@ -433,7 +432,7 @@ public class QueryDao implements BaseDao {
 		if (valueMap != null)
 			return new BigDecimal(String.valueOf(fieldValue(idx)));
 		else
-			throw new JdaoRunTimeException("field2BigDecimal error");
+			throw new JdaoRuntimeException("field2BigDecimal error");
 	}
 
 	/**
@@ -446,7 +445,7 @@ public class QueryDao implements BaseDao {
 		if (valueMap != null)
 			return Util.dateFormat((Date) (valueMap.get(fieldFormat(field))), format);
 		else
-			throw new JdaoRunTimeException("field2Date error");
+			throw new JdaoRuntimeException("field2Date error");
 	}
 
 	/**
@@ -459,7 +458,7 @@ public class QueryDao implements BaseDao {
 		if (valueMap != null)
 			return Util.date2String((Date) (valueMap.get(fieldFormat(field))), format);
 		else
-			throw new JdaoRunTimeException("field2DateString error");
+			throw new JdaoRuntimeException("field2DateString error");
 	}
 
 	/**
