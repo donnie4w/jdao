@@ -20,6 +20,7 @@ import com.jdao.dbHandler.JdaoUtil;
  * @date 2013-1-10
  * @verion 1.0 JdaoHandler implement
  */
+@Deprecated
 public class JdaoImpl4JdbcTemplate implements JdaoHandler {
 
 	private static final long serialVersionUID = 1L;

@@ -5,10 +5,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.sql.DataSource;
 import com.jdao.dbHandler.JdaoHandler;
 
 /**
@@ -43,7 +45,7 @@ public class Table<T extends Table<?>> implements Serializable {
 	private String node = null;
 	private String commentLine = null;
 	private List<Where> whereList = new ArrayList<Where>();
-
+	private DataSource ds;
 	private int totalcount;
 
 	private boolean pageTurn;
@@ -58,6 +60,15 @@ public class Table<T extends Table<?>> implements Serializable {
 
 	public void setJdaoHandler(JdaoHandler jdaoHandler) {
 		this.jdao = jdaoHandler;
+	}
+
+	public DataSource getDataSource() {
+		return this.ds;
+	}
+
+	public void setDataSource(DataSource ds) {
+		this.ds = ds;
+		this.jdao = com.jdao.dbHandler.JdaoHandlerFactory.getJdaoHandler(ds);
 	}
 
 	public Table(String tablename, Class<T> claz) {
@@ -132,6 +143,19 @@ public class Table<T extends Table<?>> implements Serializable {
 		return whereList;
 	}
 
+	/**
+	 * 条件 同sql 中where后的条件
+	 * 
+	 * @param wheres
+	 */
+	public List<Where> where(List<Where> list) {
+		whereList = list;
+		return whereList;
+	}
+
+	/**
+	 * @return
+	 */
 	public List<Where> where() {
 		return whereList;
 	}
@@ -631,7 +655,9 @@ public class Table<T extends Table<?>> implements Serializable {
 			}
 			list.add(o);
 		}
-
+		if (isloggerOn) {
+			logger.log("[BATCH SQL][" + sb1.toString() + "]" + Arrays.toString(list.toArray()));
+		}
 		return jdao.executeBatch(sb1.toString(), list);
 	}
 

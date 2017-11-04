@@ -64,7 +64,7 @@ public class DaoFactory {
 	// jdao = jdaoHandler;
 	// }
 
-	public static void SetDefaultDataSource(DataSource ds) {
+	public static void setDefaultDataSource(DataSource ds) {
 		defaultDataSource = ds;
 	}
 

@@ -37,7 +37,7 @@ public class DBUtils<T extends DBUtils<T>> implements Cloneable {
 	public void select(String sql, Object... objects) throws Exception {
 		qd = new QueryDao(getjh(), sql, objects);
 	}
-	
+
 	public DataSource getDataSource() {
 		return qd.getDataSource();
 	}
