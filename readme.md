@@ -84,7 +84,7 @@
 <br/>		DBUtils<?> db=new DBUtils();
 <br/>		db.select("select * from hstest where id=? limit 1",1);
 <br/>		System.out.println(db.getString("value"));
-<br/>		int i = db.select("insert into hstest(`rowname`,`value`)values(?,?)",1,2);
+<br/>		int i = db.execute("insert into hstest(`rowname`,`value`)values(?,?)",1,2);
 <br/> **四.自定义类继承 DBUtils**
 <br/>  任何子类继承自DBUtils 都可以设置与其对应的数据源，同时支持sql编写，支持翻页
 <br/>  如：class RsTest extends DBUtils<RsTest> {}
