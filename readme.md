@@ -1,6 +1,7 @@
 ### jdao是一个java的轻量级orm工具包，根据表名可以生成与之对应的dao类，同时也支持原生sql语句操作.
 
 **v1.1.6**
+<br/>
 **jdao 初始化：**
 <br/>		DaoFactory.setDefaultDataSource(getDataSource()); 
 <br/>		jdao初始化 设置数据源，一步完成。
@@ -84,7 +85,7 @@
 <br/>		db.select("select * from hstest where id=? limit 1",1);
 <br/>		System.out.println(db.getString("value"));
 <br/>		int i = db.select("insert into hstest(`rowname`,`value`)values(?,?)",1,2);
-**四.自定义类继承 DBUtils**
+<br/> **四.自定义类继承 DBUtils**
 <br/>  任何子类继承自DBUtils 都可以设置与其对应的数据源，同时支持sql编写，支持翻页
 <br/>  如：class RsTest extends DBUtils<RsTest> {}
 <br/>    //翻页
@@ -138,7 +139,7 @@
 <br/>			System.out.println(h.getRowname() + " " + h.getValue());
 <br/>		}
 <br/>	}
-**五.事务**
+<br/> **五.事务**
 <br/>		Transaction t = new Transaction(DataSourceTest.getByDruid());
 <br/>		Hstest hstest = new Hstest();
 <br/>		hstest.setTransaction(t);
