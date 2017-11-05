@@ -1,10 +1,9 @@
 ### jdao是一个java的轻量级orm工具包，根据表名可以生成与之对应的dao类，同时也支持原生sql语句操作.
 
-
+**v1.1.6**
 **jdao 初始化：**
-<br/>		JdaoHandler jdaohandler = JdaoHandlerFactory.getJdaoHandler(getDataSource());  
-<br/>		DaoFactory.setJdaoHandler(jdaohandler);  
-<br/>		以上两步便完成 jdao初始化
+<br/>		DaoFactory.setDefaultDataSource(getDataSource()); 
+<br/>		jdao初始化 设置数据源，一步完成。
 <br/>		
 
 <br/>		getDataSource()获取数据源方法：
@@ -28,7 +27,7 @@
 <br/>	public void createDao() throws Exception {
 <br/>		Class.forName("com.mysql.jdbc.Driver");
 <br/>		String driverUrl = "jdbc:mysql://127.0.0.1:3306/test";
-<br/>		String path = System.getProperty("user.dir") + "\\test\\com\\jdao\\action";
+<br/>		String path = System.getProperty("user.dir") + "/test/com/jdao/action";
 <br/>		CreateDaoUtil.createFile("com.jdao.action", "hstest",path,DriverManager.getConnection(driverUrl, "root", "123456"), "utf-8");
 <br/>		//com.jdao.action 为 Hstest的包名
 <br/>		//hstest为表名
@@ -80,26 +79,12 @@
 <br/>t.where(Hstest.ID.EQ(2));
 <br/>t.delete();
 <br/>
-**三.复杂SQL查询,可使用QueryDao查询数据**
-<br/>	QueryDao qd = new QueryDao("select id,rowname from hstest limit ?,?", 0, 10);
-<br/>	//获取数据方式一
-<br/>	while (qd.hasNext()) {
-<br/> 	    QueryDao q = qd.next();
-<br/>	    //获取字段方式一
-<br/>	    System.out.println(q.fieldValue(1) + "   " + q.fieldValue(2));
-<br/>	    //获取字段方式二
-<br/>	    System.out.println(q.fieldValue("id") + "   " + q.fieldValue("rowname"));
-<br/>	}
-<br/>	//获取数据方式二
-<br/>	for(QueryDao q:qd.queryDaoList()){
-<br/>    	System.out.println(q.fieldValue(1) + "   " + q.fieldValue(2));
-<br/>	}
-<br/>
-**四.对增删改SQL的操作**
-<br/>		JdaoHandler jdaohandler = JdaoHandlerFactory.getJdaoHandler(getDataSource());
-<br/>		jdaohandler.executeUpdate("insert into hstest (id,rowname,value) values(1,\"donnie\",\"wuxiaodong\")");
-
-**五.DBUtils CRUD超级类 用于代替 QueryDao**
+**三.支持SQL操作 DBUtils**
+<br/>		DBUtils<?> db=new DBUtils();
+<br/>		db.select("select * from hstest where id=? limit 1",1);
+<br/>		System.out.println(db.getString("value"));
+<br/>		int i = db.select("insert into hstest(`rowname`,`value`)values(?,?)",1,2);
+**四.自定义类继承 DBUtils**
 <br/>  任何子类继承自DBUtils 都可以设置与其对应的数据源，同时支持sql编写，支持翻页
 <br/>  如：class RsTest extends DBUtils<RsTest> {}
 <br/>    //翻页
@@ -153,3 +138,19 @@
 <br/>			System.out.println(h.getRowname() + " " + h.getValue());
 <br/>		}
 <br/>	}
+**五.事务**
+<br/>		Transaction t = new Transaction(DataSourceTest.getByDruid());
+<br/>		Hstest hstest = new Hstest();
+<br/>		hstest.setTransaction(t);
+<br/>		hstest.setRowname("wu");
+<br/>		hstest.setValue("dong");
+<br/>		hstest.save();
+<br/>		Hstest hstest2 = new Hstest();
+<br/>		hstest2.setTransaction(t);
+<br/>		hstest2.setRowname("wu2");
+<br/>		hstest2.setValue("dong2");
+<br/>		hstest2.save();
+<br/>		DBUtils rt = new DBUtils();
+<br/>		rt.setTransaction(t);
+<br/>		rt.execute("insert into hstest(`rowname`,`value`)values(?,?)", 1, 2);
+<br/>		t.rollBackAndClose();
