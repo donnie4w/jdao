@@ -1,4 +1,4 @@
-### jdao是一个java的轻量级orm工具包，根据表名可以生成与之对应的dao类，同时也支持原生sql语句操作.
+### jdao是轻量级orm工具包，生成与数据表对应的dao类，持久层dao对象操作，同时也支持原生sql语句操作，支持多数据源，对象缓存等.
 
 **v1.1.6**
 <br/>
@@ -140,7 +140,7 @@
 <br/>		}
 <br/>	}
 <br/> **五.事务**
-<br/>		Transaction t = new Transaction(DataSourceTest.getByDruid());
+<br/>		Transaction t = new Transaction(getDataSource());
 <br/>		Hstest hstest = new Hstest();
 <br/>		hstest.setTransaction(t);
 <br/>		hstest.setRowname("wu");
