@@ -46,18 +46,18 @@ public class Transaction {
 
 	/**
 	 * @throws SQLException
-	 *             事务回滚
+	 *             事务回滚并关闭连接
 	 */
-	public void rollBackAndClose() throws SQLException {
+	public synchronized void rollBackAndClose() throws SQLException {
 		this.jh.rollBack();
 		this.close();
 	}
 
 	/**
 	 * @throws SQLException
-	 *             事务提交
+	 *             事务提交并关闭链接
 	 */
-	public void commitAndClose() throws SQLException {
+	public synchronized void commitAndClose() throws SQLException {
 		this.jh.commit();
 		this.close();
 	}
