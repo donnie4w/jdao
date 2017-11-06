@@ -53,8 +53,8 @@ public class JdaoHandlerDefaultImpl implements JdaoHandler {
 
 	@Override
 	public void close(Connection con) throws SQLException {
-		if (_conn != null) {
-			_conn.close();
+		if (con != null) {
+			con.close();
 		}
 	}
 
@@ -191,11 +191,11 @@ public class JdaoHandlerDefaultImpl implements JdaoHandler {
 	@Override
 	public synchronized boolean setAutoCommit(boolean auto) throws SQLException {
 		if (auto) {
+			transaction = false;
+			close();
+		} else {
 			this._conn = getConnection();
 			this._conn.setAutoCommit(false);
-			transaction = false;
-		} else {
-			this._conn = null;
 			transaction = true;
 		}
 		return true;
