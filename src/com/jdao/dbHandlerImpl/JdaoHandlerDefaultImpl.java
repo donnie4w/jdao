@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import javax.sql.DataSource;
+
+import com.jdao.base.JdaoRuntimeException;
 import com.jdao.base.QueryDao;
 import com.jdao.base.Table;
 import com.jdao.dbHandler.JdaoHandler;
@@ -21,12 +23,12 @@ public class JdaoHandlerDefaultImpl implements JdaoHandler {
 	private static final long serialVersionUID = 1L;
 	private DataSource dataSource;
 	private boolean transaction = false;
-	private Connection conn;
+	private Connection _conn;
 
 	public JdaoHandlerDefaultImpl(DataSource dataSource) throws SQLException {
 		this.dataSource = dataSource;
-		conn = dataSource.getConnection();
-		conn.setAutoCommit(true);
+		// conn = dataSource.getConnection();
+		// conn.setAutoCommit(true);
 	}
 
 	public DataSource getDataSource() {
@@ -34,36 +36,51 @@ public class JdaoHandlerDefaultImpl implements JdaoHandler {
 	}
 
 	public Connection getConnection() {
-		return conn;
+		try {
+			return getConn();
+		} catch (SQLException e) {
+			throw new JdaoRuntimeException(e);
+		}
 	}
 
 	@Override
 	public void close() throws SQLException {
-		if (conn != null) {
-			conn.close();
-			conn = null;
+		if (_conn != null) {
+			_conn.close();
+			_conn = null;
 		}
 	}
 
 	@Override
 	public void close(Connection con) throws SQLException {
-		if (con != null) {
-			con.close();
+		if (_conn != null) {
+			_conn.close();
 		}
 	}
 
 	@Override
 	public void commit() throws SQLException {
-		if (conn != null) {
-			conn.commit();
+		if (_conn != null) {
+			_conn.commit();
+		}
+	}
+
+	synchronized Connection getConn() throws SQLException {
+		if (this._conn != null) {
+			return _conn;
+		} else {
+			Connection c = dataSource.getConnection();
+			c.setAutoCommit(true);
+			return c;
 		}
 	}
 
 	@Override
 	public int[] executeBatch(String sql, List<Object[]> list) throws SQLException {
 		PreparedStatement ps = null;
+		Connection c = getConn();
 		try {
-			ps = conn.prepareStatement(sql);
+			ps = c.prepareStatement(sql);
 			for (Object[] args : list) {
 				for (int i = 1; i <= args.length; i++) {
 					ps.setObject(i, args[i - 1]);
@@ -77,56 +94,61 @@ public class JdaoHandlerDefaultImpl implements JdaoHandler {
 					ps.close();
 			} finally {
 				if (!transaction)
-					close(conn);
+					close(c);
 			}
 		}
 	}
 
 	@Override
 	public QueryDao executeQuery(String sql) throws SQLException {
+		Connection c = getConn();
 		try {
-			return new QueryDao(conn, sql);
+			return new QueryDao(c, sql);
 		} finally {
 			if (!transaction)
-				close(conn);
+				close(c);
 		}
 	}
 
 	@Override
 	public QueryDao executeQuery(String sql, Object... values) throws SQLException {
+		Connection c = getConn();
 		try {
-			return new QueryDao(conn, sql, values);
+			return new QueryDao(c, sql, values);
 		} finally {
 			if (!transaction)
-				close(conn);
+				close(c);
 		}
 	}
 
 	@Override
 	public <T extends Table<?>> List<T> executeQuery(String sql, Class<T> claz) throws Exception {
+		Connection c = getConn();
 		try {
-			return JdaoUtil.selectDaos(conn, sql, claz, null);
+			return JdaoUtil.selectDaos(c, sql, claz, null);
 		} finally {
 			if (!transaction)
-				close(conn);
+				close(c);
 		}
 	}
 
 	@Override
 	public <T extends Table<?>> List<T> executeQuery(Class<T> claz, String sql, Object... values) throws Exception {
+		Connection c = getConn();
 		try {
-			return JdaoUtil.selectDaos(conn, sql, claz, values);
+			return JdaoUtil.selectDaos(c, sql, claz, values);
 		} finally {
 			if (!transaction)
-				close(conn);
+				close(c);
 		}
 	}
 
 	@Override
 	public int executeUpdate(String sql, Object... values) throws SQLException {
 		PreparedStatement ps = null;
+		Connection c = getConn();
 		try {
-			ps = conn.prepareStatement(sql);
+			ps = c.prepareStatement(sql);
 			for (int i = 1; i <= values.length; i++) {
 				ps.setObject(i, values[i - 1]);
 			}
@@ -137,7 +159,7 @@ public class JdaoHandlerDefaultImpl implements JdaoHandler {
 					ps.close();
 			} finally {
 				if (!transaction)
-					close(conn);
+					close(c);
 			}
 		}
 	}
@@ -145,8 +167,9 @@ public class JdaoHandlerDefaultImpl implements JdaoHandler {
 	@Override
 	public int executeUpdate(String sql) throws SQLException {
 		PreparedStatement ps = null;
+		Connection c = getConn();
 		try {
-			ps = conn.prepareStatement(sql);
+			ps = c.prepareStatement(sql);
 			return ps.executeUpdate();
 		} finally {
 			try {
@@ -154,24 +177,25 @@ public class JdaoHandlerDefaultImpl implements JdaoHandler {
 					ps.close();
 			} finally {
 				if (!transaction)
-					close(conn);
+					close(c);
 			}
 		}
 	}
 
 	@Override
 	public void rollBack() throws SQLException {
-		if (conn != null)
-			conn.rollback();
+		if (_conn != null)
+			_conn.rollback();
 	}
 
 	@Override
 	public synchronized boolean setAutoCommit(boolean auto) throws SQLException {
 		if (auto) {
-			conn.setAutoCommit(true);
+			this._conn = getConnection();
+			this._conn.setAutoCommit(false);
 			transaction = false;
 		} else {
-			conn.setAutoCommit(false);
+			this._conn = null;
 			transaction = true;
 		}
 		return true;
@@ -179,11 +203,12 @@ public class JdaoHandlerDefaultImpl implements JdaoHandler {
 
 	@Override
 	public <T extends Table<?>> T executeQueryById(Class<T> claz, String sql, Object... values) throws Exception {
+		Connection c = getConn();
 		try {
-			return JdaoUtil.selectDao(conn, sql, claz, values);
+			return JdaoUtil.selectDao(c, sql, claz, values);
 		} finally {
 			if (!transaction)
-				close(conn);
+				close(c);
 		}
 	}
 }
