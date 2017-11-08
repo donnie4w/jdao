@@ -57,7 +57,7 @@ public class Table<T extends Table<?>> implements Serializable {
 	public void setPageTurn(boolean pageTurn) {
 		this.pageTurn = pageTurn;
 	}
-	
+
 	public void setJdaoHandler(JdaoHandler jdaoHandler) {
 		this.jdao = jdaoHandler;
 	}
@@ -130,6 +130,7 @@ public class Table<T extends Table<?>> implements Serializable {
 	 * @param wheres
 	 */
 	public List<Where> where(Where... wheres) {
+		whereList.clear();
 		for (Where w : wheres) {
 			whereList.add(w);
 		}
