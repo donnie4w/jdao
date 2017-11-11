@@ -662,6 +662,7 @@ public class Table<T extends Table<?>> implements Serializable {
 	 * @throws SQLException
 	 */
 	public int update() throws SQLException {
+		parseWhere();
 		StringBuilder sb = new StringBuilder();
 		if (commentLine != null) {
 			sb.append("/* ").append(commentLine).append(" */");
@@ -711,6 +712,7 @@ public class Table<T extends Table<?>> implements Serializable {
 	 * @throws SQLException
 	 */
 	public int delete() throws SQLException {
+		parseWhere();
 		StringBuilder sb = new StringBuilder();
 		if (commentLine != null) {
 			sb.append("/* ").append(commentLine).append(" */");
