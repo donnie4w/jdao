@@ -47,7 +47,6 @@ public class Table<T extends Table<?>> implements Serializable {
 	private List<Where> whereList = new ArrayList<Where>();
 	private DataSource ds;
 	private int totalcount;
-
 	private boolean pageTurn;
 
 	public boolean isPageTurn() {
@@ -293,16 +292,9 @@ public class Table<T extends Table<?>> implements Serializable {
 		if (list.size() > 0) {
 			args = new Object[list.size()];
 			list.toArray(args);
-			if (this.isloggerOn) {
-				StringBuilder s = new StringBuilder();
-				for (Object o : args) {
-					s.append(o).append(",");
-				}
-				logger.log("[SELETE SQL][" + sql + "][" + s.toString().substring(0, s.length() - 1) + "]");
-			}
 			return new SqlKV(sql, args);
 		} else {
-			logger.log("[SELETE SQL][" + sql + "]");
+			// logger.log("[SELETE SQL][" + sql + "]");
 			return new SqlKV(sql);
 		}
 	}
@@ -353,6 +345,9 @@ public class Table<T extends Table<?>> implements Serializable {
 		if (isCache) {
 			Cache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv, node), o);
 		}
+		if (this.isloggerOn) {
+			logger.log("[SELETE SQL][" + skv.getSql() + "]" + Arrays.toString(skv.getArgs()));
+		}
 		return (List<T>) o;
 	}
 
@@ -368,6 +363,9 @@ public class Table<T extends Table<?>> implements Serializable {
 		List<T> list = executeQuery(clazz, sql, skv.getArgs());
 		for (T t : list) {
 			t.setTotalcount(totalcount);
+		}
+		if (this.isloggerOn) {
+			logger.log("[SELETE SQL][" + sql + "]" + Arrays.toString(skv.getArgs()));
 		}
 		return list;
 	}
@@ -431,6 +429,9 @@ public class Table<T extends Table<?>> implements Serializable {
 		PageDao<T> pd = new PageDao<T>();
 		pd.setList(list);
 		pd.setTotalcount(totalcount);
+		if (this.isloggerOn) {
+			logger.log("[SELETE SQL][" + sql + "]" + Arrays.toString(skv.getArgs()));
+		}
 		return pd;
 	}
 
@@ -470,6 +471,9 @@ public class Table<T extends Table<?>> implements Serializable {
 		}
 		if (isCache) {
 			Cache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv, node), o);
+		}
+		if (this.isloggerOn) {
+			logger.log("[SELETE SQL][" + skv.getSql() + "]" + Arrays.toString(skv.getArgs()));
 		}
 		return (QueryDao) o;
 	}
