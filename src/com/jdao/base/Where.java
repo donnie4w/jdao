@@ -9,6 +9,11 @@ public class Where {
 	private String expression;
 	private Object value;
 
+	public Where(OR or) {
+		this.expression = or.getExpression();
+		this.value = or.getValue();
+	}
+
 	public Where(String expression, Object value) {
 		this.expression = expression;
 		this.value = value;
@@ -49,5 +54,15 @@ public class Where {
 
 	public Object getValue() {
 		return value;
+	}
+
+	public Where setExpression(String expression) {
+		this.expression = expression;
+		return this;
+	}
+
+	public Where setValue(Object value) {
+		this.value = value;
+		return this;
 	}
 }
