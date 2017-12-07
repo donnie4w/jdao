@@ -23,7 +23,7 @@ public class Table<T extends Table<?>> implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@SuppressWarnings("unused")
-	private static final String JdaoVersion = "1.1.6.2";
+	private static final String JdaoVersion = "1.1.6.3";
 
 	static final String AND = " and ";
 	private transient Log logger = Log.newInstance();
@@ -130,6 +130,18 @@ public class Table<T extends Table<?>> implements Serializable {
 	 */
 	public List<Where> where(Where... wheres) {
 		whereList.clear();
+		for (Where w : wheres) {
+			whereList.add(w);
+		}
+		return whereList;
+	}
+	
+	/**
+	 * 条件 同sql 中where后的条件
+	 * 
+	 * @param wheres
+	 */
+	public List<Where> whereAppend(Where... wheres) {
 		for (Where w : wheres) {
 			whereList.add(w);
 		}
