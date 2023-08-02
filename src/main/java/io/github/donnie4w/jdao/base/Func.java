@@ -6,9 +6,9 @@
 package io.github.donnie4w.jdao.base;
 
 /**
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-1-10
- * @verion 1.0
+ * Copyright 2012-2013 donnie(donnie4w@gmail.com)
+ * date 2013-1-10
+ * verion 1.0
  */
 public class Func implements Field {
 	private static final long serialVersionUID = 1L;
@@ -30,35 +30,35 @@ public class Func implements Field {
 	}
 
 	/**
-	 * > 大于
+	 *  大于
 	 */
 	public Where GT(Object value) {
 		return new Where(fieldName + ">?", value);
 	}
 
 	/**
-	 * >= 大于等于
+	 *  大于等于
 	 */
 	public Where GE(Object value) {
 		return new Where(fieldName + ">=?", value);
 	}
 
 	/**
-	 * <= 小于等于
+	 * 小于等于
 	 */
 	public Where LE(Object value) {
 		return new Where(fieldName + "<=?", value);
 	}
 
 	/**
-	 * < 小于
+	 *  小于
 	 */
 	public Where LT(Object value) {
 		return new Where(fieldName + "<?", value);
 	}
 
 	/**
-	 * <> 不等于
+	 *  不等于
 	 */
 	public Where NEQ(Object value) {
 		return new Where(fieldName + "<>?", value);

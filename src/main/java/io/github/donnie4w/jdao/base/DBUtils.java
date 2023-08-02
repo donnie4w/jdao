@@ -12,11 +12,9 @@ import java.util.List;
 import javax.sql.DataSource;
 
 /**
- * @File:jdao: com.jdao.base :DBUtils.java
- * @Date:2017年10月23日
- * @Copyright (c) 2017, donnie4w@gmail.com All Rights Reserved.
- * @Author: dong
- * @Desc: CRUD 超级类
+ * Date:2017年10月23日
+ * Copyright (c) 2017, donnie4w@gmail.com All Rights Reserved.
+ * Desc: CRUD
  */
 public class DBUtils<T extends DBUtils<T>> implements Cloneable {
 
@@ -44,7 +42,7 @@ public class DBUtils<T extends DBUtils<T>> implements Cloneable {
         this.transaction = null;
     }
 
-    public void select(String sql, Object... objects) throws JException {
+    public void selectSingle(String sql, Object... objects) throws JException {
         qd = new QueryBean(getjh(), sql, objects);
     }
 
@@ -52,8 +50,7 @@ public class DBUtils<T extends DBUtils<T>> implements Cloneable {
         return qd.getDataSource();
     }
 
-    @SuppressWarnings("unchecked")
-    public T selectList(String sql, Object... objects) throws JException {
+    public T select(String sql, Object... objects) throws JException {
         try {
             QueryBean qd = new QueryBean(getjh(), sql, objects);
             if (qd != null) {
@@ -73,8 +70,7 @@ public class DBUtils<T extends DBUtils<T>> implements Cloneable {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public T selectListPage(int rowStart, int scanRows, String sql, Object... objects) throws JException {
+    public T selectToPage(int rowStart, int scanRows, String sql, Object... objects) throws JException {
         try {
             QueryBean qd = new QueryBean(getjh()).PageTurn(sql, rowStart, scanRows, objects);
             if (qd != null) {

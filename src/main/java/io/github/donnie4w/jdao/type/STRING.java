@@ -10,7 +10,7 @@ import io.github.donnie4w.jdao.base.Fields;
 import java.math.BigDecimal;
 
 /**
- *  String <=> char,varchar
+ *  String ： char,varchar
  */
 public class STRING extends Fields {
     public  String value;

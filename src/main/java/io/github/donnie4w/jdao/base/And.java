@@ -6,11 +6,9 @@
 package io.github.donnie4w.jdao.base;
 
 /**
- * @File:jdao: :And.java
- * @Date:2017年12月6日
- * @Copyright (c) 2017, donnie4w@gmail.com All Rights Reserved.
- * @Author: dong
- * @Desc:
+ * File:jdao: :And.java
+ * Date:2017年12月6日
+ * Copyright (c) 2017, donnie4w@gmail.com All Rights Reserved.
  */
 public class And {
 	public static Where[] and(Where... wheres) {

@@ -14,11 +14,9 @@ import javax.sql.DataSource;
 import io.github.donnie4w.jdao.util.Utils;
 
 /**
- * @File:jdao: com.jdao.dbHandlerImpl :JdaoHandlerDefaultImpl.java
- * @Date:2017年11月4日
- * @Copyright (c) 2017, donnie4w@gmail.com All Rights Reserved.
- * @Author: donnie4w
- * @Desc:
+ * Date:2017年11月4日
+ * Copyright (c) 2017, donnie4w@gmail.com All Rights Reserved.
+ * Author: donnie4w
  */
 public class JdaoHandlerDefaultImpl implements JdaoHandler {
     private static final long serialVersionUID = 1L;

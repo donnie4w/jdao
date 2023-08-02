@@ -15,7 +15,7 @@ import java.time.ZoneId;
 import java.util.Date;
 
 /**
- * date <=> timestamp, date ,time
+ * date : timestamp, date ,time
  */
 public class DATE extends Fields {
     public Date value;

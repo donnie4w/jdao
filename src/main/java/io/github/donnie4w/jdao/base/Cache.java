@@ -71,7 +71,6 @@ public abstract class Cache {
 
 	public abstract boolean build();
 
-	@SuppressWarnings("rawtypes")
 	public static Object getCache(String domain, Class<?> clazz, Object condition) {
 		if (!cacheMap.containsKey(domain) || condition == null) {
 			return null;
@@ -108,7 +107,6 @@ public abstract class Cache {
 		return null;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void setCache(String domain, Class<Table<?>> clazz, Object condition, Object result) {
 		CacheBeen cb = (CacheBeen) cacheMap.get(domain);
 		if (cb == null)

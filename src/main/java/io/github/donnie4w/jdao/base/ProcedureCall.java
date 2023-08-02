@@ -15,9 +15,9 @@ import javax.sql.DataSource;
 import io.github.donnie4w.jdao.util.Utils;
 
 /**
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-2-2
- * @verion 1.0.1 存储过程调用
+ * Copyright 2012-2013 donnie(donnie4w@gmail.com)
+ * date 2013-2-2
+ * verion 1.0.1 存储过程调用
  */
 public class ProcedureCall {
 

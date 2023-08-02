@@ -9,6 +9,9 @@ import io.github.donnie4w.jdao.base.Fields;
 
 import java.math.BigDecimal;
 
+/**
+ *  long
+ */
 public class LONG extends Fields {
     public long value;
 

@@ -7,11 +7,8 @@
 package io.github.donnie4w.jdao.base;
 
 /**
- * @File:jdao: com.jdao.base :JdaoException.java
- * @Date:2017年10月23日
- * @Copyright (c) 2017, donnie4w@gmail.com All Rights Reserved.
- * @Author: dong
- * @Desc:
+ * Date:2017年10月23日
+ * Copyright (c) 2017, donnie4w@gmail.com All Rights Reserved.
  */
 public class JRuntimeException extends RuntimeException {
 

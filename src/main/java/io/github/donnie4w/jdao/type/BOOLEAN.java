@@ -11,7 +11,7 @@ import io.github.donnie4w.jdao.base.Fields;
 import java.math.BigDecimal;
 
 /**
- * boolean <==> bit
+ * boolean : bit
  */
 public class BOOLEAN extends Fields {
     public  boolean value;

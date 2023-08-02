@@ -9,7 +9,9 @@ import io.github.donnie4w.jdao.base.Fields;
 
 import java.math.BigDecimal;
 
-//double <==> DOUBLE
+/**
+ *  double : DOUBLE
+ */
 public class DOUBLE extends Fields {
     public  double  value;
 

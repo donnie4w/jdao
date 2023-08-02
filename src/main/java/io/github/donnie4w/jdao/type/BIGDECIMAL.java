@@ -10,7 +10,7 @@ import io.github.donnie4w.jdao.base.Fields;
 import java.math.BigDecimal;
 
 /**
- *  BigDecimal <==> decimal,numeric
+ *  BigDecimal : decimal,numeric
  */
 public class BIGDECIMAL extends Fields {
     public BigDecimal value;

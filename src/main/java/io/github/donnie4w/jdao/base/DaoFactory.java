@@ -10,9 +10,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 
 /**
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-3-7
- * @verion 1.0.3 创建Dao对象工厂类
+ * Copyright 2012-2013 donnie(donnie4w@gmail.com)
+ * date 2013-3-7
+ * verion 1.0.3 创建Dao对象工厂类
  */
 public class DaoFactory {
 //	private static FieldFilter field;

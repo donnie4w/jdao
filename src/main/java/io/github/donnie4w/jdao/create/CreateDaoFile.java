@@ -22,9 +22,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 /**
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-1-10
- * @verion 1.0
+ * Copyright 2012-2013 donnie(donnie4w@gmail.com)
+ * date 2013-1-10
+ * verion 1.0
  * 生成数据表映射 Jdao Bean文件
  */
 public class CreateDaoFile {

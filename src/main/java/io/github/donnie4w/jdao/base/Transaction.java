@@ -8,11 +8,9 @@ package io.github.donnie4w.jdao.base;
 import javax.sql.DataSource;
 
 /**
- * @File:jdao: Transaction.java
- * @Date:2017年11月4日
- * @Copyright (c) 2017, donnie4w@gmail.com All Rights Reserved.
- * @Author: dong
- * @Desc: 事务管理
+ * Date:2017年11月4日
+ * Copyright (c) 2017, donnie4w@gmail.com All Rights Reserved.
+ * Desc: 事务管理
  */
 public class Transaction {
 	JdaoHandler jh;

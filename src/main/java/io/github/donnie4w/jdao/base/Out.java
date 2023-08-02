@@ -8,9 +8,9 @@ package io.github.donnie4w.jdao.base;
 import java.sql.Types;
 
 /**
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-2-2
- * @verion 1.0.1 出参
+ * Copyright 2012-2013 donnie(donnie4w@gmail.com)
+ * date 2013-2-2
+ * verion 1.0.1 出参
  */
 public class Out extends Params {
 

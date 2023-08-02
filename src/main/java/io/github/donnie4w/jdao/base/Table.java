@@ -21,10 +21,9 @@ import javax.sql.DataSource;
 import io.github.donnie4w.jdao.type.*;
 import io.github.donnie4w.jdao.util.Utils;
 /**
- * @param <T>
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-1-10
- * @verion 2.0.0
+ * Copyright 2012-2013 donnie(donnie4w@gmail.com)
+ * date 2013-1-10
+ * verion 2.0.0
  */
 public class Table<T extends Table<?>> implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -198,8 +197,6 @@ public class Table<T extends Table<?>> implements Serializable {
 
     /**
      * 条件 同sql 中where后的条件
-     *
-     * @param wheres
      */
     public List<Where> where(Where... wheres) {
         whereList.clear();
@@ -211,8 +208,6 @@ public class Table<T extends Table<?>> implements Serializable {
 
     /**
      * 条件 同sql 中where后的条件
-     *
-     * @param wheres
      */
     public List<Where> whereAppend(Where... wheres) {
         for (Where w : wheres) {
@@ -223,17 +218,12 @@ public class Table<T extends Table<?>> implements Serializable {
 
     /**
      * 条件 同sql 中where后的条件
-     *
-     * @param list
      */
     public List<Where> where(List<Where> list) {
         whereList = list;
         return whereList;
     }
 
-    /**
-     * @return
-     */
     public List<Where> where() {
         return whereList;
     }
@@ -246,8 +236,6 @@ public class Table<T extends Table<?>> implements Serializable {
 
     /**
      * 排序 同 sql 中order by
-     *
-     * @param sorts
      */
     public void sort(Sort... sorts) {
         for (Sort s : sorts) {
@@ -260,8 +248,6 @@ public class Table<T extends Table<?>> implements Serializable {
 
     /**
      * 分组 同sql中group by
-     *
-     * @param fields
      */
     public void groupBy(Fields... fields) {
         for (Fields f : fields) {
@@ -273,8 +259,6 @@ public class Table<T extends Table<?>> implements Serializable {
 
     /**
      * 分组条件，同sql中having
-     *
-     * @param wheres
      */
     public void having(Where... wheres) {
         for (Where w : wheres) {
@@ -284,18 +268,11 @@ public class Table<T extends Table<?>> implements Serializable {
 
     /**
      * 结果集翻页函数limit仅适用于部分数据库，如mysql
-     *
-     * @param f
-     * @param t
      */
     public void limit(int f, int t) {
         limitStr = new int[]{f, t};
     }
 
-    /**
-     * @param pageNumber
-     * @param rows
-     */
     public void limitByPageNumber(int pageNumber, int rows) {
         limit(pageNumber * rows, rows);
     }
@@ -383,9 +360,6 @@ public class Table<T extends Table<?>> implements Serializable {
 
     /**
      * 查询所有字段
-     *
-     * @return List<T>
-     * @throws JException
      */
     public List<T> select() throws JException {
         initFields();
@@ -394,20 +368,11 @@ public class Table<T extends Table<?>> implements Serializable {
 
     /**
      * 返回结果只有一个整数时，直接转换为int
-     *
-     * @param field
-     * @return int
-     * @throws JException
      */
     public int selectToInt(Field field) throws JException {
         return select(field).toInt();
     }
 
-    /**
-     * @param fields 查询字段
-     * @return List<T>
-     * @throws JException
-     */
     @SuppressWarnings("unchecked")
     public List<T> select(Fields... fields) throws JException {
         try {
@@ -459,11 +424,6 @@ public class Table<T extends Table<?>> implements Serializable {
         }
     }
 
-    /**
-     * @param fields 查询字段
-     * @return T
-     * @throws JException
-     */
     @SuppressWarnings("unchecked")
     public T selectById(Fields... fields) throws JException {
         try {
@@ -538,18 +498,13 @@ public class Table<T extends Table<?>> implements Serializable {
 
     /**
      * 查询字段
-     *
-     * @return List<T>
-     * @throws JException
      */
     public T selectById() throws JException {
         return selectById(fields);
     }
 
     /**
-     * @param fields 查询字段，一般包含函数操作，如 count,sum等
-     * @return QueryDao对象
-     * @throws JException
+     * fields 查询字段，一般包含函数操作，如 count,sum等
      */
     public QueryBean select(Field... fields) throws JException {
         try {
@@ -614,9 +569,6 @@ public class Table<T extends Table<?>> implements Serializable {
 
     /**
      * 数据插入操作 同sql中insert
-     *
-     * @return
-     * @throws JException
      */
     public int insert() throws JException {
         SqlKV kv = save_();
@@ -625,9 +577,6 @@ public class Table<T extends Table<?>> implements Serializable {
 
     /**
      * 仅适用于mysql ，插入并返回主鍵ID,调用的是mysql LAST_INSERT_ID() 函数； 注意：该方法调用了jdaoHandler的close()方法关闭了连接
-     *
-     * @return int
-     * @throws JException
      */
 //    public int getLastInsertId4MySql() throws JException {
 //        Connection conn = jdao.getConnection();
@@ -640,9 +589,6 @@ public class Table<T extends Table<?>> implements Serializable {
 
     /**
      * 仅适用于mysql ，插入并返回主鍵ID,调用的是mysql LAST_INSERT_ID() 函数； 注意：该方法沒有调用了jdaoHandler的close()方法。 仅适用于jdaoHandler实例中使用的是同一个connnect的情况。
-     *
-     * @return int
-     * @throws JException
      */
     public int getLastInsertId4Mysql() throws JException {
         return getLastInsertId(jdao.getConnection());
@@ -721,10 +667,7 @@ public class Table<T extends Table<?>> implements Serializable {
     }
 
     /**
-     * 批量插入
-     *
-     * @return 插入批处理影响的条数数组
-     * @throws JException
+     * 批量操作结束并执行
      */
     public int[] endBatch() throws JException {
         StringBuilder sb1 = new StringBuilder();
@@ -765,9 +708,6 @@ public class Table<T extends Table<?>> implements Serializable {
 
     /**
      * 更新操作 同sql中update
-     *
-     * @return
-     * @throws SQLException
      */
     public int update() throws JException {
         initFieldValueMap();
@@ -816,9 +756,6 @@ public class Table<T extends Table<?>> implements Serializable {
 
     /**
      * 删除操作 同sql中delete
-     *
-     * @return
-     * @throws SQLException
      */
     public int delete() throws JException {
         parseWhere();
@@ -872,8 +809,6 @@ public class Table<T extends Table<?>> implements Serializable {
 
     /**
      * 开启或关闭日志记录
-     *
-     * @param on
      */
     public void setLoggerOn(boolean on) {
         this.isloggerOn = on;
@@ -966,8 +901,6 @@ public class Table<T extends Table<?>> implements Serializable {
 
     /**
      * SQL注释行内容设置
-     *
-     * @param commentLine
      */
     public void setCommentLine(String commentLine) {
         this.commentLine = commentLine.matches(".{0,}\\*/.{0,}") ? null : commentLine;

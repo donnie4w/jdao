@@ -9,9 +9,9 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-1-10
- * @verion 1.0
+ * Copyright 2012-2013 donnie(donnie4w@gmail.com)
+ * date 2013-1-10
+ * verion 1.0
  */
 public abstract class Fields implements Field, Serializable {
 
@@ -76,21 +76,21 @@ public abstract class Fields implements Field, Serializable {
     }
 
     /**
-     * <= 小于等于
+     *  小于等于
      */
     public Where LE(Object value) {
         return parse(value, LE);
     }
 
     /**
-     * < 小于
+     *  小于
      */
     public Where LT(Object value) {
         return parse(value, LT);
     }
 
     /**
-     * <> 不等于
+     *  不等于
      */
     public Where NEQ(Object value) {
         return parse(value, NEQ);

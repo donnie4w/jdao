@@ -9,7 +9,10 @@ import io.github.donnie4w.jdao.base.Fields;
 
 import java.math.BigDecimal;
 
-//short <==> smallint
+
+/**
+ *  short ： smallint
+ */
 public class SHORT extends Fields {
     public  short value;
 

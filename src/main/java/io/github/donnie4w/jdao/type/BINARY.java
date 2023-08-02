@@ -10,7 +10,7 @@ import io.github.donnie4w.jdao.base.Fields;
 import java.math.BigDecimal;
 
 /**
- * byte[] <==>  binary, varbinary , longvarbinary
+ * byte[] :  binary, varbinary , longvarbinary
  */
 public class BINARY extends Fields {
     public byte[] value;

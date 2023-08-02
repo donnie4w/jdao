@@ -8,11 +8,9 @@ package io.github.donnie4w.jdao.base;
 import java.util.List;
 
 /**
- * @File:jdao: com.jdao.base :PageDao.java
- * @Date:2017年10月20日
- * @Copyright (c) 2017, donnie4w@gmail.com All Rights Reserved.
- * @Author: dong
- * @Desc: 分页封装类
+ * Date:2017年10月20日
+ * Copyright (c) 2017, donnie4w@gmail.com All Rights Reserved.
+ * Desc: 分页封装类
  */
 public class PageBean<T> {
 

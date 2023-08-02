@@ -9,7 +9,9 @@ import io.github.donnie4w.jdao.base.Fields;
 
 import java.math.BigDecimal;
 
-//float <==> real
+/**
+ *  float : real
+ */
 public class FLOAT extends Fields {
     public  float  value;
 

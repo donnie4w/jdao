@@ -29,9 +29,9 @@ import javax.sql.DataSource;
 import io.github.donnie4w.jdao.util.Utils;
 
 /**
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-1-13
- * @verion 1.0 用于查询结果集
+ * Copyright 2012-2013 donnie(donnie4w@gmail.com)
+ * date 2013-1-13
+ * verion 1.0 用于查询结果集
  */
 public class QueryBean implements BaseDao, Serializable {
     private static final long serialVersionUID = 1L;
@@ -49,16 +49,10 @@ public class QueryBean implements BaseDao, Serializable {
 
     private transient Log log = Log.newInstance(true, QueryBean.class);
 
-    /**
-     * @return totalcount
-     */
     public int getTotalcount() {
         return totalcount;
     }
 
-    /**
-     * @param totalcount
-     */
     public QueryBean setTotalcount(int totalcount) {
         this.totalcount = totalcount;
         return this;
@@ -75,10 +69,6 @@ public class QueryBean implements BaseDao, Serializable {
         return this.jdao.getDataSource();
     }
 
-    /**
-     * @param sql
-     * @return
-     */
     public QueryBean PageTurn(String sql, int start, int rowNumber, Object... objects) throws JException {
         try {
             List<Map<String, Object>> list = queryForMaps(getjh(), "select count(1) c from (" + sql + ") A ", objects);
@@ -89,12 +79,6 @@ public class QueryBean implements BaseDao, Serializable {
         }
     }
 
-    /**
-     * @param jdao
-     * @param sql     查询SQL
-     * @param objects sql参数值
-     * @throws SQLException
-     */
     public QueryBean(JdaoHandler jdao, String sql, Object... objects) throws JException {
         this.sql = sql;
         this.args = objects;
@@ -103,14 +87,6 @@ public class QueryBean implements BaseDao, Serializable {
 
     /**
      * 返回指定class 的集合类
-     *
-     * @param <T>
-     * @param jdao
-     * @param clazz
-     * @param sql
-     * @param objects
-     * @return
-     * @throws Exception
      */
     public static <T> List<T> queryForBeens(JdaoHandler jdao, Class<T> clazz, String sql, Object... objects) throws JException {
         Connection con = null;
@@ -122,16 +98,6 @@ public class QueryBean implements BaseDao, Serializable {
         }
     }
 
-    /**
-     * author donnie wu
-     *
-     * @param <T>
-     * @param clazz
-     * @param sql
-     * @param objects
-     * @return
-     * @throws Exception
-     */
     public static <T> List<T> queryForBeens(Class<T> clazz, String sql, Object... objects) throws JException {
         Connection con = null;
         JdaoHandler jdao = DaoFactory.getJdaoHandler(clazz, null);
@@ -147,12 +113,7 @@ public class QueryBean implements BaseDao, Serializable {
     /**
      * 返回Map 的集合类
      *
-     * @param jdao
-     * @param sql
-     * @param objects
-     * @return
-     * @throws Exception
-     */
+    */
     public static List<Map<String, Object>> queryForMaps(JdaoHandler jdao, String sql, Object... objects) throws JException {
         Connection con = null;
         try {
@@ -163,21 +124,11 @@ public class QueryBean implements BaseDao, Serializable {
         }
     }
 
-    /**
-     * @param jdao
-     * @param sql  查询sql
-     * @throws SQLException
-     */
     public QueryBean(JdaoHandler jdao, String sql) throws JException {
         this.sql = sql;
         execute(jdao);
     }
 
-    /**
-     * @param conn    数据库连接
-     * @param objects sql参数值
-     * @throws SQLException
-     */
     public QueryBean(Connection conn, String sql, Object... objects) throws JException {
         this.sql = sql;
         this.args = objects;
@@ -194,21 +145,11 @@ public class QueryBean implements BaseDao, Serializable {
         }
     }
 
-    /**
-     * @param conn 数据库连接
-     * @param sql  查询SQL
-     * @throws SQLException
-     */
     public QueryBean(Connection conn, String sql) throws JException {
         this.sql = sql;
         execute_(conn);
     }
 
-    /**
-     * @param sql
-     * @param objects
-     * @throws SQLException
-     */
     public QueryBean(String sql, Object... objects) throws JException {
         this.sql = sql;
         this.args = objects;
@@ -430,8 +371,7 @@ public class QueryBean implements BaseDao, Serializable {
     }
 
     /**
-     * @param format 格式化
-     * @param field  查询字段 查询日期类型字段值，格式化后返回Date类型 format the Date value and return Date type
+     *  查询字段 查询日期类型字段值，格式化后返回Date类型 format the Date value and return Date type
      */
     public Date field2Date(String field, String format) throws ParseException {
         if (valueMap != null)
@@ -441,8 +381,7 @@ public class QueryBean implements BaseDao, Serializable {
     }
 
     /**
-     * @param format 格式化
-     * @param field  查询字段 查询日期类型字段值，格式化后返回String类型 format the Date value and return String type
+     * 查询字段 查询日期类型字段值，格式化后返回String类型 format the Date value and return String type
      */
     public String field2DateString(String field, String format) throws ParseException {
         if (valueMap != null)
@@ -452,9 +391,8 @@ public class QueryBean implements BaseDao, Serializable {
     }
 
     /**
-     * auther donnie wu
      *
-     * @return int 返回值转换为整型
+     * 返回值转换为整型
      */
     public int toInt() {
         return Integer.parseInt(String.valueOf(valueMap.get(valueMap.keySet().iterator().next())));
