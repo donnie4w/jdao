@@ -1,157 +1,164 @@
-### jdao是轻量级orm工具包，生成与数据表对应的dao类，持久层dao对象操作，同时也支持原生sql语句操作，支持多数据源，对象缓存等.
+### Jdao  基于Java的持久层框架，零配置，零SQL操作持久层
 
-**v1.1.6**
-<br/>
-**jdao 初始化：**
-<br/>		DaoFactory.setDefaultDataSource(getDataSource()); 
-<br/>		jdao初始化 设置数据源，一步完成。
-<br/>		
+------------
 
-<br/>		getDataSource()获取数据源方法：
-<br/>		如：ActionTest1_1_2.java 中：
-<br/>		public static DataSource getDataSource() throws Exception {
-<br/>			Properties p = new Properties();
-<br/>			p.load(ActionTest1_1_2.class.getClassLoader().getResourceAsStream("druid.properties"));
-<br/>		return DruidDataSourceFactory.createDataSource(p);}
-		 
+- 用最简单的方式操作数据库
+- 支持全对象方式读写数据；
+- 支持事务，缓存，批处理等操作；
+- 支持原生sql 操作;
+- 支持注册多数据源，设置对象，类，包名对应不同数据源；
+- 支持自动生成数据表对应的java Bean对象；
+- jdao使用非常简单方便，可用于快速构建持久层封装服务；
 
-***
+------------
+
+# 基本使用
+
+#### Jdao 数据表对应的javaBean：
+
+	import io.github.donnie4w.jdao.base.DefName;
+	import io.github.donnie4w.jdao.base.Table;
+	import io.github.donnie4w.jdao.type.*;
+	 public class Hstest2 extends Table<Hstest2> {
+			public LONG id;
+			public STRING name;
+			public SHORT age;
+			public DATE createtime;
+			public DOUBLE money;
+			public BINARY binary;
+			public FLOAT real;
+			//当变量(或类名)与表不对应时，用注解DefName修正
+			@DefName(name = "level") 
+			public INT level2;
+	}
+
+####与数据表 hstest2  表名列名一一对应
+
+| Field  | Type  |   |
+| ------------ | ------------ | ------------ |
+| id  | bigint  | NOT NULL AUTO_INCREMENT  |
+|  name | varchar(100)  |  NULL |
+|  age |  tinyint | NULL  |
+|  createtime | timestamp  |  NULL|
+|  money |  double | NULL  |
+|  binary |  binary(100) |  NULL |
+|  real |  float | NULL  |
+|  level |  int | NULL  |
+
+####  hstest2 可直接操作数据：
 	
-例如：对 数据库表名为 hstest的操作 
-<br/>	CREATE TABLE `hstest` (
-<br/>   		`id` int(10) DEFAULT NULL,
-<br/>   		`value` varchar(50) DEFAULT '',
-<br/>   		`rowname` varchar(50) DEFAULT ''
-<br/>    )
+	设置数据源(一切操作从设置数据源开始)
+	这里使用druid 演示：
+	Properties p = new Properties()
+	p.load(new FileReader("druid.properties"));
+	DataSource ds = DruidDataSourceFactory.createDataSource(p);
+	DaoFactory.registDefaultDataSource(ds);
+	以上完成jdao 数据源的设置操作，该数据源默认适用全部持久层对象
 
-**一.生成dao对象,生成Hstest.java**
-<br/>	public void createDao() throws Exception {
-<br/>		Class.forName("com.mysql.jdbc.Driver");
-<br/>		String driverUrl = "jdbc:mysql://127.0.0.1:3306/test";
-<br/>		String path = System.getProperty("user.dir") + "/test/com/jdao/action";
-<br/>		CreateDaoUtil.createFile("com.jdao.action", "hstest",path,DriverManager.getConnection(driverUrl, "root", "123456"), "utf-8");
-<br/>		//com.jdao.action 为 Hstest的包名
-<br/>		//hstest为表名
-<br/>	}
+##### 插入数据
+	Hstest2 h = new Hstest2();
+	h.money.setValue(11.2);
+	h.age.setValue((short) 22);
+	h.name.setValue("tom");
+	h.binary.setValue("hello".getBytes(StandardCharsets.UTF_8));
+	h.createtime.setValue(new Date());
+	h.real.setValue(33.3f);
+	h.level2.setValue(33);
+	h.insert();
+	以上完成插入数据的操作
 
-**二.对Hstest对象的操作**
-**查询**SQL: select value,rowname from hstest where id between 2 and 10;
-<br/>jdao对象操作如下：
-<br/>Hstest t = new Hstest();
-<br/>t.where(Hstest.ID.BETWEEN(2, 10));
-<br/>t.query(Hstest.VALUE, Hstest.ROWNAME);
+##### 查询数据
 
-**插入**SQL:  insert into hstest (id,rowname,value) values(1,"donnie","wuxiaodong")
-<br/>jdao对象操作如下：
-<br/>Hstest t = new Hstest();
-<br/>t.setId(1);
-<br/>t.setRowname("donnie");
-<br/>t.setValue("wuxiaodong");
-<br/>t.save();
+	Hstest2 h = new Hstest2();
+	h.where(h.id.GE(1),h.name.LIKE("tom"));
+	List<Hstest2> list = h.select(h.id,h.name);
+	for (Hstest2 ht : list) {
+				System.out.println(ht.id.getValue());
+	}
+	以上对应查询sql：
+	select id,name from hstest2 where `id`>=1 and `name` like %'tom'%
 
-**批量插入**SQL:  insert into hstest (id,rowname,value) values(1,"donnie1","wuxiaodong1"),(2,"donnie2","wuxiaodong2"),(3,"donnie3","wuxiaodong3")
-<br/>jdao对象操作如下：
-<br/>Hstest t = new Hstest();
-<br/>t.setId(1);
-<br/>t.setRowname("donnie1");
-<br/>t.setValue("wuxiaodong1");
-<br/>t.addBatch();
-<br/>t.setId(2);
-<br/>t.setRowname("donnie2");
-<br/>t.setValue("wuxiaodong2");
-<br/>t.addBatch();
-<br/>t.setId(3);
-<br/>t.setRowname("donnie3");
-<br/>t.setValue("wuxiaodong3");
-<br/>t.addBatch();
-<br/>t.batchForSave();
+#####事务操作
+	Transaction t = new Transaction(DataSourceTest.getDataSourceByDruid());
+	Hstest hstest = new Hstest();
+	hstest.setTransaction(t);  //使用事务t
+	hstest.rowname.setValue("wu");
+	hstest.value.setValue("dong");
+	hstest.insert();
+	Hstest hstest2 = new Hstest();
+	hstest2.setTransaction(t); //使用事务t
+	hstest2.rowname.setValue("wu2");
+	hstest2.value.setValue("dong2");
+	hstest2.insert();
+	t.commit();   //提交
+	//t.rollBack(); //回滚
+	//t.close();    //关闭事务
 
-**更新**SQL:  update hstest set rowname="wuxiaodong",value="wuxiaodong" where id=10
-<br/>jdao对象操作如下：
-<br/>Hstest t = new Hstest();
-<br/>t.setRowname("wuxiaodong");
-<br/>t.setValue("wuxiaodong");
-<br/>t.where(Hstest.ID.EQ(10));
-<br/>t.update();
-<br/>
-**删除**SQL:  delete from hstest where id=2
-<br/>jdao对象操作如下:
-<br/>Hstest t = new Hstest();
-<br/>t.where(Hstest.ID.EQ(2));
-<br/>t.delete();
-<br/>
-**三.支持SQL操作 DBUtils**
-<br/>		DBUtils<?> db=new DBUtils();
-<br/>		db.select("select * from hstest where id=? limit 1",1);
-<br/>		System.out.println(db.getString("value"));
-<br/>		int i = db.execute("insert into hstest(`rowname`,`value`)values(?,?)",1,2);
-<br/> **四.自定义类继承 DBUtils**
-<br/>  任何子类继承自DBUtils 都可以设置与其对应的数据源，同时支持sql编写，支持翻页
-<br/>  如：class RsTest extends DBUtils<RsTest> {}
-<br/>    //翻页
-<br/>	public static void testSelectListPage() throws Exception {
-<br/>		RsTest rt = new RsTest();
-<br/>		// 分页查询方法
-<br/>		rt.selectListPage(0, 20, "select * from hstest");
-<br/>		System.out.println(rt.rsList().size());
-<br/>		// selectListPage 会返回 totalcount
-<br/>		List<RsTest> list = rt.rsList();
-<br/>		for (RsTest r : list) {
-<br/>			System.out.println(r.getString("value"));
-<br/>		}
-<br/>	}
-<br/>
-<br/>	//单行返回
-<br/>	public static void testSelect() throws Exception {
-<br/>		RsTest rt = new RsTest();
-<br/>		rt.select("select * from hstest where id=?", 1);
-<br/>		System.out.println(rt.getString("value"));
-<br/>		rt.select("select * from hstest where id=?", 2);
-<br/>		System.out.println(rt.getString("value"));
-<br/>	}
-<br/>
-<br/>	//插入
-<br/>	public static void testInsert() throws Exception {
-<br/>		RsTest rt = new RsTest();
-<br/>		System.out.println(rt.execute("insert into hstest(`value`,`rowname`)values(?,?),(?,?) ", "wu1", "11", "wu2", "22"));
-<br/>	}
-<br/>
-<br/>	//生成dao 的翻页测试类
-<br/>	public static void testPageTurn() throws Exception {
-<br/>		Hstest ht = new Hstest();
-<br/>		ht.setPageTurn(true);   //翻页
-<br/>		ht.where(Hstest.ID.GE(0));
-<br/>		List<Hstest> list = ht.query();
-<br/>		System.out.println("totalcount:" + list.get(0).getTotalcount());
-<br/>		for (Hstest h : list) {
-<br/>			System.out.println(h.getRowname() + " " + h.getValue());
-<br/>		}
-<br/>	}
-<br/>
-<br/>	//PageDao类测试
-<br/>	public static void testPageDao() throws Exception {
-<br/>		Hstest ht = new Hstest();
-<br/>		ht.where(Hstest.ID.GE(1));
-<br/>		PageDao<Hstest> pd = ht.selectListPage();
-<br/>		System.out.println("totalcount:" + pd.getTotalcount());
-<br/>		List<Hstest> list = pd.getList();
-<br/>		for (Hstest h : list) {
-<br/>			System.out.println(h.getRowname() + " " + h.getValue());
-<br/>		}
-<br/>	}
-<br/> **五.事务**
-<br/>		Transaction t = new Transaction(getDataSource());
-<br/>		Hstest hstest = new Hstest();
-<br/>		hstest.setTransaction(t);
-<br/>		hstest.setRowname("wu");
-<br/>		hstest.setValue("dong");
-<br/>		hstest.save();
-<br/>		Hstest hstest2 = new Hstest();
-<br/>		hstest2.setTransaction(t);
-<br/>		hstest2.setRowname("wu2");
-<br/>		hstest2.setValue("dong2");
-<br/>		hstest2.save();
-<br/>		DBUtils rt = new DBUtils();
-<br/>		rt.setTransaction(t);
-<br/>		rt.execute("insert into hstest(`rowname`,`value`)values(?,?)", 1, 2);
-<br/>		t.rollBackAndClose();
+#####批处理
+
+	Hstest ht = new Hstest();
+	ht.rowname.setValue("1111");
+	ht.value.setValue("2222");
+	ht.addBatch();  //加入批处理
+	ht.rowname.setValue("3333");
+	ht.value.setValue("4444");
+	ht.addBatch(); //加入批处理
+	ht.endBatch(); //批处理结束并执行
+
+##### java 支持对象对数据库 增删改查的全部操作，返回相应的对象
+##### 数据表操作全部映射为简单的对象操作
+
+------------
+
+
+#### 复杂的SQL操作，jdao支持原生sql操作，使用DBUtil
+	第一步，设置数据源，如上面数据源设置即可
+	例如：
+	DBUtil dt = new DBUtil()
+	int id = dt.execute("insert into hstest(`value`,`rowname`)values(?,?)", "11", "aa");
+	增删改 使用 execute方法
+	————————————————————————
+	DBUtil dt = new DBUtil()
+	dt.selects("select * from hstest where id>?", 0)
+	List<DBUtil> list = dt.rsList();
+	for (DBUtil r : list) {
+	      System.out.println(r.getString("value"));
+	}
+	查询数据使用 select,  返回一行使用selectSingle
+	
+
+
+------------
+
+##### maven 配置，jdao本身无其他的依赖
+
+			<dependency>
+				<groupId>io.github.donnie4w</groupId>
+				<artifactId>jdao</artifactId>
+				<version>2.0.0</version>
+			</dependency>
+
+------------
+
+
+
+[jdao项目地址：https://github.com/donnie4w/jdao](https://github.com/donnie4w/jdao "jdao项目地址：https://github.com/donnie4w/jdao")
+
+[jdao使用demo地址：https://github.com/donnie4w/jdaodemo](https://github.com/donnie4w/jdaodemo "jdao使用demo地址：https://github.com/donnie4w/jdaodemo")
+
+
+------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
