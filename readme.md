@@ -32,7 +32,7 @@
 			public INT level2;
 	}
 
-####与数据表 hstest2  表名列名一一对应
+#### 与数据表 hstest2  表名列名一一对应
 
 | Field  | Type  |   |
 | ------------ | ------------ | ------------ |
@@ -78,7 +78,7 @@
 	以上对应查询sql：
 	select id,name from hstest2 where `id`>=1 and `name` like %'tom'%
 
-#####事务操作
+##### 事务操作
 	Transaction t = new Transaction(DataSourceTest.getDataSourceByDruid());
 	Hstest hstest = new Hstest();
 	hstest.setTransaction(t);  //使用事务t
@@ -94,7 +94,7 @@
 	//t.rollBack(); //回滚
 	//t.close();    //关闭事务
 
-#####批处理
+##### 批处理
 
 	Hstest ht = new Hstest();
 	ht.rowname.setValue("1111");
