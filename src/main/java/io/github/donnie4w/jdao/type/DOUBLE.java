@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 /**
  *  double : DOUBLE
  */
-public class DOUBLE extends Fields {
+public final class DOUBLE extends Fields {
     public  double  value;
 
     @Override

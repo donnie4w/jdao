@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 /**
  * int : integer
  */
-public class INT extends Fields {
+public final class INT extends Fields {
     public  int value;
 
     @Override

@@ -8,11 +8,12 @@ package io.github.donnie4w.jdao.type;
 import io.github.donnie4w.jdao.base.Fields;
 
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 
 /**
  * byte[] :  binary, varbinary , longvarbinary
  */
-public class BINARY extends Fields {
+public final class BINARY extends Fields {
     public byte[] value;
 
     @Override
@@ -43,4 +44,5 @@ public class BINARY extends Fields {
     public byte[] getValue(){
         return value;
     }
+
 }

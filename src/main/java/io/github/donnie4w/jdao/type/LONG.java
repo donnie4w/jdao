@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 /**
  *  long
  */
-public class LONG extends Fields {
+public final class LONG extends Fields {
     public long value;
 
     private LONG(String name) {

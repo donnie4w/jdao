@@ -29,25 +29,13 @@ import java.sql.Types;
  */
 public class CreateDaoFile {
     /**
-     * @param tablename
-     * @param destPath
-     * @param conn
-     * @param charset
-     * @throws JException                 通过jdbc连接数据库，根据参数 tableName(表名) 生成相应的 java源文件。 生成的java文件没有package ，所以 实际使用时，需在生成的文件中自行加上相应的包名。 destPath
-     *                                      为java文件的目标地址。如果空值则生成的文件在根目录下(文件创建完成后会在控制台提示生成文件的绝对地址)。
+     * 通过jdbc连接数据库，根据参数 tableName(表名) 生成相应的 java源文件。 生成的java文件没有package ，所以 实际使用时，需在生成的文件中自行加上相应的包名。 destPath
+     * 为java文件的目标地址。如果空值则生成的文件在根目录下(文件创建完成后会在控制台提示生成文件的绝对地址)。
      */
     public static void createDao(String tablename, String destPath, Connection conn, Charset charset, boolean override) throws JException {
         createFile_(null, tablename, destPath, conn, charset, override);
     }
 
-    /**
-     * @param packageName
-     * @param tablename
-     * @param destPath
-     * @param conn
-     * @param charset
-     * @throws JException
-     */
     public static void createDaoWithPackage(String packageName, String tablename, String destPath, Connection conn, Charset charset, boolean override) throws JException {
         createFile_(packageName, tablename, destPath, conn, charset, override);
     }
@@ -165,9 +153,8 @@ public class CreateDaoFile {
 
     /**
      * 创建Jdao bean文件
-     * @param tableName   表名
-     * @param filePath    文件输出路径
-     * @throws JException
+     *  tableName   表名
+     *  filePath    文件输出路径
      */
     public void createDao(String tableName, String filePath) throws JException {
         Connection conn = DaoFactory.getDefaultHandler().getConnection();
@@ -177,10 +164,9 @@ public class CreateDaoFile {
     }
 
     /**
-     * @param tableName  表名
-     * @param packageName  包名
-     * @param filePath   文件输出路径
-     * @throws JException
+     *  tableName  表名
+     *  packageName  包名
+     *  filePath   文件输出路径
      */
     public void createDaoPackage(String tableName,String packageName, String filePath) throws JException {
         Connection conn = DaoFactory.getDefaultHandler().getConnection();
@@ -191,12 +177,11 @@ public class CreateDaoFile {
 
     /**
      *  创建Jdao bean文件
-     * @param tableName   表名
-     * @param filePath    文件输出路径
-     * @param packageName 包名
-     * @param charset     文件编码
-     * @param isOverride  是否覆盖已存在文件
-     * @throws JException
+     *  tableName   表名
+     *  filePath    文件输出路径
+     *  packageName 包名
+     *  charset     文件编码
+     *  isOverride  是否覆盖已存在文件
      */
     public void createDaoFull(String tableName, String filePath, String packageName, Charset charset, Boolean isOverride) throws JException {
         Connection conn = DaoFactory.getDefaultHandler().getConnection();

@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 /**
  *  short ： smallint
  */
-public class SHORT extends Fields {
+public final class SHORT extends Fields {
     public  short value;
 
     @Override

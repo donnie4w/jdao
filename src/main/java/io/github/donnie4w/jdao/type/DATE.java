@@ -17,7 +17,7 @@ import java.util.Date;
 /**
  * date : timestamp, date ,time
  */
-public class DATE extends Fields {
+public final class DATE extends Fields {
     public Date value;
 
     @Override

@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 /**
  *  float : real
  */
-public class FLOAT extends Fields {
+public final class FLOAT extends Fields {
     public  float  value;
 
     @Override

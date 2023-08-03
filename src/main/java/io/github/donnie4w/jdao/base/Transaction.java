@@ -35,7 +35,6 @@ public class Transaction {
 	}
 
 	/**
-	 * @throws JException
 	 *             事务提交
 	 */
 	public void commit() throws JException {
@@ -43,7 +42,6 @@ public class Transaction {
 	}
 
 	/**
-	 * @throws JException
 	 *             事务回滚并关闭连接
 	 */
 	public synchronized void rollBackAndClose() throws JException {
@@ -52,7 +50,6 @@ public class Transaction {
 	}
 
 	/**
-	 * @throws JException
 	 *             事务提交并关闭链接
 	 */
 	public synchronized void commitAndClose() throws JException {
@@ -61,7 +58,6 @@ public class Transaction {
 	}
 
 	/**
-	 * @throws JException
 	 *             事务回滚
 	 */
 	public void rollBack() throws JException {
@@ -69,7 +65,6 @@ public class Transaction {
 	}
 
 	/**
-	 * @throws JException
 	 *             连接关闭
 	 */
 	public void close() throws JException {

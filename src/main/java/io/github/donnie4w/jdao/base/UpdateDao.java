@@ -6,7 +6,7 @@
 package io.github.donnie4w.jdao.base;
 
 import java.sql.Connection;
-
+@Deprecated
 public class UpdateDao {
 
 	public static void execute(String sql, Object... objects) throws JException {
@@ -35,7 +35,6 @@ public class UpdateDao {
 	}
 
 	private static void execute_(Connection conn, String sql, Object... objects) {
-
 	}
 
 }

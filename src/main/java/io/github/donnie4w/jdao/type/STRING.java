@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 /**
  *  String ： char,varchar
  */
-public class STRING extends Fields {
+public final class STRING extends Fields{
     public  String value;
     private STRING(String name) {
         super(name);

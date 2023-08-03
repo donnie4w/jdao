@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 /**
  * boolean : bit
  */
-public class BOOLEAN extends Fields {
+public final class BOOLEAN extends Fields {
     public  boolean value;
 
     @Override
