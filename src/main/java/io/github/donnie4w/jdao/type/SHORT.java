@@ -1,7 +1,7 @@
 /**
- *  https://github.com/donnie4w/jdao
- *  Copyright jdao Author. All Rights Reserved.
- *  Email: donnie4w@gmail.com
+ * https://github.com/donnie4w/jdao
+ * Copyright jdao Author. All Rights Reserved.
+ * Email: donnie4w@gmail.com
  */
 package io.github.donnie4w.jdao.type;
 
@@ -11,20 +11,25 @@ import java.math.BigDecimal;
 
 
 /**
- *  short ： smallint
+ * short ： smallint
  */
 public final class SHORT extends Fields {
-    public  short value;
+    public short value;
 
     @Override
     protected void _setobject(Object o) {
-        this.value = ((Integer)o).shortValue();
+        if (o instanceof Short) {
+            this.value = ((Short) o).shortValue();
+        } else {
+            this.value = ((Integer) o).shortValue();
+        }
     }
 
-    protected  void _setBigDecimal(BigDecimal o){
+    protected void _setBigDecimal(BigDecimal o) {
         this.value = o.shortValue();
     }
-    public void setValue(short v){
+
+    public void setValue(short v) {
         this.value = v;
         this.isSetValue = true;
         this._value = this.value;
@@ -38,10 +43,12 @@ public final class SHORT extends Fields {
     private SHORT(String name) {
         super(name);
     }
-    public static SHORT New(String fieldName){
+
+    public static SHORT New(String fieldName) {
         return new SHORT(fieldName);
     }
-    public short getValue(){
+
+    public short getValue() {
         return value;
     }
 }
