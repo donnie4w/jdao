@@ -1,24 +1,34 @@
-/**
- *  https://github.com/donnie4w/jdao
- *  Copyright jdao Author. All Rights Reserved.
- *  Email: donnie4w@gmail.com
+/*
+ * Copyright (c) 2024, donnie <donnie4w@gmail.com> All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * github.com/donnie4w/jdao
  */
+
 package io.github.donnie4w.jdao.base;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
+import io.github.donnie4w.jdao.legacy.base.JdaoRuntimeException;
 
 /**
- * Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * date 2013-1-10
- * verion 1.0
+ * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
+ * @date 2013-1-10
+ * @verion 1.0
  */
-public abstract class Fields implements Field, Serializable {
+public class Fields implements Field {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
+
     static final String AND = " and ";
     static final String EQ = "=";
     static final String GT = ">";
@@ -27,22 +37,13 @@ public abstract class Fields implements Field, Serializable {
     static final String LT = "<";
     static final String NEQ = "<>";
 
-    protected String fieldName;
-
-    protected abstract void _setobject(Object o);
-    protected abstract void _setBigDecimal(BigDecimal o);
-    protected abstract Class<?> valueClass();
-
-    protected boolean isSetValue;
-    protected Object _value;
+    public String fieldName;
 
     public Fields(String name) {
-        if (name == null || name.isBlank() || name.isEmpty())
-            throw new RuntimeException("name can't be null!");
-        fieldName =  "`"+name+"`";
+        if (name == null)
+            throw new JdaoRuntimeException("name can't be null!");
+        fieldName = name;
     }
-
-    public Fields(){}
 
     public Where parse(Object value, String _OPER) {
         String f = "?";
@@ -62,35 +63,35 @@ public abstract class Fields implements Field, Serializable {
     }
 
     /**
-     * > 大于
+     * >= 大于等于
      */
     public Where GT(Object value) {
         return parse(value, GT);
     }
 
     /**
-     * >= 大于等于
+     * <= 大于等于
      */
     public Where GE(Object value) {
         return parse(value, GE);
     }
 
     /**
-     *  小于等于
+     * < 小于等于
      */
     public Where LE(Object value) {
         return parse(value, LE);
     }
 
     /**
-     *  小于
+     * > 小于
      */
     public Where LT(Object value) {
         return parse(value, LT);
     }
 
     /**
-     *  不等于
+     * <> 不等于
      */
     public Where NEQ(Object value) {
         return parse(value, NEQ);
@@ -134,7 +135,7 @@ public abstract class Fields implements Field, Serializable {
             if (i < objects.length - 1)
                 sb.append(",");
         }
-        return new Where(AND + fieldName + " in(" + sb.toString() + ") ", new Array(objects));
+        return new Where(AND + fieldName + " in(" + sb + ") ", new Array(objects));
     }
 
     /**
@@ -147,7 +148,7 @@ public abstract class Fields implements Field, Serializable {
             if (i < objects.length - 1)
                 sb.append(",");
         }
-        return new Where(AND + fieldName + " not in(" + sb.toString() + ") ", new Array(objects));
+        return new Where(AND + fieldName + " not in(" + sb + ") ", new Array(objects));
     }
 
     /**
@@ -261,9 +262,7 @@ public abstract class Fields implements Field, Serializable {
 
     public boolean equals(Object anObject) {
         if (anObject != null) {
-            if (this.fieldName == ((Fields) anObject).getFieldName()) {
-                return true;
-            }
+            return this.fieldName.equals(((Fields) anObject).getFieldName());
         }
         return false;
     }
