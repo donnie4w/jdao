@@ -1,7 +1,19 @@
-/**
- *  https://github.com/donnie4w/jdao
- *  Copyright jdao Author. All Rights Reserved.
- *  Email: donnie4w@gmail.com
+/*
+ * Copyright (c) 2024, donnie <donnie4w@gmail.com> All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * github.com/donnie4w/jdao
  */
 package io.github.donnie4w.jdao.base;
 
@@ -10,56 +22,59 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CacheBeen extends Cache {
-	private String domain = null;
-	private int expire = 0;
-	private StoreModel storeModel = StoreModel.STRONG;
-	Map<Class<Table<?>>, Map<Object, List<?>>> map = new ConcurrentHashMap<Class<Table<?>>, Map<Object, List<?>>>();
+    private static final String defaultDomain = String.valueOf(System.nanoTime());
 
-	private CacheBeen() {
-	}
+    static {
+        new ClearThread().start();
+    }
 
-	public static Cache newInstance() {
-		return new CacheBeen();
-	}
+    Map<Class<Table<?>>, Map<Object, List<?>>> map = new ConcurrentHashMap<Class<Table<?>>, Map<Object, List<?>>>();
+    private String domain = null;
+    //millisecond
+    private int expire = 5 * 60 * 1000;
+    private StoreModel storeModel = StoreModel.SOFT;
 
-	static {
-		new ClearThread().start();
-	}
+    private CacheBeen() {
+    }
 
-	@Override
-	public Cache setDomain(String domain) {
-		this.domain = domain;
-		return this;
-	}
+    public static Cache newInstance() {
+        return new CacheBeen();
+    }
 
-	@Override
-	public Cache setExpire(int expire) {
-		this.expire = expire;
-		return this;
-	}
+    @Override
+    public Cache setDomain(String domain) {
+        this.domain = domain;
+        return this;
+    }
 
-	@Override
-	public Cache setStoreModel(StoreModel storeModel) {
-		this.storeModel = storeModel;
-		return this;
-	}
+    @Override
+    public Cache setExpire(int expire) {
+        this.expire = expire;
+        return this;
+    }
 
-	@Override
-	public boolean build() {
-		if (domain == null || cacheMap.containsKey(domain)) {
-			return false;
-		}
-		cacheMap.put(domain, this);
-		return true;
-	}
+    @Override
+    public Cache setStoreModel(StoreModel storeModel) {
+        this.storeModel = storeModel;
+        return this;
+    }
 
-	@Override
-	public int getExpire() {
-		return this.expire;
-	}
+    @Override
+    public boolean build() {
+        if (domain == null) {
+            domain = defaultDomain;
+        }
+        cacheMap.put(domain, this);
+        return true;
+    }
 
-	@Override
-	public StoreModel getStoreModel() {
-		return this.storeModel;
-	}
+    @Override
+    public int getExpire() {
+        return this.expire;
+    }
+
+    @Override
+    public StoreModel getStoreModel() {
+        return this.storeModel;
+    }
 }
