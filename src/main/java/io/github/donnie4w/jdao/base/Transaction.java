@@ -1,74 +1,26 @@
-/**
- *  https://github.com/donnie4w/jdao
- *  Copyright jdao Author. All Rights Reserved.
- *  Email: donnie4w@gmail.com
+/*
+ * Copyright (c) 2024, donnie <donnie4w@gmail.com> All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * github.com/donnie4w/jdao
  */
 package io.github.donnie4w.jdao.base;
 
-import javax.sql.DataSource;
+import io.github.donnie4w.jdao.dbHandler.JdaoException;
+import io.github.donnie4w.jdao.dbHandler.JdbcHandle;
 
-/**
- * Date:2017年11月4日
- * Copyright (c) 2017, donnie4w@gmail.com All Rights Reserved.
- * Desc: 事务管理
- */
-public class Transaction {
-	JdaoHandler jh;
-
-	public Transaction(JdaoHandler jh) throws JException {
-		this.jh = jh;
-		this.jh.setAutoCommit(false);
-	}
-
-	public Transaction(DataSource ds) throws JException {
-		this.jh = JdaoHandlerFactory.getJdaoHandler(ds);
-		this.jh.setAutoCommit(false);
-	}
-
-	public Transaction(DBUtils<?> db) throws JException {
-		this.jh = db.getJdaoHandler();
-		this.jh.setAutoCommit(false);
-	}
-
-	public JdaoHandler getJdaoHandler() {
-		return jh;
-	}
-
-	/**
-	 *             事务提交
-	 */
-	public void commit() throws JException {
-		this.jh.commit();
-	}
-
-	/**
-	 *             事务回滚并关闭连接
-	 */
-	public synchronized void rollBackAndClose() throws JException {
-		this.jh.rollBack();
-		this.close();
-	}
-
-	/**
-	 *             事务提交并关闭链接
-	 */
-	public synchronized void commitAndClose() throws JException {
-		this.jh.commit();
-		this.close();
-	}
-
-	/**
-	 *             事务回滚
-	 */
-	public void rollBack() throws JException {
-		this.jh.rollBack();
-	}
-
-	/**
-	 *             连接关闭
-	 */
-	public void close() throws JException {
-		this.jh.close();
-	}
-
+public interface Transaction extends JdbcHandle {
+    public void commit() throws JdaoException;
+    public void rollback() throws JdaoException;
 }
