@@ -1,7 +1,19 @@
-/**
- *  https://github.com/donnie4w/jdao
- *  Copyright jdao Author. All Rights Reserved.
- *  Email: donnie4w@gmail.com
+/*
+ * Copyright (c) 2024, donnie <donnie4w@gmail.com> All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * github.com/donnie4w/jdao
  */
 package io.github.donnie4w.jdao.base;
 
@@ -9,69 +21,43 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Log {
-	private Logger logger;
-	private boolean isLog;
-	// Object o = new Object();
-	// private static Handler handler = null;
-	// private static Map<Handler, Byte> mapHandler = new ConcurrentHashMap<Handler,
-	// Byte>();
+    private final Logger logger;
+    private boolean isLog;
 
-	// static {
-	// handler = new ConsoleHandler();
-	// handler.setLevel(Level.ALL);
-	// }
+    private Log(boolean on, Class<?> clazz) {
+        isLog = on;
+        logger = Logger.getLogger(clazz == null ? "" : clazz.getName());
+        logger.setLevel(Level.INFO);
+    }
 
-	private Log(boolean on, Class<?> clazz) {
-		isLog = on;
-		logger = Logger.getLogger(clazz == null ? "" : clazz.getName());
-		logger.setLevel(Level.INFO);
-		// createLog();
-	}
 
-	// private void createLog() {
-	// synchronized (o) {
-	// if (logger == null && isLog) {
-	// logger = Logger.getLogger(clazz == null ? "" : clazz.getName());
-	// logger.setUseParentHandlers(false);
-	// logger.setLevel(Level.INFO);
-	// synchronized (mapHandler.getClass()) {
-	// if (!mapHandler.containsKey(handler)) {
-	// mapHandler.put(handler, (byte) 0);
-	// logger.addHandler(handler);
-	// }
-	// }
-	// }
-	// }
-	// }
+    public static Log newInstance() {
+        return new Log(false, null);
+    }
 
-	public static Log newInstance() {
-		return new Log(false, null);
-	}
+    public static Log newInstance(Class<?> clazz) {
+        return new Log(false, clazz);
+    }
 
-	public static Log newInstance(Class<?> clazz) {
-		return new Log(false, clazz);
-	}
+    public static Log newInstance(boolean on, Class<?> clazz) {
+        return new Log(on, clazz);
+    }
 
-	public static Log newInstance(boolean on, Class<?> clazz) {
-		return new Log(on, clazz);
-	}
+    public void logOn(boolean isLog) {
+        this.isLog = isLog;
+    }
 
-	public void isLog(boolean isLog, Class<?> clazz) {
-		this.isLog = isLog;
-	}
-
-	public void log(String log) {
-		if (isLog) {
-			logger.log(Level.INFO, log);
-		}
-	}
-
-	public static void main(String[] args) {
-		Log log = Log.newInstance(true, Log.class);
-		log.log("111111111");
-
-		log = Log.newInstance(false, Table.class);
-		log.isLog(true, Table.class);
-		log.log("222222222");
-	}
+    public void log(String... log) {
+        if (isLog) {
+            if (log != null && log.length == 1) {
+                logger.log(Level.INFO, log[0]);
+            } else if (log != null && log.length > 1) {
+                StringBuilder sb = new StringBuilder();
+                for (String s : log) {
+                    sb.append(s);
+                }
+                logger.log(Level.INFO, sb.toString());
+            }
+        }
+    }
 }
