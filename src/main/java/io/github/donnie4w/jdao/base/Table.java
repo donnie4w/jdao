@@ -1,288 +1,144 @@
-/**
- * https://github.com/donnie4w/jdao
- * Copyright jdao Author. All Rights Reserved.
- * Email: donnie4w@gmail.com
+/*
+ * Copyright (c) 2024, donnie <donnie4w@gmail.com> All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * github.com/donnie4w/jdao
  */
+
 package io.github.donnie4w.jdao.base;
 
-import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import javax.sql.DataSource;
+import io.github.donnie4w.jdao.dbHandler.DBType;
+import io.github.donnie4w.jdao.dbHandler.DBhandle;
+import io.github.donnie4w.jdao.dbHandler.JdaoException;
+import io.github.donnie4w.jdao.dbHandler.JdaoRuntimeException;
 
-import io.github.donnie4w.jdao.type.*;
-import io.github.donnie4w.jdao.util.Utils;
+import javax.sql.DataSource;
+import java.io.Serializable;
+import java.util.*;
+
 /**
- * Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * date 2013-1-10
- * verion 2.0.0
+ * @param <T>
+ * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
+ * @date 2013-1-10
+ * @verion 1.0.9
  */
-public class Table<T extends Table<?>> implements Serializable {
+public abstract class Table<T extends Table<?>> implements Scanner, Serializable {
     private static final long serialVersionUID = 1L;
 
-    @SuppressWarnings("unused")
-    private static final String JdaoVersion = "2.0.0";
-
-    protected  static Map<String,String>  fieldnamemap =new ConcurrentHashMap<String,String>();
-    static final String AND = " and ";
-    private transient Log logger = Log.newInstance();
-    protected Map<String, Object> whereMap = new LinkedHashMap<String, Object>();
-    protected Map<String, Object> havingMap = new LinkedHashMap<String, Object>();
-    protected StringBuilder sortStr = new StringBuilder();
-    protected StringBuilder groupStr = new StringBuilder();
-    protected int[] limitStr = null;
-
+    private final transient Log logger = Log.newInstance();
+    protected final List<ObjKV<String, Object>> where = new ArrayList<>();
+    protected final List<ObjKV<String, Object>> having = new ArrayList();
+    protected final Map<Fields, Object>  fieldMap = new HashMap();
+    protected final StringBuilder orderStr = new StringBuilder();
+    protected final StringBuilder groupStr = new StringBuilder();
+    private final Map<Fields, List<Object>> mBatch = new HashMap<Fields, List<Object>>();
+    private final String AND = " and ";
+    protected int[] limitArg = null;
     protected Fields[] fields = null;
+    protected boolean isloggerOn = false;
+
     private String TABLENAME = null;
     private Class<T> clazz = null;
-    private Map<Fields, List<Object>> mBatch = new HashMap<Fields, List<Object>>();
-    protected boolean isloggerOn = false;
-    private transient JdaoHandler jdao = null;
-    protected Map<Fields, Object> fieldValueMap = new HashMap<>();
+
     private boolean isCache = false;
     private String domain = null;
     private String node = null;
     private String commentLine = null;
-    private List<Where> whereList = new ArrayList<Where>();
-    private DataSource ds;
-    private int totalcount;
-    private boolean pageTurn;
+    private transient Transaction transaction = null;
+    private transient DBhandle dbhandle = null;
+    private transient boolean mustMaster = false;
 
-    public boolean isPageTurn() {
-        return pageTurn;
+    public Table(String tablename, Class<T> claz) {
+        this.TABLENAME = tablename;
+        this.clazz = claz;
     }
 
-    public void setPageTurn(boolean pageTurn) {
-        this.pageTurn = pageTurn;
-    }
-
-    public void setJdaoHandler(JdaoHandler jdaoHandler) {
-        this.jdao = jdaoHandler;
-    }
-
-    public DataSource getDataSource() {
-        return this.ds;
-    }
-
-    public Transaction setTransaction(Transaction transaction) {
-        this.jdao = transaction.jh;
-        return transaction;
-    }
-
-    public void setDataSource(DataSource ds) throws SQLException {
-        this.ds = ds;
-        this.jdao = JdaoHandlerFactory.getJdaoHandler(ds);
-    }
-
-    public Table() {
-        if (this.getClass().isAnnotationPresent(DefName.class)){
-            this.TABLENAME = this.getClass().getAnnotation(DefName.class).name();
-        }else{
-            this.TABLENAME = this.getClass().getSimpleName().toLowerCase();
-        }
-        this.clazz = (Class<T>) this.getClass();
-        String pkgn = this.getClass().getPackage().getName();
-        setJdaoHandler(this.getClass(), pkgn);
-        initFields();
-    }
-
-    private void initFields() {
-        try {
-                java.lang.reflect.Field[] fs = this.getClass().getFields();
-                fields = new Fields[fs.length];
-                int i = 0;
-                for (java.lang.reflect.Field f : fs) {
-                    String fname = null;
-                    if (f.isAnnotationPresent(DefName.class)){
-                        String name = f.getAnnotation(DefName.class).name();
-                        fieldnamemap.put(this.getClass().getName()+"_"+name,f.getName());
-                        fname = name;
-                    }else{
-                        fname = f.getName();
-                    }
-                    Fields ff =  newInstance(f.getType(),fname);
-                    f.set(this,ff);
-                    fields[i++] = ff;
-                }
-        } catch (Exception e) {
+    private static void getArrayObj(List<Object> list, Array a) {
+        for (Object o : a.getArray()) {
+            if (o instanceof Array) {
+                getArrayObj(list, (Array) o);
+            } else {
+                list.add(o);
+            }
         }
     }
 
-
-    private Fields newInstance(Class<?> claz,String fieldname){
-        Fields ff = null;
-        switch (claz.getTypeName()){
-            case "io.github.donnie4w.jdao.type.LONG":
-               ff = LONG.New(fieldname);
-                break;
-            case "io.github.donnie4w.jdao.type.STRING":
-                ff = STRING.New(fieldname);
-                break;
-            case "io.github.donnie4w.jdao.type.SHORT":
-                ff = SHORT.New(fieldname);
-                break;
-            case "io.github.donnie4w.jdao.type.DATE":
-                ff = DATE.New(fieldname);
-                break;
-            case "io.github.donnie4w.jdao.type.DOUBLE":
-                ff = DOUBLE.New(fieldname);
-                break;
-            case "io.github.donnie4w.jdao.type.BINARY":
-                ff = BINARY.New(fieldname);
-                break;
-            case "io.github.donnie4w.jdao.type.FLOAT":
-                ff = FLOAT.New(fieldname);
-                break;
-            case "io.github.donnie4w.jdao.type.BIGDECIMAL":
-                ff = BIGDECIMAL.New(fieldname);
-                break;
-            case "io.github.donnie4w.jdao.type.BOOLEAN":
-                ff = BOOLEAN.New(fieldname);
-                break;
-            case "io.github.donnie4w.jdao.type.INT":
-                ff = INT.New(fieldname);
-                break;
-            default:
-        }
-        return  ff;
+    public void setMustMaster(boolean mustMaster) {
+        this.mustMaster = mustMaster;
     }
 
-    void setJdaoHandler(Class<?> clz, String packageName) {
-        this.jdao = DaoFactory.getJdaoHandler(clz, packageName);
+    public void useTransaction(Transaction transaction) {
+        this.transaction = transaction;
+    }
+
+    public void useDataSource(DataSource dataSource, DBType dbType) {
+        this.dbhandle = Jdao.newDBhandle(dataSource, dbType);
+    }
+
+    private DBhandle getDBhandle(boolean qureyType) {
+        if (this.dbhandle != null) {
+            return this.dbhandle;
+        }
+        DBhandle dbhandle = Jdao.getDBhandle(this.clazz, this.clazz.getPackageName(), qureyType && !mustMaster);
+        if (dbhandle == null) {
+            throw new JdaoRuntimeException("DataSource not found");
+        }
+        return dbhandle;
     }
 
     public void setFields(Fields... fields) {
         this.fields = fields;
     }
 
-    protected void setTableName(String tableName) {
-        this.TABLENAME = tableName;
-    }
-
-    /**
-     * 时间函数 ，仅用于mysql get time;mysql now() function;
-     */
-    public static String Now() {
-        return " now() ";
-    }
-
-    /**
-     * 时间函数 ，仅用于Sql Server get time;sql Server getdate() function
-     */
-    public static String getdate() {
-        return " getdate() ";
-    }
-
-    /**
-     * 时间函数 ，仅用于oracle get time;oracle sysdate system variable
-     */
-    public static String sysdate() {
-        return " sysdate ";
-    }
-
-    /**
-     * get time; DB2 current system variable
-     */
-    public static String current() {
-        return " current ";
-    }
-
-    /**
-     * 条件 同sql 中where后的条件
-     */
-    public List<Where> where(Where... wheres) {
-        whereList.clear();
+    public List<ObjKV<String, Object>> where(Where... wheres) {
         for (Where w : wheres) {
-            whereList.add(w);
+            where.add(new ObjKV<>(w.getExpression(), w.getValue()));
         }
-        return whereList;
+        return where;
     }
 
-    /**
-     * 条件 同sql 中where后的条件
-     */
-    public List<Where> whereAppend(Where... wheres) {
-        for (Where w : wheres) {
-            whereList.add(w);
-        }
-        return whereList;
-    }
-
-    /**
-     * 条件 同sql 中where后的条件
-     */
-    public List<Where> where(List<Where> list) {
-        whereList = list;
-        return whereList;
-    }
-
-    public List<Where> where() {
-        return whereList;
-    }
-
-    private void parseWhere() {
-        for (Where w : whereList) {
-            whereMap.put(w.getExpression(), w.getValue());
-        }
-    }
-
-    /**
-     * 排序 同 sql 中order by
-     */
-    public void sort(Sort... sorts) {
+    public void orderBy(Sort... sorts) {
         for (Sort s : sorts) {
-            if (sortStr.length() > 0) {
-                sortStr.append(",");
+            if (orderStr.length() > 0) {
+                orderStr.append(",");
             }
-            sortStr.append(s.getFieldName());
+            orderStr.append(s.getFieldName());
         }
     }
 
-    /**
-     * 分组 同sql中group by
-     */
     public void groupBy(Fields... fields) {
         for (Fields f : fields) {
-            if (groupStr.length() > 0)
-                groupStr.append(",");
+            if (groupStr.length() > 0) groupStr.append(",");
             groupStr.append(f.getFieldName());
         }
     }
 
-    /**
-     * 分组条件，同sql中having
-     */
     public void having(Where... wheres) {
         for (Where w : wheres) {
-            havingMap.put(w.getExpression(), w.getValue());
+            having.add(new ObjKV<>(w.getExpression(), w.getValue()));
         }
     }
 
-    /**
-     * 结果集翻页函数limit仅适用于部分数据库，如mysql
-     */
-    public void limit(int f, int t) {
-        limitStr = new int[]{f, t};
+    public void limit(int limit) {
+        limitArg = new int[]{limit};
     }
 
-    public void limitByPageNumber(int pageNumber, int rows) {
-        limit(pageNumber * rows, rows);
+    public void limit(int offset, int limit) {
+        limitArg = new int[]{offset, limit};
     }
 
-    private SqlKV query_(Field... fields) throws SQLException {
-        return query_(true, fields);
-    }
-
-    private SqlKV query_(boolean isPageturn, Field... fields) throws SQLException {
-        parseWhere();
+    private SqlKV encodeSqlKV(Field... fields) throws JdaoException {
         final StringBuilder sb = new StringBuilder();
         final List<Object> list = new ArrayList<Object>();
         if (commentLine != null) {
@@ -301,319 +157,188 @@ public class Table<T extends Table<?>> implements Serializable {
             i++;
         }
         if (fieldsSb.length() > 0) {
-            sb.append(fieldsSb.toString());
+            sb.append(fieldsSb);
         } else {
             sb.append("*");
         }
         sb.append(" from ").append(TABLENAME);
-        length = whereMap.size();
+        length = where.size();
         if (length > 0) {
             final StringBuilder sbWhere = new StringBuilder();
-            for (String string : whereMap.keySet()) {
-                sbWhere.append(string);
-                Object o = whereMap.get(string);
-                if (o != null)
-                    if (o instanceof Array) {
-                        getArrayObj(list, (Array) o);
-                    } else {
-                        list.add(o);
+            for (ObjKV<String, Object> kv : where) {
+                if (sbWhere.length() == 0) {
+                    sbWhere.append(" where ");
+                    String key = kv.getKey();
+                    if (key.startsWith(AND)) {
+                        sbWhere.append(key.substring(AND.length()));
                     }
-            }
-            sb.append(sbWhere.toString().replaceFirst(AND, " where "));
-        }
-        if (groupStr.length() > 0)
-            sb.append(" group by ").append(groupStr.toString());
+                } else {
+                    sbWhere.append(kv.getKey());
+                }
 
-        if (havingMap.size() > 0) {
+                Object o = kv.getValue();
+                if (o != null) if (o instanceof Array) {
+                    getArrayObj(list, (Array) o);
+                } else {
+                    list.add(o);
+                }
+            }
+            sb.append(sbWhere);
+        }
+        if (groupStr.length() > 0) sb.append(" group by ").append(groupStr);
+
+        if (having.size() > 0) {
             final StringBuilder sbhaving = new StringBuilder();
-            sbhaving.append(" having");
-            for (String string : havingMap.keySet()) {
-                sbhaving.append(string);
-                Object o = havingMap.get(string);
+            sbhaving.append(" having ");
+            for (ObjKV kv : having) {
+                sbhaving.append(kv.getKey());
+                Object o = kv.getValue();
                 if (o instanceof Array) {
                     getArrayObj(list, (Array) o);
                 } else {
-                    list.add(havingMap.get(string));
+                    list.add(o);
                 }
             }
-            sb.append(sbhaving.toString());
+            sb.append(sbhaving);
         }
 
-        if (sortStr.length() > 0)
-            sb.append(" order by ").append(sortStr);
-        if (limitStr != null && isPageturn) {
-            sb.append(" limit ?,?");
-            list.add(limitStr[0]);
-            list.add(limitStr[1]);
+        if (orderStr.length() > 0) sb.append(" order by ").append(orderStr);
+        if (limitArg != null) {
+            if (limitArg.length == 1) {
+                sb.append(limitAdapt());
+                list.add(limitArg[0]);
+            } else if (limitArg.length == 2) {
+                sb.append(limit2Adapt());
+                list.add(limitArg[0]);
+                list.add(limitArg[1]);
+            }
         }
-        Object[] args = null;
         String sql = sb.toString();
         if (list.size() > 0) {
-            args = new Object[list.size()];
+            Object[] args = new Object[list.size()];
             list.toArray(args);
             return new SqlKV(sql, args);
         } else {
-            // logger.log("[SELETE SQL][" + sql + "]");
             return new SqlKV(sql);
         }
     }
 
-    /**
-     * 查询所有字段
-     */
-    public List<T> select() throws JException {
-        initFields();
-        return select(fields);
-    }
-
-    /**
-     * 返回结果只有一个整数时，直接转换为int
-     */
-    public int selectToInt(Field field) throws JException {
-        return select(field).toInt();
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<T> select(Fields... fields) throws JException {
-        try {
-            if (pageTurn) {
-                return selectForPage(fields);
-            }
-            SqlKV skv = query_(fields);
-            Object o = null;
-            if (isCache) {
-                o = Cache.getCache(domain, clazz, Condition.newInstance(skv, node));
-                if (o != null) {
-                    logger.log("[USE CACHE]:" + skv.toString() + "");
-                    return (List<T>) o;
-                }
-            }
-            o = executeQuery(clazz, skv.getSql(), skv.getArgs());
-            if (isCache) {
-                Cache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv, node), o);
-            }
-            if (this.isloggerOn) {
-                logger.log("[SELETE SQL][" + skv.getSql() + "]" + Arrays.toString(skv.getArgs()));
-            }
-            return (List<T>) o;
-        } catch (Exception e) {
-            throw new JException(e);
+    private String limitAdapt() {
+        switch (getDBhandle(true).getDBType()) {
+            case SQLSERVER:
+                return " OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY ";
+            case ORACLE:
+            case DB2:
+            case DERBY:
+                return " FETCH FIRST ? ROWS ONLY ";
+            case GREENPLUM:
+            case NETEZZA:
+            case POSTGRESQL:
+                return " LIMIT ? OFFSET 0 ";
+            case TERADATA:
+            case FIREBIRD:
+            case SYBASE:
+                limitArg = null;
+                return "";
+            case INGRES:
+            case H2:
+            case VERTICA:
+            case MYSQL:
+            case MARIADB:
+            case SQLITE:
+            default:
+                return " LIMIT ? ";
         }
     }
 
-    private List<T> selectForPage(Fields... fields) throws JException {
-        try {
-            SqlKV skv = query_(false, fields);
-            int totalcount = 0;
-            QueryBean qd = executeQuery("select count(1) c from (" + skv.getSql() + ") A", skv.getArgs());
-            totalcount = qd.queryDaoList().get(0).field2Int("c");
-            String sql = skv.getSql();
-            if (limitStr != null && limitStr.length > 0) {
-                sql = sql + " limit " + limitStr[0] + "," + limitStr[1];
-            }
-            List<T> list = executeQuery(clazz, sql, skv.getArgs());
-            for (T t : list) {
-                t.setTotalcount(totalcount);
-            }
-            if (this.isloggerOn) {
-                logger.log("[SELETE SQL][" + sql + "]" + Arrays.toString(skv.getArgs()));
-            }
-            return list;
-        } catch (Exception e) {
-            throw new JException(e);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public T selectById(Fields... fields) throws JException {
-        try {
-            if (pageTurn) {
-                return selectByIdToPage(fields);
-            }
-            SqlKV skv = query_(fields);
-            Object o = null;
-            if (isCache) {
-                o = Cache.getCache(domain, clazz, Condition.newInstance(skv, node));
-                if (o != null) {
-                    logger.log("[USE CACHE]:" + skv.toString() + "");
-                    return (T) o;
-                }
-            }
-
-            if (skv.getArgs() == null) {
-                o = jdao.executeQueryById(clazz, skv.getSql());
-            } else {
-                o = jdao.executeQueryById(clazz, skv.getSql(), skv.getArgs());
-            }
-
-            if (isCache) {
-                Cache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv, node), o);
-            }
-            return (T) o;
-        } catch (Exception e) {
-            throw new JException(e);
-        }
-    }
-
-    private T selectByIdToPage(Fields... fields) throws JException {
-        try {
-            SqlKV skv = query_(false, fields);
-            int totalcount = 0;
-            QueryBean qd = executeQuery("select count(1) c from (" + skv.getSql() + ") A", skv.getArgs());
-            totalcount = qd.queryDaoList().get(0).field2Int("c");
-            String sql = skv.getSql();
-            if (limitStr != null && limitStr.length > 0) {
-                sql = sql + " limit " + limitStr[0] + "," + limitStr[1];
-            }
-            T t = executeQueryById(sql, skv.getArgs());
-            t.setTotalcount(totalcount);
-            return t;
-        } catch (Exception e) {
-            throw new JException(e);
-        }
-    }
-
-    public <K> PageBean<T> selectListPage(Fields... fields) throws JException {
-        try {
-            SqlKV skv = query_(false, fields);
-            QueryBean qd = executeQuery("select count(1) c from (" + skv.getSql() + ") A", skv.getArgs());
-            int totalcount = qd.queryDaoList().get(0).field2Int("c");
-            String sql = skv.getSql();
-            if (limitStr != null && limitStr.length > 0) {
-                sql = sql + " limit " + limitStr[0] + "," + limitStr[1];
-            }
-            List<T> list = (List<T>) executeQuery(clazz, sql, skv.getArgs());
-            PageBean<T> pd = new PageBean<T>();
-            pd.setList(list);
-            pd.setTotalcount(totalcount);
-            if (this.isloggerOn) {
-                logger.log("[SELETE SQL][" + sql + "]" + Arrays.toString(skv.getArgs()));
-            }
-            return pd;
-        } catch (Exception e) {
-            throw new JException(e);
+    private String limit2Adapt() {
+        switch (getDBhandle(true).getDBType()) {
+            case POSTGRESQL:
+            case GREENPLUM:
+                return " OFFSET ? LIMIT ? ";
+            case ORACLE:
+            case SQLSERVER:
+                return " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ";
+            case SQLITE:
+            case NETEZZA:
+            case INGRES:
+            case H2:
+            case VERTICA:
+                int offset = limitArg[0];
+                limitArg[0] = limitArg[1];
+                limitArg[1] = offset;
+                return " LIMIT ? OFFSET ? ";
+            case DB2:
+            case DERBY:
+                offset = limitArg[0];
+                limitArg[0] = limitArg[1];
+                limitArg[1] = offset;
+                return " FETCH FIRST ? ROWS ONLY OFFSET ? ROWS ";
+            case SYBASE:
+            case TERADATA:
+            case FIREBIRD:
+                limitArg = null;
+                return "";
+            case MYSQL:
+            case MARIADB:
+            default:
+                return " LIMIT ?,? ";
         }
     }
 
 
-    /**
-     * 查询字段
-     */
-    public T selectById() throws JException {
-        return selectById(fields);
-    }
-
-    /**
-     * fields 查询字段，一般包含函数操作，如 count,sum等
-     */
-    public QueryBean select(Field... fields) throws JException {
-        try {
-            SqlKV skv = query_(fields);
-            Object o = null;
-            if (isCache) {
-                o = Cache.getCache(domain, clazz, Condition.newInstance(skv, node));
-                if (o != null) {
-                    logger.log("[USE CACHE]:" + skv.toString() + "");
-                    return (QueryBean) o;
-                }
-            }
-            if (skv.getArgs() == null) {
-                o = jdao.executeQuery(skv.getSql());
-            } else {
-                o = jdao.executeQuery(skv.getSql(), skv.getArgs());
-            }
-            if (isCache) {
-                Cache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv, node), o);
-            }
-            if (this.isloggerOn) {
-                logger.log("[SELETE SQL][" + skv.getSql() + "]" + Arrays.toString(skv.getArgs()));
-            }
-            return (QueryBean) o;
-        } catch (Exception e) {
-            throw new JException(e);
+    public List<T> selects(Field... fs) throws JdaoException {
+        if (fs == null) {
+            fs = fields;
         }
-    }
-
-    private QueryBean executeQuery(String sql, Object... values) throws JException {
-        return jdao.executeQuery(sql, values);
-    }
-
-    private T executeQueryById(String sql, Object... values) throws JException {
-        try {
-            return jdao.executeQueryById(clazz, sql, values);
-        } catch (Exception e) {
-            throw new JException(e);
+        SqlKV skv = encodeSqlKV(fs);
+        if (this.isloggerOn) {
+            logger.log("[SELETE SQL][" + skv.getSql() + "]" + Arrays.toString(skv.getArgs()));
         }
-    }
-
-    private List<T> executeQuery(Class<T> claz, String sql, Object... values) throws JException {
-        try {
-            if (values == null) {
-                return jdao.executeQuery(sql, claz);
-            }
-            return jdao.executeQuery(claz, sql, values);
-        } catch (Exception e) {
-            throw new JException(e);
-        }
-    }
-
-    private static void getArrayObj(List<Object> list, Array a) {
-        for (Object o : a.getArray()) {
-            if (o instanceof Array) {
-                getArrayObj(list, (Array) o);
-            } else {
-                list.add(o);
+        Object o = null;
+        if (isCache) {
+            o = Cache.getCache(domain, clazz, Condition.newInstance(skv, node));
+            if (o != null) {
+                logger.log("[USE CACHE]:" + skv);
+                return (List<T>) o;
             }
         }
+        o = getDBhandle(true).executeQueryList(transaction, clazz, skv.getSql(), skv.getArgs());
+        if (isCache) {
+            Cache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv, node), o);
+        }
+        return (List<T>) o;
     }
 
-    /**
-     * 数据插入操作 同sql中insert
-     */
-    public int insert() throws JException {
+    public T select(Fields... fs) throws JdaoException {
+        if (fs == null) {
+            fs = fields;
+        }
+        SqlKV skv = encodeSqlKV(fs);
+        if (this.isloggerOn) {
+            logger.log("[SELETE SQL][" + skv.getSql() + "]" + Arrays.toString(skv.getArgs()));
+        }
+        Object o = null;
+        if (isCache) {
+            o = Cache.getCache(domain, clazz, Condition.newInstance(skv, node));
+            if (o != null) {
+                logger.log("[USE CACHE]:" + skv);
+                return (T) o;
+            }
+        }
+        o = getDBhandle(true).executeQuery(transaction, clazz, skv.getSql(), skv.getArgs());
+        if (isCache) {
+            Cache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv, node), o);
+        }
+        return (T) o;
+    }
+
+    public int insert() throws JdaoException {
         SqlKV kv = save_();
-        return jdao.executeUpdate(kv.getSql(), kv.getArgs());
-    }
-
-    /**
-     * 仅适用于mysql ，插入并返回主鍵ID,调用的是mysql LAST_INSERT_ID() 函数； 注意：该方法调用了jdaoHandler的close()方法关闭了连接
-     */
-//    public int getLastInsertId4MySql() throws JException {
-//        Connection conn = jdao.getConnection();
-//        try {
-//            return getLastInsertId(conn);
-//        } finally {
-//            jdao.close(conn);
-//        }
-//    }
-
-    /**
-     * 仅适用于mysql ，插入并返回主鍵ID,调用的是mysql LAST_INSERT_ID() 函数； 注意：该方法沒有调用了jdaoHandler的close()方法。 仅适用于jdaoHandler实例中使用的是同一个connnect的情况。
-     */
-    public int getLastInsertId4Mysql() throws JException {
-        return getLastInsertId(jdao.getConnection());
-    }
-
-    private int getLastInsertId(Connection conn) throws JException {
-        SqlKV kv = save_();
-        PreparedStatement ps = null;
-        try {
-            ps = conn.prepareStatement(kv.getSql());
-            Object[] values = kv.getArgs();
-            for (int i = 1; i <= values.length; i++) {
-                ps.setObject(i, values[i - 1]);
-            }
-            ps.executeUpdate();
-            return new QueryBean(conn, "select LAST_INSERT_ID() id").field2Int("id");
-        } catch (Exception e) {
-            throw new JException(e);
-        } finally {
-            Utils.close(ps);
-        }
+        return getDBhandle(false).executeUpdate(transaction, kv.getSql(), kv.getArgs());
     }
 
     private SqlKV save_() {
-        initFieldValueMap();
         StringBuilder sb1 = new StringBuilder();
         StringBuilder sb2 = new StringBuilder();
         if (commentLine != null) {
@@ -622,10 +347,10 @@ public class Table<T extends Table<?>> implements Serializable {
         sb1.append("insert into " + TABLENAME + "(");
         sb2.append(")values(");
         int i = 1;
-        int length = fieldValueMap.size();
+        int length = fieldMap.size();
         Object[] values = new Object[length];
-        for (Fields hf : fieldValueMap.keySet()) {
-            values[i - 1] = fieldValueMap.get(hf);
+        for (Fields hf : fieldMap.keySet()) {
+            values[i - 1] = fieldMap.get(hf);
             sb1.append(hf.getFieldName());
             sb2.append("?");
             if (i < length) {
@@ -634,42 +359,41 @@ public class Table<T extends Table<?>> implements Serializable {
             }
             i++;
         }
-        sb1.append(sb2.toString()).append(")");
+        sb1.append(sb2).append(")");
         String sql = sb1.toString();
         if (this.isloggerOn) {
-            StringBuilder s = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             for (Object o : values) {
-                s.append(o).append(",");
+                sb.append(o).append(",");
             }
-            logger.log("[INSERT SQL][" + sql + "][" + s.toString().substring(0, s.length() - 1) + "]");
+            logger.log("[INSERT SQL][" + sql + "][" + sb.substring(0, sb.length() - 1) + "]");
         }
         SqlKV skv = new SqlKV(sql, values);
         return skv;
     }
 
-    /***
-     * 加入一组参数到批处理对象中
-     *
-     */
     public void addBatch() {
-        initFieldValueMap();
         if (mBatch.size() == 0) {
-            for (Fields f : fieldValueMap.keySet()) {
+            for (Fields f : fieldMap.keySet()) {
                 List<Object> list = new ArrayList<Object>();
-                list.add(fieldValueMap.get(f));
+                list.add(fieldMap.get(f));
                 mBatch.put(f, list);
             }
         } else {
             for (Fields f : mBatch.keySet()) {
-                mBatch.get(f).add(fieldValueMap.get(f));
+                mBatch.get(f).add(fieldMap.get(f));
             }
         }
+        fieldMap.clear();
     }
 
-    /**
-     * 批量操作结束并执行
-     */
-    public int[] endBatch() throws JException {
+    public int[] executeBatch() throws JdaoException {
+        if (fieldMap.size()>0){
+            addBatch();
+        }
+        if (mBatch.size() == 0) {
+            return new int[]{};
+        }
         StringBuilder sb1 = new StringBuilder();
         StringBuilder sb2 = new StringBuilder();
         if (commentLine != null) {
@@ -691,7 +415,7 @@ public class Table<T extends Table<?>> implements Serializable {
             }
             i++;
         }
-        sb1.append(sb2.toString()).append(")");
+        sb1.append(sb2).append(")");
         List<Object[]> list = new ArrayList<Object[]>();
         for (int k = 0; k < length; k++) {
             Object[] o = new Object[listfields.size()];
@@ -701,17 +425,12 @@ public class Table<T extends Table<?>> implements Serializable {
             list.add(o);
         }
         if (isloggerOn) {
-            logger.log("[BATCH SQL][" + sb1.toString() + "]" + Arrays.toString(list.toArray()));
+            logger.log("[BATCH SQL][" + sb1 + "]" + Arrays.toString(list.toArray()));
         }
-        return jdao.executeBatch(sb1.toString(), list);
+        return getDBhandle(false).executeBatch(transaction, sb1.toString(), list);
     }
 
-    /**
-     * 更新操作 同sql中update
-     */
-    public int update() throws JException {
-        initFieldValueMap();
-        parseWhere();
+    public int update() throws JdaoException {
         StringBuilder sb = new StringBuilder();
         if (commentLine != null) {
             sb.append("/* ").append(commentLine).append(" */");
@@ -719,27 +438,34 @@ public class Table<T extends Table<?>> implements Serializable {
         sb.append("update " + TABLENAME + " set ");
         int i = 1;
         List<Object> list = new ArrayList<Object>();
-        for (Fields hf : fieldValueMap.keySet()) {
-            list.add(fieldValueMap.get(hf));
+        for (Fields hf : fieldMap.keySet()) {
+            list.add(fieldMap.get(hf));
             sb.append(hf.getFieldName()).append("=?");
-            if (i < fieldValueMap.size()) {
+            if (i < fieldMap.size()) {
                 sb.append(",");
             }
             i++;
         }
-        if (whereMap.size() > 0) {
+        if (where.size() > 0) {
             StringBuilder sbWhere = new StringBuilder();
-            for (String str : whereMap.keySet()) {
-                sbWhere.append(str);
-                Object o = whereMap.get(str);
-                if (o != null)
-                    if (o instanceof Array) {
-                        getArrayObj(list, (Array) o);
-                    } else {
-                        list.add(o);
+            for (ObjKV<String, Object> kv : where) {
+                if (sbWhere.length() == 0) {
+                    sbWhere.append(" where ");
+                    String key = kv.getKey();
+                    if (key.startsWith(AND)) {
+                        sbWhere.append(key.substring(AND.length()));
                     }
+                } else {
+                    sbWhere.append(kv.getKey());
+                }
+                Object o = kv.getValue();
+                if (o != null) if (o instanceof Array) {
+                    getArrayObj(list, (Array) o);
+                } else {
+                    list.add(o);
+                }
             }
-            sb.append(sbWhere.toString().replaceFirst(AND, " where "));
+            sb.append(sbWhere);
         }
         String sql = sb.toString();
         Object[] values = new Object[list.size()];
@@ -749,150 +475,86 @@ public class Table<T extends Table<?>> implements Serializable {
             for (Object o : values) {
                 s.append(o).append(",");
             }
-            logger.log("[UPDATE SQL][" + sql + "][" + s.toString().substring(0, s.length() - 1) + "]");
+            logger.log("[UPDATE SQL][" + sql + "][" + s.substring(0, s.length() - 1) + "]");
         }
-        return jdao.executeUpdate(sql, list.toArray(values));
+        return getDBhandle(false).executeUpdate(transaction, sql, list.toArray(values));
     }
 
-    /**
-     * 删除操作 同sql中delete
-     */
-    public int delete() throws JException {
-        parseWhere();
+    public int delete() throws JdaoException {
         StringBuilder sb = new StringBuilder();
         if (commentLine != null) {
             sb.append("/* ").append(commentLine).append(" */");
         }
-        sb.append("delete from " + TABLENAME + "");
-        int length = whereMap.size();
+        sb.append("delete from " + TABLENAME);
+        int length = where.size();
+        Object[] values = null;
         if (length > 0) {
             StringBuilder sbWhere = new StringBuilder();
             List<Object> list = new ArrayList<Object>();
-            for (String str : whereMap.keySet()) {
-                sbWhere.append(str);
-                Object o = whereMap.get(str);
-                if (o != null)
-                    if (o instanceof Array) {
-                        getArrayObj(list, (Array) o);
-                    } else {
-                        list.add(o);
+            for (ObjKV<String, Object> kv : where) {
+                if (sbWhere.length() == 0) {
+                    sbWhere.append(" where ");
+                    String key = kv.getKey();
+                    if (key.startsWith(AND)) {
+                        sbWhere.append(key.substring(AND.length()));
                     }
+                } else {
+                    sbWhere.append(kv.getKey());
+                }
+
+                Object o = kv.getValue();
+                if (o != null) if (o instanceof Array) {
+                    getArrayObj(list, (Array) o);
+                } else {
+                    list.add(o);
+                }
             }
-            sb.append(sbWhere.toString().replaceFirst(AND, " where "));
-            String sql = sb.toString();
-            Object[] values = new Object[list.size()];
+            sb.append(sbWhere);
+            values = new Object[list.size()];
             list.toArray(values);
-            if (this.isloggerOn) {
+        }
+        if (this.isloggerOn) {
+            if (values != null && values.length > 0) {
                 StringBuilder s = new StringBuilder();
                 for (Object o : values) {
                     s.append(o).append(",");
                 }
-                logger.log("execu sql[" + sql + "][" + s.toString().substring(0, s.length() - 1) + "]");
+                logger.log("[DELETE SQL][" + sb + "][" + s.substring(0, s.length() - 1) + "]");
+            } else {
+                logger.log("[DELETE SQL][" + sb + "]");
             }
+        }
+        return getDBhandle(false).executeUpdate(transaction, sb.toString(), values);
 
-            return jdao.executeUpdate(sb.toString(), list.toArray(values));
-        } else {
-            logger.log("[DELETE SQL][" + sb.toString() + "]");
-            return jdao.executeUpdate(sb.toString());
-        }
-    }
-    private void initFieldValueMap() {
-        try {
-            for(Fields f : this.fields){
-                if (f.isSetValue){
-                    fieldValueMap.put(f, f._value);
-                }
-            }
-        } catch (Exception e) {
-        }
     }
 
-    /**
-     * 开启或关闭日志记录
-     */
-    public void setLoggerOn(boolean on) {
+    public void logger(boolean on) {
         this.isloggerOn = on;
         if (on) {
-            logger.isLog(on, clazz);
+            logger.logOn(on);
         }
     }
 
-//    public FieldFilter getFieldFilter() {
-//        return fieldFilter;
-//    }
-
-//    public void setFieldFilter(FieldFilter fieldFilter) {
-//        this.fieldFilter = fieldFilter;
-//    }
-
-    /**
-     * 对象SQL操作缓存初始化
-     */
-//    public void clear() {
-//        whereMap.clear();
-//        havingMap.clear();
-//        sortStr = new StringBuilder();
-//        groupStr = new StringBuilder();
-//        limitStr = null;
-//        mBatch = new HashMap<Fields, List<Object>>();
-//       fieldValueMap = new MyMap<Fields, Object>(clazz);
-//        fieldValueMap = new HashMap<Fields, Object>();
-//        fieldFilter = null;
-//    }
-
-//    class MyMap<K, V> extends HashMap<K, V> {
-//        private Class<?> clazz;
-//
-//        public MyMap(Class<?> t) {
-//            clazz = t;
-//        }
-//
-//        private static final long serialVersionUID = 1L;
-//
-//        @SuppressWarnings("unchecked")
-//        public V put(K key, V value) {
-//
-//            if (value == null)
-//                return null;
-//
-//            if (fieldFilter != null) {
-//                Object o = fieldFilter.process(((Fields) key), ((Fields) key).getFieldName(), value);
-//                return o == null ? null : super.put(key, (V) o);
-//            }
-//
-//            if (DaoFactory.fieldMap.containsKey(clazz)) {
-//                FieldFilter ff = DaoFactory.fieldMap.get(clazz);
-//                Object o = ff.process(((Fields) key), ((Fields) key).getFieldName(), value);
-//                return o == null ? null : super.put(key, (V) o);
-//            }
-//
-//            if (DaoFactory.getField() != null) {
-//                Object o = DaoFactory.getField().process(((Fields) key), ((Fields) key).getFieldName(), value);
-//                return o == null ? null : super.put(key, (V) o);
-//            }
-//
-//            return super.put(key, value);
-//        }
-//    }
-
-    public int getTotalcount() {
-        return totalcount;
+    public void reset() {
+        where.clear();
+        having.clear();
+        orderStr.setLength(0);
+        groupStr.setLength(0);
+        limitArg = null;
+        mBatch.clear();
+        fieldMap.clear();
+        commentLine = null;
     }
 
-    public void setTotalcount(int totalcount) {
-        this.totalcount = totalcount;
-    }
-
-    public T useCache(String domain) {
+    public <T> T useCache(String domain) {
         return useCache(true, domain, null);
     }
 
-    public T useCache(String domain, String node) {
+    public <T> T useCache(String domain, String node) {
         return useCache(true, domain, node);
     }
 
-    @SuppressWarnings("unchecked")
-    private T useCache(boolean isCache, String domain, String node) {
+    private <T> T useCache(boolean isCache, String domain, String node) {
         this.isCache = isCache;
         this.domain = domain;
         this.node = node;
@@ -900,9 +562,10 @@ public class Table<T extends Table<?>> implements Serializable {
     }
 
     /**
-     * SQL注释行内容设置
+     * @param commentLine
      */
     public void setCommentLine(String commentLine) {
         this.commentLine = commentLine.matches(".{0,}\\*/.{0,}") ? null : commentLine;
     }
 }
+
