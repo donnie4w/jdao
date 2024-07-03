@@ -1,73 +1,71 @@
-/**
- *  https://github.com/donnie4w/jdao
- *  Copyright jdao Author. All Rights Reserved.
- *  Email: donnie4w@gmail.com
+/*
+ * Copyright (c) 2024, donnie <donnie4w@gmail.com> All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * github.com/donnie4w/jdao
  */
+
 package io.github.donnie4w.jdao.base;
 
 /**
- * Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * date 2013-1-10
- * verion 1.0
+ * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
+ * @date 2013-1-10
+ * @verion 1.0
  */
 public class Where {
-	private String expression;
-	private Object value;
+    private String expression;
+    private Object value;
 
-	public Where(OR or) {
-		this.expression = or.getExpression();
-		this.value = or.getValue();
-	}
+    public Where(String expression, Object value) {
+        this.expression = expression;
+        this.value = value;
+    }
 
-	public Where(String expression, Object value) {
-		this.expression = expression;
-		this.value = value;
-	}
+    public Where(String expression, Object... value) {
+        this.expression = expression;
+        if (value != null && value.length > 0)
+            this.value = value;
+    }
 
-	public Where(String expression, Object... value) {
-		this.expression = expression;
-		if (value != null && value.length > 0)
-			this.value = value;
-	}
+    public OR OR(Where... wheres) {
+        if (wheres != null && wheres.length == 1) {
+            expression = expression + wheres[0].getExpression().replaceFirst(" and ", " or ");
+            value = value != null ? new Array(value, wheres[0].getValue()) : null;
+        } else {
+            StringBuilder sb = new StringBuilder();
+            for (Where w : wheres) {
+                sb.append(w.getExpression());
+                value = value != null ? new Array(value, w.getValue()) : null;
+            }
+            sb.append(") ");
+            expression = expression + sb.toString().replaceFirst(" and ", " or (");
+        }
 
-	public OR OR(Where... wheres) {
-		if (wheres != null && wheres.length == 1) {
-			expression = expression + wheres[0].getExpression().replaceFirst(" and ", " or ");
-			value = value != null ? new Array(value, wheres[0].getValue()) : null;
-		} else {
-			StringBuilder sb = new StringBuilder();
-			for (Where w : wheres) {
-				sb.append(w.getExpression());
-				value = value != null ? new Array(value, w.getValue()) : null;
-			}
-			sb.append(") ");
-			expression = expression + sb.toString().replaceFirst(" and ", " or (");
-		}
+        return new OR(expression, value);
+    }
 
-		return new OR(expression, value);
-	}
+    public Where AND(OR or) {
+        expression = expression + or.getExpression().replaceFirst(" and ", " and (") + ")";
+        value = value != null ? new Array(value, or.getValue()) : null;
+        return this;
+    }
 
-	public Where AND(OR or) {
-		expression = expression + or.getExpression().replaceFirst(" and ", " and (") + ")";
-		value = value != null ? new Array(value, or.getValue()) : null;
-		return this;
-	}
+    public String getExpression() {
+        return expression;
+    }
 
-	public String getExpression() {
-		return expression;
-	}
-
-	public Object getValue() {
-		return value;
-	}
-
-	public Where setExpression(String expression) {
-		this.expression = expression;
-		return this;
-	}
-
-	public Where setValue(Object value) {
-		this.value = value;
-		return this;
-	}
+    public Object getValue() {
+        return value;
+    }
 }
