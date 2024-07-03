@@ -24,13 +24,11 @@ import java.util.Date;
 
 public class FieldBean {
 
-    private static final long serialVersionUID = 1L;
+    private final String fieldName;
+    private final int fieldIndex;
+    private final Object fieldValue;
 
-    private String fieldName;
-    private int fieldIndex;
-    private Object fieldValue;
-
-    public FieldBean(String fieldName,int fieldIndex,Object fieldValue){
+    public FieldBean(String fieldName, int fieldIndex, Object fieldValue) {
         this.fieldName = fieldName;
         this.fieldIndex = fieldIndex;
         this.fieldValue = fieldValue;
@@ -40,12 +38,12 @@ public class FieldBean {
         return fieldValue;
     }
 
-    public String name(){
+    public String name() {
         return fieldName;
     }
 
-    public int index(){
-        return  fieldIndex;
+    public int index() {
+        return fieldIndex;
     }
 
     public Date valueDate() {
@@ -55,36 +53,36 @@ public class FieldBean {
         return null;
     }
 
-    public String  ValueString(){
-        return  Util.asString(fieldValue);
+    public String ValueString() {
+        return Util.asString(fieldValue);
     }
 
-    public long valueLong(){
-        return  Util.asLong(fieldValue);
+    public long valueLong() {
+        return Util.asLong(fieldValue);
     }
 
-    public int valueInt(){
-        return  Util.asInt(fieldValue);
+    public int valueInt() {
+        return Util.asInt(fieldValue);
     }
 
-    public short valueShort(){
-        return  Util.asShort(fieldValue);
+    public short valueShort() {
+        return Util.asShort(fieldValue);
     }
 
-    public float valueFloat(){
-        return  Util.asFloat(fieldValue);
+    public float valueFloat() {
+        return Util.asFloat(fieldValue);
     }
 
-    public double valueDouble(){
-        return  Util.asDouble(fieldValue);
+    public double valueDouble() {
+        return Util.asDouble(fieldValue);
     }
 
-    public BigInteger valueBigInteger(){
-        return  Util.asBigInteger(fieldValue);
+    public BigInteger valueBigInteger() {
+        return Util.asBigInteger(fieldValue);
     }
 
-    public BigDecimal valueBigDecimal(){
-        return  Util.asBigDecimal(fieldValue);
+    public BigDecimal valueBigDecimal() {
+        return Util.asBigDecimal(fieldValue);
     }
 
 }
