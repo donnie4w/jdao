@@ -18,51 +18,65 @@
 
 package io.github.donnie4w.jdao.base;
 
-import io.github.donnie4w.jdao.dbHandler.DBType;
-import io.github.donnie4w.jdao.dbHandler.DBhandle;
-import io.github.donnie4w.jdao.dbHandler.JdaoException;
-import io.github.donnie4w.jdao.dbHandler.JdaoRuntimeException;
+import io.github.donnie4w.jdao.handle.*;
 
 import javax.sql.DataSource;
 import java.io.Serializable;
 import java.util.*;
 
 /**
- * @param <T>
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
  * @date 2013-1-10
  * @verion 1.0.9
  */
 public abstract class Table<T extends Table<?>> implements Scanner, Serializable {
-    private static final long serialVersionUID = 1L;
+    @java.io.Serial
+    private static final long serialVersionUID = 6118092300004961000L;
 
-    private final transient Log logger = Log.newInstance();
-    protected final List<ObjKV<String, Object>> where = new ArrayList<>();
-    protected final List<ObjKV<String, Object>> having = new ArrayList();
-    protected final Map<Fields, Object>  fieldMap = new HashMap();
-    protected final StringBuilder orderStr = new StringBuilder();
-    protected final StringBuilder groupStr = new StringBuilder();
-    private final Map<Fields, List<Object>> mBatch = new HashMap<Fields, List<Object>>();
-    private final String AND = " and ";
-    protected int[] limitArg = null;
-    protected Fields[] fields = null;
-    protected boolean isloggerOn = false;
+    private static final String AND = " and ";
+    private static final Log logger = Log.newInstance();
 
-    private String TABLENAME = null;
-    private Class<T> clazz = null;
-
-    private boolean isCache = false;
-    private String domain = null;
-    private String node = null;
-    private String commentLine = null;
+    private transient List<ObjKV<String, Object>> where;
+    private transient List<ObjKV<String, Object>> having;
+    private transient Map<Fields, Object> fieldMap;
+    private transient StringBuilder orderSb;
+    private transient StringBuilder groupSb;
+    private transient Map<Fields, List<Object>> batchMap;
+    private transient int[] limitArg;
+    private transient Fields[] fields;
+    private transient boolean isloggerOn = false;
+    private transient boolean isCache = false;
+    private transient String domain = null;
+    private transient String node = null;
+    private transient String commentLine = null;
     private transient Transaction transaction = null;
     private transient DBhandle dbhandle = null;
     private transient boolean mustMaster = false;
+    private transient boolean isinit = false;
+    private transient Class<T> clazz = null;
+    private String TABLENAME = null;
 
-    public Table(String tablename, Class<T> claz) {
+    protected Table(String tablename, Class<T> claz) {
         this.TABLENAME = tablename;
-        this.clazz = claz;
+        init(claz);
     }
+
+    protected void fieldPut(Fields field, Object value) {
+        if (fieldMap != null) fieldMap.put(field, value);
+    }
+
+    protected void init(Class<T> claz) {
+        this.where = new ArrayList<>();
+        this.having = new ArrayList();
+        this.fieldMap = new HashMap();
+        this.orderSb = new StringBuilder();
+        this.groupSb = new StringBuilder();
+        this.batchMap = new HashMap<Fields, List<Object>>();
+        this.clazz = claz;
+        this.isinit = true;
+    }
+
+    public abstract void toJdao();
 
     private static void getArrayObj(List<Object> list, Array a) {
         for (Object o : a.getArray()) {
@@ -90,9 +104,29 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         if (this.dbhandle != null) {
             return this.dbhandle;
         }
-        DBhandle dbhandle = Jdao.getDBhandle(this.clazz, this.clazz.getPackageName(), qureyType && !mustMaster);
+        DBhandle dbhandle = getDBhandle(this.clazz, this.clazz.getPackageName(), qureyType && !mustMaster);
         if (dbhandle == null) {
             throw new JdaoRuntimeException("DataSource not found");
+        }
+        return dbhandle;
+    }
+
+    static DBhandle getDBhandle(Class<?> clz, String packageName, boolean queryType) {
+        DBhandle dbhandle = null;
+
+        if (SlaveSource.size() > 0 && queryType) {
+            dbhandle = SlaveSource.get(clz, packageName);
+            if (dbhandle != null) {
+                return dbhandle;
+            }
+        }
+
+        dbhandle = Jdao.getDBhandle(clz);
+        if (dbhandle == null) {
+            dbhandle = Jdao.getDBhandle(packageName);
+        }
+        if (dbhandle == null) {
+            dbhandle = Jdao.getDefaultDBhandle();
         }
         return dbhandle;
     }
@@ -101,39 +135,72 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         this.fields = fields;
     }
 
+    /**
+     * where
+     *
+     * @param wheres
+     * @return
+     */
     public List<ObjKV<String, Object>> where(Where... wheres) {
+        isinit();
         for (Where w : wheres) {
             where.add(new ObjKV<>(w.getExpression(), w.getValue()));
         }
         return where;
     }
 
+    /**
+     * order by
+     *
+     * @param sorts
+     */
     public void orderBy(Sort... sorts) {
         for (Sort s : sorts) {
-            if (orderStr.length() > 0) {
-                orderStr.append(",");
+            if (orderSb.length() > 0) {
+                orderSb.append(",");
             }
-            orderStr.append(s.getFieldName());
+            orderSb.append(s.getFieldName());
         }
     }
 
+    /**
+     * group by
+     *
+     * @param fields
+     */
     public void groupBy(Fields... fields) {
         for (Fields f : fields) {
-            if (groupStr.length() > 0) groupStr.append(",");
-            groupStr.append(f.getFieldName());
+            if (groupSb.length() > 0) groupSb.append(",");
+            groupSb.append(f.getFieldName());
         }
     }
 
+    /**
+     * having
+     *
+     * @param wheres
+     */
     public void having(Where... wheres) {
         for (Where w : wheres) {
             having.add(new ObjKV<>(w.getExpression(), w.getValue()));
         }
     }
 
+    /**
+     * limit ?
+     *
+     * @param limit
+     */
     public void limit(int limit) {
         limitArg = new int[]{limit};
     }
 
+    /**
+     * limit ?,?
+     *
+     * @param offset
+     * @param limit
+     */
     public void limit(int offset, int limit) {
         limitArg = new int[]{offset, limit};
     }
@@ -185,7 +252,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
             }
             sb.append(sbWhere);
         }
-        if (groupStr.length() > 0) sb.append(" group by ").append(groupStr);
+        if (groupSb.length() > 0) sb.append(" group by ").append(groupSb);
 
         if (having.size() > 0) {
             final StringBuilder sbhaving = new StringBuilder();
@@ -202,7 +269,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
             sb.append(sbhaving);
         }
 
-        if (orderStr.length() > 0) sb.append(" order by ").append(orderStr);
+        if (orderSb.length() > 0) sb.append(" order by ").append(orderSb);
         if (limitArg != null) {
             if (limitArg.length == 1) {
                 sb.append(limitAdapt());
@@ -287,7 +354,15 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
     }
 
 
+    /**
+     * select
+     *
+     * @param fs
+     * @return
+     * @throws JdaoException
+     */
     public List<T> selects(Field... fs) throws JdaoException {
+        isinit();
         if (fs == null) {
             fs = fields;
         }
@@ -310,7 +385,15 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         return (List<T>) o;
     }
 
+    /**
+     * select
+     *
+     * @param fs
+     * @return
+     * @throws JdaoException
+     */
     public T select(Fields... fs) throws JdaoException {
+        isinit();
         if (fs == null) {
             fs = fields;
         }
@@ -333,7 +416,14 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         return (T) o;
     }
 
+    /**
+     * insert into
+     *
+     * @return
+     * @throws JdaoException
+     */
     public int insert() throws JdaoException {
+        isinit();
         SqlKV kv = save_();
         return getDBhandle(false).executeUpdate(transaction, kv.getSql(), kv.getArgs());
     }
@@ -373,25 +463,27 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
     }
 
     public void addBatch() {
-        if (mBatch.size() == 0) {
+        isinit();
+        if (batchMap.size() == 0) {
             for (Fields f : fieldMap.keySet()) {
                 List<Object> list = new ArrayList<Object>();
                 list.add(fieldMap.get(f));
-                mBatch.put(f, list);
+                batchMap.put(f, list);
             }
         } else {
-            for (Fields f : mBatch.keySet()) {
-                mBatch.get(f).add(fieldMap.get(f));
+            for (Fields f : batchMap.keySet()) {
+                batchMap.get(f).add(fieldMap.get(f));
             }
         }
         fieldMap.clear();
     }
 
     public int[] executeBatch() throws JdaoException {
-        if (fieldMap.size()>0){
+        isinit();
+        if (fieldMap.size() > 0) {
             addBatch();
         }
-        if (mBatch.size() == 0) {
+        if (batchMap.size() == 0) {
             return new int[]{};
         }
         StringBuilder sb1 = new StringBuilder();
@@ -401,11 +493,11 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         }
         sb1.append("insert into " + TABLENAME + "(");
         sb2.append(")values(");
-        int length = mBatch.get(mBatch.keySet().iterator().next()).size();
-        int lengthfield = mBatch.size();
+        int length = batchMap.get(batchMap.keySet().iterator().next()).size();
+        int lengthfield = batchMap.size();
         int i = 1;
         List<Fields> listfields = new ArrayList<Fields>();
-        for (Fields f : mBatch.keySet()) {
+        for (Fields f : batchMap.keySet()) {
             listfields.add(f);
             sb1.append(f.getFieldName());
             sb2.append("?");
@@ -420,7 +512,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         for (int k = 0; k < length; k++) {
             Object[] o = new Object[listfields.size()];
             for (int j = 0; j < lengthfield; j++) {
-                o[j] = mBatch.get(listfields.get(j)).get(k);
+                o[j] = batchMap.get(listfields.get(j)).get(k);
             }
             list.add(o);
         }
@@ -430,7 +522,14 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         return getDBhandle(false).executeBatch(transaction, sb1.toString(), list);
     }
 
+    /**
+     * update
+     *
+     * @return
+     * @throws JdaoException
+     */
     public int update() throws JdaoException {
+        isinit();
         StringBuilder sb = new StringBuilder();
         if (commentLine != null) {
             sb.append("/* ").append(commentLine).append(" */");
@@ -480,7 +579,14 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         return getDBhandle(false).executeUpdate(transaction, sql, list.toArray(values));
     }
 
+    /**
+     * delete
+     *
+     * @return
+     * @throws JdaoException
+     */
     public int delete() throws JdaoException {
+        isinit();
         StringBuilder sb = new StringBuilder();
         if (commentLine != null) {
             sb.append("/* ").append(commentLine).append(" */");
@@ -529,28 +635,29 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
     }
 
     public void logger(boolean on) {
+        isinit();
         this.isloggerOn = on;
-        if (on) {
-            logger.logOn(on);
-        }
     }
 
     public void reset() {
+        isinit();
         where.clear();
         having.clear();
-        orderStr.setLength(0);
-        groupStr.setLength(0);
+        orderSb.setLength(0);
+        groupSb.setLength(0);
         limitArg = null;
-        mBatch.clear();
+        batchMap.clear();
         fieldMap.clear();
         commentLine = null;
     }
 
     public <T> T useCache(String domain) {
+        isinit();
         return useCache(true, domain, null);
     }
 
     public <T> T useCache(String domain, String node) {
+        isinit();
         return useCache(true, domain, node);
     }
 
@@ -565,7 +672,14 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      * @param commentLine
      */
     public void setCommentLine(String commentLine) {
+        isinit();
         this.commentLine = commentLine.matches(".{0,}\\*/.{0,}") ? null : commentLine;
+    }
+
+    private void isinit() {
+        if (!this.isinit) {
+            throw new JdaoRuntimeException("the object is not a Jdao object and should be converted to a Jdao object by calling the toJdao() function");
+        }
     }
 }
 
