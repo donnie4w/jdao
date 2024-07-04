@@ -32,7 +32,7 @@ public class Log {
 
 
     public static Log newInstance() {
-        return new Log(false, null);
+        return new Log(true, null);
     }
 
     public static Log newInstance(Class<?> clazz) {
