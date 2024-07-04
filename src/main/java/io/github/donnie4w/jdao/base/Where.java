@@ -23,7 +23,7 @@ package io.github.donnie4w.jdao.base;
  * @date 2013-1-10
  * @verion 1.0
  */
-public class Where {
+public class Where<T> {
     private String expression;
     private Object value;
 
@@ -38,13 +38,13 @@ public class Where {
             this.value = value;
     }
 
-    public OR OR(Where... wheres) {
+    public OR<T> OR(Where<T>... wheres) {
         if (wheres != null && wheres.length == 1) {
             expression = expression + wheres[0].getExpression().replaceFirst(" and ", " or ");
             value = value != null ? new Array(value, wheres[0].getValue()) : null;
         } else {
             StringBuilder sb = new StringBuilder();
-            for (Where w : wheres) {
+            for (Where<T> w : wheres) {
                 sb.append(w.getExpression());
                 value = value != null ? new Array(value, w.getValue()) : null;
             }
@@ -52,10 +52,10 @@ public class Where {
             expression = expression + sb.toString().replaceFirst(" and ", " or (");
         }
 
-        return new OR(expression, value);
+        return new OR<T>(expression, value);
     }
 
-    public Where AND(OR or) {
+    public Where<T> AND(OR<T> or) {
         expression = expression + or.getExpression().replaceFirst(" and ", " and (") + ")";
         value = value != null ? new Array(value, or.getValue()) : null;
         return this;
