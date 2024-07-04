@@ -18,16 +18,17 @@
 
 package io.github.donnie4w.jdao.base;
 
-import io.github.donnie4w.jdao.legacy.base.JdaoRuntimeException;
+
+import io.github.donnie4w.jdao.handle.JdaoRuntimeException;
+
+import java.util.Objects;
 
 /**
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
  * @date 2013-1-10
  * @verion 1.0
  */
-public class Fields implements Field {
-
-    private static final long serialVersionUID = 1L;
+public class Fields<T> implements Field<T> {
 
     static final String AND = " and ";
     static final String EQ = "=";
@@ -41,233 +42,240 @@ public class Fields implements Field {
 
     public Fields(String name) {
         if (name == null)
-            throw new JdaoRuntimeException("name can't be null!");
+            throw new JdaoRuntimeException("field name can't be null!");
         fieldName = name;
     }
 
-    public Where parse(Object value, String _OPER) {
+    public Where<T> parse(Object value, String _OPER) {
         String f = "?";
         Object v = value;
         if (value instanceof Fields) {
             f = ((Fields) value).getFieldName();
             v = null;
         }
-        return new Where(AND + fieldName + _OPER + f, v);
+        return new Where<T>(AND + fieldName + _OPER + f, v);
     }
 
     /**
      * = 等于
      */
-    public Where EQ(Object value) {
+    public Where<T> EQ(Object value) {
         return parse(value, EQ);
     }
 
     /**
      * >= 大于等于
      */
-    public Where GT(Object value) {
+    public Where<T> GT(Object value) {
         return parse(value, GT);
     }
 
     /**
      * <= 大于等于
      */
-    public Where GE(Object value) {
+    public Where<T> GE(Object value) {
         return parse(value, GE);
     }
 
     /**
      * < 小于等于
      */
-    public Where LE(Object value) {
+    public Where<T> LE(Object value) {
         return parse(value, LE);
     }
 
     /**
      * > 小于
      */
-    public Where LT(Object value) {
+    public Where<T> LT(Object value) {
         return parse(value, LT);
     }
 
     /**
      * <> 不等于
      */
-    public Where NEQ(Object value) {
+    public Where<T> NEQ(Object value) {
         return parse(value, NEQ);
     }
 
     /**
      * like %value%
      */
-    public Where LIKE(String value) {
-        return new Where(AND + fieldName + " like ? ", "%" + value + "%");
+    public Where<T> LIKE(String value) {
+        return new Where<T>(AND + fieldName + " like ? ", "%" + value + "%");
     }
 
     /**
      * like value%
      */
-    public Where lLIKE(String value) {
-        return new Where(AND + fieldName + " like ? ", value + "%");
+    public Where<T> lLIKE(String value) {
+        return new Where<T>(AND + fieldName + " like ? ", value + "%");
     }
 
     /**
      * like %value
      */
-    public Where rLIKE(String value) {
-        return new Where(AND + fieldName + " like  ? ", "%" + value);
+    public Where<T> rLIKE(String value) {
+        return new Where<T>(AND + fieldName + " like  ? ", "%" + value);
     }
 
     /**
      * between ? and ?
      */
-    public Where BETWEEN(Object from, Object to) {
-        return new Where(AND + fieldName + " between ? and ? ", new Array(from, to));
+    public Where<T> BETWEEN(Object from, Object to) {
+        return new Where<T>(AND + fieldName + " between ? and ? ", new Array(from, to));
     }
 
     /**
      * in (?)
      */
-    public Where IN(Object... objects) {
+    public Where<T> IN(Object... objects) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < objects.length; i++) {
             sb.append("?");
             if (i < objects.length - 1)
                 sb.append(",");
         }
-        return new Where(AND + fieldName + " in(" + sb + ") ", new Array(objects));
+        return new Where<T>(AND + fieldName + " in(" + sb + ") ", new Array(objects));
     }
 
     /**
      * not in (?)
      */
-    public Where NOTIN(Object... objects) {
+    public Where<T> NOTIN(Object... objects) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < objects.length; i++) {
             sb.append("?");
             if (i < objects.length - 1)
                 sb.append(",");
         }
-        return new Where(AND + fieldName + " not in(" + sb + ") ", new Array(objects));
+        return new Where<T>(AND + fieldName + " not in(" + sb + ") ", new Array(objects));
     }
 
     /**
      * is null
      */
-    public Where ISNULL() {
-        return new Where(AND + fieldName + " is null ");
+    public Where<T> ISNULL() {
+        return new Where<T>(AND + fieldName + " is null ");
     }
 
     /**
      * is not null
      */
-    public Where ISNONULL() {
-        return new Where(AND + fieldName + " is not null ");
+    public Where<T> ISNONULL() {
+        return new Where<T>(AND + fieldName + " is not null ");
     }
 
     /**
      * order by ? asc 升序
      */
-    public Sort asc() {
-        return new Sort(fieldName + " asc");
+    public Sort<T> asc() {
+        return new Sort<T>(fieldName + " asc");
     }
 
     /**
      * order by ? desc 降序
      */
-    public Sort desc() {
-        return new Sort(fieldName + " desc");
+    public Sort<T> desc() {
+        return new Sort<T>(fieldName + " desc");
     }
 
     /**
      * count(?)
      */
-    public Func count() {
-        return new Func(" count(" + fieldName + ") ");
+    public Func<T> count() {
+        return new Func<T>(" count(" + fieldName + ") ");
     }
 
     /**
      * sum(?)
      */
-    public Func sum() {
-        return new Func(" sum(" + fieldName + ") ");
+    public Func<T> sum() {
+        return new Func<T>(" sum(" + fieldName + ") ");
     }
 
     /**
      * distinct
      */
-    public Func distinct() {
-        return new Func(" distinct " + fieldName + " ");
+    public Func<T> distinct() {
+        return new Func<T>(" distinct " + fieldName + " ");
     }
 
     /**
      * avg
      */
-    public Func avg() {
-        return new Func(" avg(" + fieldName + ") ");
+    public Func<T> avg() {
+        return new Func<T>(" avg(" + fieldName + ") ");
     }
 
     /**
      * max
      */
-    public Func max() {
-        return new Func(" max(" + fieldName + ") ");
+    public Func<T> max() {
+        return new Func<T>(" max(" + fieldName + ") ");
     }
 
     /**
      * min
      */
-    public Func min() {
-        return new Func(" min(" + fieldName + ") ");
+    public Func<T> min() {
+        return new Func<T>(" min(" + fieldName + ") ");
     }
 
     /**
      * ucase 转换为大写
      */
-    public Func ucase() {
-        return new Func(" ucase(" + fieldName + ") ");
+    public Func<T> ucase() {
+        return new Func<T>(" ucase(" + fieldName + ") ");
     }
 
     /**
      * lcase 转换为小写
      */
-    public Func lcase() {
-        return new Func(" lcase(" + fieldName + ") ");
+    public Func<T> lcase() {
+        return new Func<T>(" lcase(" + fieldName + ") ");
     }
 
     /**
      * len 长度
      */
-    public Func len() {
-        return new Func(" len(" + fieldName + ") ");
+    public Func<T> len() {
+        return new Func<T>(" len(" + fieldName + ") ");
     }
 
     /**
      * round(fieldName,0) round函数
      */
-    public Func round(int decimals) {
-        return new Func(" round(" + fieldName + " ," + decimals + ") ");
+    public Func<T> round(int decimals) {
+        return new Func<T>(" round(" + fieldName + " ," + decimals + ") ");
     }
 
     /**
-     * format(fieldName,'YYYY-MM-DD') 格式化
+     * Implementation function wrapping
+     * e.g.  ID.FnWarp("max")  mean:  max("id")
+     *
+     * @param function
+     * @return
      */
-    public Func format(String format) {
-        return new Func(" format(" + fieldName + " ,'" + format + "') ");
+    public Func<T> FnWarp(String function) {
+        return new Func<T>(" " + function + "(" + fieldName + ") ");
     }
 
     public String getFieldName() {
         return fieldName;
     }
 
-    public boolean equals(Object anObject) {
-        if (anObject != null) {
-            return this.fieldName.equals(((Fields) anObject).getFieldName());
-        }
-        return false;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Fields fields = (Fields) o;
+        return Objects.equals(fieldName, fields.fieldName);
     }
 
+    @Override
     public int hashCode() {
-        return this.fieldName.hashCode() * 31;
+        return Objects.hashCode(fieldName) * 31;
     }
 }
