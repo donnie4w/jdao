@@ -17,6 +17,8 @@
  */
 package io.github.donnie4w.jdao.base;
 
+import java.util.Objects;
+
 public class Condition {
     private SqlKV sqlKV = null;
     private String node = "";
@@ -38,18 +40,17 @@ public class Condition {
         return node;
     }
 
-    public boolean equals(Object obj) {
-        Condition cd = (Condition) obj;
-        if (sqlKV == null || cd.getSqlKV() == null || !sqlKV.equals(cd.getSqlKV()) || !node.equals(cd.getNode())) {
-            return false;
-        }
-        return true;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Condition condition = (Condition) o;
+        return Objects.equals(sqlKV, condition.sqlKV) && Objects.equals(node, condition.node);
     }
 
+    @Override
     public int hashCode() {
-        if (sqlKV == null)
-            return node.hashCode();
-        return 31 * sqlKV.hashCode() + node.hashCode();
+        return Objects.hash(sqlKV, node);
     }
 
     public String toString() {
