@@ -27,7 +27,6 @@ import java.util.*;
 /**
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
  * @date 2013-1-10
- * @verion 1.0.9
  */
 public abstract class Table<T extends Table<?>> implements Scanner, Serializable {
     @java.io.Serial
@@ -38,16 +37,14 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
 
     private transient List<ObjKV<String, Object>> where;
     private transient List<ObjKV<String, Object>> having;
-    private transient Map<Fields, Object> fieldMap;
+    private transient Map<Fields<T>, Object> fieldMap;
     private transient StringBuilder orderSb;
     private transient StringBuilder groupSb;
-    private transient Map<Fields, List<Object>> batchMap;
+    private transient Map<Fields<T>, List<Object>> batchMap;
     private transient int[] limitArg;
-    private transient Fields[] fields;
+    private transient Fields<T>[] fields;
     private transient boolean isloggerOn = false;
-    private transient boolean isCache = false;
-    private transient String domain = null;
-    private transient String node = null;
+    private transient byte isCache = 0;
     private transient String commentLine = null;
     private transient Transaction transaction = null;
     private transient DBhandle dbhandle = null;
@@ -61,7 +58,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         init(claz);
     }
 
-    protected void fieldPut(Fields field, Object value) {
+    protected void fieldPut(Fields<T> field, Object value) {
         if (fieldMap != null) fieldMap.put(field, value);
     }
 
@@ -71,7 +68,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         this.fieldMap = new HashMap();
         this.orderSb = new StringBuilder();
         this.groupSb = new StringBuilder();
-        this.batchMap = new HashMap<Fields, List<Object>>();
+        this.batchMap = new HashMap<Fields<T>, List<Object>>();
         this.clazz = claz;
         this.isinit = true;
     }
@@ -131,7 +128,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         return dbhandle;
     }
 
-    public void setFields(Fields... fields) {
+    public void setFields(Fields<T>... fields) {
         this.fields = fields;
     }
 
@@ -141,9 +138,9 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      * @param wheres
      * @return
      */
-    public List<ObjKV<String, Object>> where(Where... wheres) {
+    public List<ObjKV<String, Object>> where(Where<T>... wheres) {
         isinit();
-        for (Where w : wheres) {
+        for (Where<T> w : wheres) {
             where.add(new ObjKV<>(w.getExpression(), w.getValue()));
         }
         return where;
@@ -154,7 +151,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      *
      * @param sorts
      */
-    public void orderBy(Sort... sorts) {
+    public void orderBy(Sort<T>... sorts) {
         for (Sort s : sorts) {
             if (orderSb.length() > 0) {
                 orderSb.append(",");
@@ -168,8 +165,8 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      *
      * @param fields
      */
-    public void groupBy(Fields... fields) {
-        for (Fields f : fields) {
+    public void groupBy(Fields<T>... fields) {
+        for (Fields<T> f : fields) {
             if (groupSb.length() > 0) groupSb.append(",");
             groupSb.append(f.getFieldName());
         }
@@ -180,8 +177,8 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      *
      * @param wheres
      */
-    public void having(Where... wheres) {
-        for (Where w : wheres) {
+    public void having(Where<T>... wheres) {
+        for (Where<T> w : wheres) {
             having.add(new ObjKV<>(w.getExpression(), w.getValue()));
         }
     }
@@ -205,7 +202,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         limitArg = new int[]{offset, limit};
     }
 
-    private SqlKV encodeSqlKV(Field... fields) throws JdaoException {
+    private SqlKV encodeSqlKV(Field<T>... fields) throws JdaoException {
         final StringBuilder sb = new StringBuilder();
         final List<Object> list = new ArrayList<Object>();
         if (commentLine != null) {
@@ -216,7 +213,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         int length = fields.length;
         int i = 1;
         StringBuilder fieldsSb = new StringBuilder();
-        for (Field hf : fields) {
+        for (Field<T> hf : fields) {
             fieldsSb.append(hf.getFieldName());
             if (i < length) {
                 fieldsSb.append(",");
@@ -361,7 +358,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      * @return
      * @throws JdaoException
      */
-    public List<T> selects(Field... fs) throws JdaoException {
+    public List<T> selects(Field<T>... fs) throws JdaoException {
         isinit();
         if (fs == null) {
             fs = fields;
@@ -370,17 +367,24 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         if (this.isloggerOn) {
             logger.log("[SELETE SQL][" + skv.getSql() + "]" + Arrays.toString(skv.getArgs()));
         }
+        String domain = JdaoCache.getCacheDomain(clazz.getPackageName(), clazz);
+        boolean iscache = (isCache == 1 || domain != null) && isCache != 2;
         Object o = null;
-        if (isCache) {
-            o = Cache.getCache(domain, clazz, Condition.newInstance(skv, node));
+        if (iscache) {
+            o = JdaoCache.getCache(domain, clazz, Condition.newInstance(skv, null));
             if (o != null) {
-                logger.log("[USE CACHE]:" + skv);
+                if (this.isloggerOn) {
+                    logger.log("[GET CACHE]:" + skv);
+                }
                 return (List<T>) o;
             }
         }
         o = getDBhandle(true).executeQueryList(transaction, clazz, skv.getSql(), skv.getArgs());
-        if (isCache) {
-            Cache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv, node), o);
+        if (iscache) {
+            JdaoCache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv, null), o);
+            if (this.isloggerOn) {
+                logger.log("[SET CACHE]:" + skv);
+            }
         }
         return (List<T>) o;
     }
@@ -392,7 +396,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      * @return
      * @throws JdaoException
      */
-    public T select(Fields... fs) throws JdaoException {
+    public T select(Fields<T>... fs) throws JdaoException {
         isinit();
         if (fs == null) {
             fs = fields;
@@ -402,16 +406,23 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
             logger.log("[SELETE SQL][" + skv.getSql() + "]" + Arrays.toString(skv.getArgs()));
         }
         Object o = null;
-        if (isCache) {
-            o = Cache.getCache(domain, clazz, Condition.newInstance(skv, node));
+        String domain = JdaoCache.getCacheDomain(clazz.getPackageName(), clazz);
+        boolean iscache = (isCache == 1 || domain != null) && isCache != 2;
+        if (iscache) {
+            o = JdaoCache.getCache(domain, clazz, Condition.newInstance(skv, null));
             if (o != null) {
-                logger.log("[USE CACHE]:" + skv);
+                if (this.isloggerOn) {
+                    logger.log("[GET CACHE]:" + skv);
+                }
                 return (T) o;
             }
         }
         o = getDBhandle(true).executeQuery(transaction, clazz, skv.getSql(), skv.getArgs());
-        if (isCache) {
-            Cache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv, node), o);
+        if (iscache) {
+            JdaoCache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv, null), o);
+            if (this.isloggerOn) {
+                logger.log("[SET CACHE]:" + skv);
+            }
         }
         return (T) o;
     }
@@ -439,7 +450,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         int i = 1;
         int length = fieldMap.size();
         Object[] values = new Object[length];
-        for (Fields hf : fieldMap.keySet()) {
+        for (Fields<T> hf : fieldMap.keySet()) {
             values[i - 1] = fieldMap.get(hf);
             sb1.append(hf.getFieldName());
             sb2.append("?");
@@ -497,7 +508,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         int lengthfield = batchMap.size();
         int i = 1;
         List<Fields> listfields = new ArrayList<Fields>();
-        for (Fields f : batchMap.keySet()) {
+        for (Fields<T> f : batchMap.keySet()) {
             listfields.add(f);
             sb1.append(f.getFieldName());
             sb2.append("?");
@@ -537,7 +548,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         sb.append("update " + TABLENAME + " set ");
         int i = 1;
         List<Object> list = new ArrayList<Object>();
-        for (Fields hf : fieldMap.keySet()) {
+        for (Fields<T> hf : fieldMap.keySet()) {
             list.add(fieldMap.get(hf));
             sb.append(hf.getFieldName()).append("=?");
             if (i < fieldMap.size()) {
@@ -651,20 +662,18 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         commentLine = null;
     }
 
-    public <T> T useCache(String domain) {
-        isinit();
-        return useCache(true, domain, null);
+    public <T> T useCache() {
+        return useCache(true);
     }
 
-    public <T> T useCache(String domain, String node) {
-        isinit();
-        return useCache(true, domain, node);
-    }
 
-    private <T> T useCache(boolean isCache, String domain, String node) {
-        this.isCache = isCache;
-        this.domain = domain;
-        this.node = node;
+    public <T> T useCache(boolean use) {
+        isinit();
+        if (use) {
+            this.isCache = 1;
+        } else {
+            this.isCache = 2;
+        }
         return (T) this;
     }
 
