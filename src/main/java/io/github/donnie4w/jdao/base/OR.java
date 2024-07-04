@@ -22,7 +22,7 @@ package io.github.donnie4w.jdao.base;
  * @date 2013-1-10
  * @verion 1.0
  */
-public class OR extends Where {
+public class OR<T> extends Where<T> {
 
     public OR(String expression, Object value) {
         super(expression, value);
