@@ -18,6 +18,7 @@
 package io.github.donnie4w.jdao.base;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
@@ -49,32 +50,17 @@ public class SqlKV {
         this.args = args;
     }
 
-    public boolean equals(Object skv) {
-        if (skv == null)
-            return false;
-        String sql2 = ((SqlKV) skv).getSql();
-        Object[] args2 = ((SqlKV) skv).getArgs();
-        if (sql != null && sql2 != null && sql.equals(sql2)) {
-            if (args == null && args2 == null) {
-                return true;
-            }
-            if (Arrays.equals(args, args2)) {
-                return true;
-            }
-        }
-        return false;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SqlKV sqlKV = (SqlKV) o;
+        return Objects.equals(sql, sqlKV.sql) && Objects.deepEquals(args, sqlKV.args);
     }
 
+    @Override
     public int hashCode() {
-        if (args == null)
-            return sql.hashCode();
-        else {
-            final StringBuilder sb = new StringBuilder();
-            for (Object o : args) {
-                sb.append(o.toString()).append(",");
-            }
-            return 31 * sql.hashCode() + sb.toString().hashCode();
-        }
+        return Objects.hash(sql, Arrays.hashCode(args)) * 31;
     }
 
     public String toString() {
@@ -85,9 +71,9 @@ public class SqlKV {
             for (Object o : args) {
                 sb.append(o.toString()).append(",");
             }
-            if (sb.length() > 2)
+            if (sb.length() > 1)
                 sb.delete(sb.length() - 1, sb.length());
-            return "SQL[" + sql + "]ARGS[" + sb.toString() + "]";
+            return "SQL[" + sql + "]ARGS[" + sb + "]";
         }
 
     }
