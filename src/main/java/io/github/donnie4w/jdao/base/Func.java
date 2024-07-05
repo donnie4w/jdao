@@ -38,78 +38,78 @@ public class Func<T> implements Field {
     /**
      * = 等于
      */
-    public Where EQ(Object value) {
-        return new Where(fieldName + "=?", value);
+    public Where<T> EQ(Object value) {
+        return new Where<T>(fieldName + "=?", value);
     }
 
     /**
      * > 大于
      */
-    public Where GT(Object value) {
-        return new Where(fieldName + ">?", value);
+    public Where<T> GT(Object value) {
+        return new Where<T>(fieldName + ">?", value);
     }
 
     /**
      * >= 大于等于
      */
-    public Where GE(Object value) {
-        return new Where(fieldName + ">=?", value);
+    public Where<T> GE(Object value) {
+        return new Where<T>(fieldName + ">=?", value);
     }
 
     /**
      * <= 小于等于
      */
-    public Where LE(Object value) {
-        return new Where(fieldName + "<=?", value);
+    public Where<T> LE(Object value) {
+        return new Where<T>(fieldName + "<=?", value);
     }
 
     /**
      * < 小于
      */
-    public Where LT(Object value) {
-        return new Where(fieldName + "<?", value);
+    public Where<T> LT(Object value) {
+        return new Where<T>(fieldName + "<?", value);
     }
 
     /**
      * <> 不等于
      */
-    public Where NEQ(Object value) {
-        return new Where(fieldName + "<>?", value);
+    public Where<T> NEQ(Object value) {
+        return new Where<T>(fieldName + "<>?", value);
     }
 
     /**
      * like %value%
      */
-    public Where LIKE(Object value) {
-        return new Where(fieldName + " like %?%", value);
+    public Where<T> LIKE(Object value) {
+        return new Where<T>(fieldName + " like %?%", value);
     }
 
     /**
      * like value%
      */
-    public Where lLIKE(Object value) {
-        return new Where(fieldName + " like %?", value);
+    public Where<T> lLIKE(Object value) {
+        return new Where<T>(fieldName + " like %?", value);
     }
 
     /**
      * like %value
      */
-    public Where rLIKE(Object value) {
-        return new Where(fieldName + " like ?%", value);
+    public Where<T> rLIKE(Object value) {
+        return new Where<T>(fieldName + " like ?%", value);
     }
 
     /**
      * between ? and ?
      */
-    public Where BETWEEN(Object from, Object to) {
-        return new Where(fieldName + " between ? and ? ", new Array(from, to));
+    public Where<T> BETWEEN(Object from, Object to) {
+        return new Where<T>(fieldName + " between ? and ? ", new Array(from, to));
     }
 
     /**
      * fieldName as alias name
      */
-    public Func AS(String alias) {
-        this.fieldName = fieldName + " as " + alias;
+    public Func<T> AS(Field<T> alias) {
+        this.fieldName = fieldName + " as " + alias.getFieldName();
         return this;
     }
 
