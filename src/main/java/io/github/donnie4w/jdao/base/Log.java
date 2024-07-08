@@ -47,13 +47,13 @@ public class Log {
         this.isLog = isLog;
     }
 
-    public void log(String... log) {
+    public void log(Object... log) {
         if (isLog) {
             if (log != null && log.length == 1) {
-                logger.log(Level.INFO, log[0]);
+                logger.log(Level.INFO, String.valueOf(log[0]));
             } else if (log != null && log.length > 1) {
                 StringBuilder sb = new StringBuilder();
-                for (String s : log) {
+                for (Object s : log) {
                     sb.append(s);
                 }
                 logger.log(Level.INFO, sb.toString());
