@@ -63,7 +63,10 @@ public class JdaoCache {
     }
 
     public static String getCacheDomain(String packageName, Class<?> clazz) {
-        String domain = rmap.get(clazz);
+        String domain = null;
+        if (clazz != null) {
+            domain = rmap.get(clazz);
+        }
         if (domain == null) {
             return rmap.get(packageName);
         }
