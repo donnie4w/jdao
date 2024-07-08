@@ -31,7 +31,7 @@ public interface JdbcHandle {
 
     DataSource getDataSource();
 
-    Transaction getTransaction() throws JdaoException;
+     Transaction getTransaction() throws JdaoException;
 
     /**
      * @param sql
