@@ -18,8 +18,11 @@
 
 package io.github.donnie4w.jdao.base;
 
+import io.github.donnie4w.jdao.handle.JdaoException;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.*;
 import java.util.Date;
 
 public class FieldBean {
@@ -48,12 +51,46 @@ public class FieldBean {
 
     public Date valueDate() {
         if (fieldValue != null) {
-            return Util.asDate(fieldValue);
+            try {
+                return Util.asDate(fieldValue);
+            } catch (JdaoException e) {
+            }
         }
         return null;
     }
 
-    public String ValueString() {
+    private ZonedDateTime convertToZonedDateTime(Date date) {
+        if (date != null) {
+            return date.toInstant().atZone(ZoneId.systemDefault());
+        }
+        return null;
+    }
+
+    public LocalDateTime valueLocalDateTime() {
+        try {
+            return Util.asLocalDateTime(fieldValue);
+        } catch (JdaoException e) {
+            return null;
+        }
+    }
+
+    public LocalDate valueLocalDate() {
+        try {
+            return Util.asLocalDate(fieldValue);
+        } catch (JdaoException e) {
+            return null;
+        }
+    }
+
+    public LocalTime valueLocalTime() {
+        try {
+            return Util.asLocalTime(fieldValue);
+        } catch (JdaoException e) {
+            return null;
+        }
+    }
+
+    public String valueString() {
         return Util.asString(fieldValue);
     }
 
@@ -65,8 +102,24 @@ public class FieldBean {
         return Util.asInt(fieldValue);
     }
 
+    public char valueChar() {
+        return Util.asChar(fieldValue);
+    }
+
+    public boolean valueBoolean() {
+        return Util.asBoolean(fieldValue);
+    }
+
     public short valueShort() {
         return Util.asShort(fieldValue);
+    }
+
+    public byte valueByte() {
+        return Util.asByte(fieldValue);
+    }
+
+    public byte[] valueBytes() {
+        return Util.asBytes(fieldValue);
     }
 
     public float valueFloat() {
@@ -85,4 +138,13 @@ public class FieldBean {
         return Util.asBigDecimal(fieldValue);
     }
 
+
+    @Override
+    public String toString() {
+        return "FieldBean{" +
+                "fieldName='" + fieldName + '\'' +
+                ", fieldIndex=" + fieldIndex +
+                ", fieldValue=" + fieldValue +
+                '}';
+    }
 }
