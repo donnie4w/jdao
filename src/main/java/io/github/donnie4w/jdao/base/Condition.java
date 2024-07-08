@@ -28,6 +28,10 @@ public class Condition {
         this.node = node == null ? "" : node;
     }
 
+    public static Condition newInstance(SqlKV sqlKV) {
+        return new Condition(sqlKV, null);
+    }
+
     public static Condition newInstance(SqlKV sqlKV, String node) {
         return new Condition(sqlKV, node);
     }
