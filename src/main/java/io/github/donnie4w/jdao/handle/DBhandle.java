@@ -7,6 +7,8 @@ import java.util.List;
 public interface DBhandle {
     public DBType getDBType();
 
+    public Transaction  getTransaction() throws JdaoException;;
+
     public JdbcHandle getJdbcHandle();
 
     public <T> List<T> executeQueryScanList(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException;
