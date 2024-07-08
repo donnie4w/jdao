@@ -37,6 +37,11 @@ public class DBhandler implements DBhandle {
         return dbType;
     }
 
+    @Override
+    public Transaction getTransaction() throws JdaoException {
+        return this.jdbcHandle.getTransaction();
+    }
+
     public JdbcHandle getJdbcHandle() {
         return jdbcHandle;
     }
