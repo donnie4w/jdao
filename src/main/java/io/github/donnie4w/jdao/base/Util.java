@@ -18,18 +18,18 @@
 
 package io.github.donnie4w.jdao.base;
 
+import io.github.donnie4w.jdao.handle.JdaoException;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
@@ -38,60 +38,6 @@ import java.util.Date;
  */
 public class Util {
 
-
-    /**
-     * @param format
-     * @return Date
-     * @throws ParseException
-     * @date date
-     */
-    public static Date string2Date(String date, String format) throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat(format);
-        Date ret = sdf.parse(date);
-        return ret;
-    }
-
-    /**
-     * @param date
-     * @param format
-     * @return String
-     * @throws ParseException
-     */
-    public static String date2String(Date date, String format) throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat(format);
-        String ret = sdf.format(date);
-        return ret;
-    }
-
-    /**
-     * @param date
-     * @param format
-     * @return Date
-     * @throws ParseException
-     */
-    public static Date dateFormat(Date date, String format) throws ParseException {
-        return string2Date(date2String(date, format), format);
-    }
-
-    public static Date parseTime(String datastr) {
-        DateTimeFormatter formatter = Const.FORMATTERS.get(datastr.length());
-        if (formatter == null) {
-            return null;
-        }
-        LocalDateTime localDateTime = LocalDateTime.parse(datastr, formatter);
-        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-    }
-
-
-//    public static Date toDate(String str, String formatter) {
-//        try {
-//            LocalDate localDate = LocalDate.parse(str, DateTimeFormatter.ofPattern(formatter));
-//            return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-//        } catch (DateTimeParseException e) {
-//            return null;
-//        }
-//    }
-
     private static int len(String s) {
         if (s != null) {
             return s.length();
@@ -99,7 +45,7 @@ public class Util {
         return 0;
     }
 
-    public static Date asDate(Object obj) {
+    public static Date asDate(Object obj) throws JdaoException {
         if (obj instanceof java.util.Date) {
             return (Date) obj;
         } else if (obj instanceof java.time.LocalDateTime) {
@@ -112,8 +58,58 @@ public class Util {
             LocalDate ld = LocalDate.now();
             LocalTime lt = LocalTime.now();
             return Date.from(lt.atDate(ld).atZone(ZoneId.systemDefault()).toInstant());
+        } else if (obj instanceof String) {
+            return DateConvert.convertToDate((String)obj);
+        } else if (obj instanceof byte[]) {
+            return DateConvert.convertToDate(new String((byte[]) obj));
         }
         return null;
+    }
+
+    public static DateTimeFormatter inferDateFormat(String dateString) {
+        DateTimeFormatter[] formatters = new DateTimeFormatter[] {
+                DateTimeFormatter.ISO_LOCAL_DATE,                // e.g. 2023-07-08
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME,           // e.g. 2023-07-08T10:15:30
+                DateTimeFormatter.ISO_OFFSET_DATE_TIME,          // e.g. 2023-07-08T10:15:30+01:00
+                DateTimeFormatter.ISO_ZONED_DATE_TIME,           // e.g. 2023-07-08T10:15:30+01:00[Europe/Paris]
+                DateTimeFormatter.ISO_INSTANT,                   // e.g. 2023-07-08T10:15:30Z
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSXXX"),  // e.g. 2024-07-08 13:45:08.280951+08:00
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSXXX")  // e.g. 2024-07-08 13:45:08.280951+08:00
+        };
+
+        for (DateTimeFormatter formatter : formatters) {
+            try {
+                if (formatter == DateTimeFormatter.ISO_LOCAL_DATE) {
+                    LocalDate.parse(dateString, formatter);
+                } else if (formatter == DateTimeFormatter.ISO_LOCAL_DATE_TIME) {
+                    LocalDateTime.parse(dateString, formatter);
+                } else if (formatter == DateTimeFormatter.ISO_OFFSET_DATE_TIME ||
+                        formatter == DateTimeFormatter.ISO_ZONED_DATE_TIME ||
+                        formatter == DateTimeFormatter.ISO_INSTANT) {
+                    OffsetDateTime.parse(dateString, formatter);
+                } else {
+                    ZonedDateTime.parse(dateString, formatter);
+                }
+                return formatter;
+            } catch (DateTimeParseException e) {
+               e.printStackTrace();
+            }
+        }
+
+        throw new IllegalArgumentException("Unknown date format: " + dateString);
+    }
+
+
+    public static String replaceMicrosecondsWithS(String timestamp) {
+        Pattern pattern = Pattern.compile("\\.(\\d+)");
+        Matcher matcher = pattern.matcher(timestamp);
+        if (matcher.find()) {
+            String microseconds = matcher.group(1);
+            String replacement = "." + "S".repeat(microseconds.length());
+            return matcher.replaceFirst(replacement);
+        } else {
+            return timestamp;
+        }
     }
 
     public static String asString(Object obj) {
@@ -146,6 +142,13 @@ public class Util {
         return false;
     }
 
+    public static byte asByte(Object obj) {
+        if (obj instanceof Byte) {
+            return (Byte) obj;
+        }
+        return 0;
+    }
+
     public static BigInteger asBigInteger(Object obj) {
         if (obj instanceof Integer) {
             return BigDecimal.valueOf((Integer) obj).toBigInteger();
@@ -158,6 +161,12 @@ public class Util {
         }
         if (obj instanceof Float) {
             return BigDecimal.valueOf(((Float) obj).intValue()).toBigInteger();
+        }
+        if (obj instanceof Byte) {
+            return BigDecimal.valueOf(((Byte) obj).byteValue()).toBigInteger();
+        }
+        if (obj instanceof Character) {
+            return BigDecimal.valueOf(((Character) obj).charValue()).toBigInteger();
         }
         if (obj instanceof Double) {
             return BigDecimal.valueOf((Double) obj).toBigInteger();
@@ -187,10 +196,16 @@ public class Util {
             return BigDecimal.valueOf((Long) obj);
         }
         if (obj instanceof Short) {
-            return BigDecimal.valueOf(((Short) obj).intValue());
+            return BigDecimal.valueOf(((Short) obj).shortValue());
         }
         if (obj instanceof Float) {
-            return BigDecimal.valueOf(((Float) obj).intValue());
+            return BigDecimal.valueOf(((Float) obj).floatValue());
+        }
+        if (obj instanceof Byte) {
+            return BigDecimal.valueOf(((Byte) obj).byteValue());
+        }
+        if (obj instanceof Character) {
+            return BigDecimal.valueOf(((Character) obj).charValue());
         }
         if (obj instanceof Double) {
             return BigDecimal.valueOf((Double) obj);
@@ -223,6 +238,12 @@ public class Util {
         }
         if (obj instanceof Float) {
             return ((Float) obj).intValue();
+        }
+        if (obj instanceof Byte) {
+            return ((Byte) obj).intValue();
+        }
+        if (obj instanceof Character) {
+            return (short) ((Character) obj).charValue();
         }
         if (obj instanceof Double) {
             return ((Double) obj).intValue();
@@ -257,10 +278,16 @@ public class Util {
             return ((Float) obj).longValue();
         }
         if (obj instanceof Double) {
-            return ((Double) obj).intValue();
+            return ((Double) obj).longValue();
+        }
+        if (obj instanceof Byte) {
+            return ((Byte) obj).longValue();
+        }
+        if (obj instanceof Character) {
+            return (short) ((Character) obj).charValue();
         }
         if (obj instanceof BigInteger) {
-            return ((BigInteger) obj).intValue();
+            return ((BigInteger) obj).longValue();
         }
         if (obj instanceof BigDecimal) {
             return ((BigDecimal) obj).longValue();
@@ -290,6 +317,12 @@ public class Util {
         if (obj instanceof Double) {
             return ((Double) obj).shortValue();
         }
+        if (obj instanceof Byte) {
+            return ((Byte) obj).shortValue();
+        }
+        if (obj instanceof Character) {
+            return (short) ((Character) obj).charValue();
+        }
         if (obj instanceof BigInteger) {
             return ((BigInteger) obj).shortValue();
         }
@@ -302,6 +335,14 @@ public class Util {
             } catch (Exception e) {
             }
         }
+        return 0;
+    }
+
+    public static char asChar(Object obj) {
+        if (obj instanceof Character) {
+            return ((Character) obj).charValue();
+        }
+        char c = (char) asShort(obj);
         return 0;
     }
 
@@ -320,6 +361,12 @@ public class Util {
         }
         if (obj instanceof Double) {
             return ((Double) obj);
+        }
+        if (obj instanceof Byte) {
+            return ((Byte) obj).doubleValue();
+        }
+        if (obj instanceof Character) {
+            return (short) ((Character) obj).charValue();
         }
         if (obj instanceof BigInteger) {
             return ((BigInteger) obj).doubleValue();
@@ -349,6 +396,12 @@ public class Util {
         if (obj instanceof Float) {
             return ((Float) obj);
         }
+        if (obj instanceof Byte) {
+            return ((Byte) obj).floatValue();
+        }
+        if (obj instanceof Character) {
+            return (short) ((Character) obj).charValue();
+        }
         if (obj instanceof Double) {
             return ((Double) obj).floatValue();
         }
@@ -365,6 +418,28 @@ public class Util {
             }
         }
         return 0;
+    }
+
+    private static  ZonedDateTime convertToZonedDateTime(Date date) {
+        if (date != null) {
+            return date.toInstant().atZone(ZoneId.systemDefault());
+        }
+        return null;
+    }
+
+    public static  LocalDateTime asLocalDateTime(Object obj) throws JdaoException {
+        ZonedDateTime zonedDateTime = convertToZonedDateTime(asDate(obj));
+        return zonedDateTime != null ? zonedDateTime.toLocalDateTime() : null;
+    }
+
+    public static LocalDate asLocalDate(Object obj) throws JdaoException {
+        ZonedDateTime zonedDateTime = convertToZonedDateTime(asDate(obj));
+        return zonedDateTime != null ? zonedDateTime.toLocalDate() : null;
+    }
+
+    public static LocalTime asLocalTime(Object obj) throws JdaoException {
+        ZonedDateTime zonedDateTime = convertToZonedDateTime(asDate(obj));
+        return zonedDateTime != null ? zonedDateTime.toLocalTime() : null;
     }
 
     public static String encodeFieldname(String name) {
