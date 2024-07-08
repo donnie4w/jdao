@@ -23,19 +23,21 @@ import io.github.donnie4w.jdao.base.Table;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class CacheHandle {
-
     private final static AtomicLong al = new AtomicLong(1);
 
     Map<Class<Table<?>>, Map<Condition, CacheBean>> map = new ConcurrentHashMap<>();
 
-    private String domain = String.valueOf(System.nanoTime() + al.incrementAndGet());
+    private String domain = newDomain();
     private int expire = 5 * 60 * 1000;
     private StoreModel storeModel = StoreModel.SOFT;
 
+
+    public static String newDomain() {
+        return String.valueOf(System.nanoTime()) + al.incrementAndGet();
+    }
 
     public CacheHandle() {
     }
