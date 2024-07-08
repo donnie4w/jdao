@@ -24,9 +24,7 @@ import io.github.donnie4w.jdao.base.Util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class DataBean implements Iterable<String> {
 
@@ -67,6 +65,32 @@ public class DataBean implements Iterable<String> {
             return fb.value();
         }
         return null;
+    }
+
+    public int size() {
+        return this.fieldNameMap.size();
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        for (String name : this) {
+            map.put(name, getValue(name));
+        }
+        return map;
+    }
+
+    public List<Object> toList() {
+        List<Object> list = new ArrayList<>();
+        for (String name : this) {
+            list.add(getValue(name));
+        }
+        return list;
+    }
+
+    public Set<Object> toSet() {
+        Set<Object> set = new LinkedHashSet<>();
+        set.addAll(toList());
+        return set;
     }
 
     public <T> T scan(Class<T> beanClass) throws JdaoException {
@@ -172,8 +196,30 @@ public class DataBean implements Iterable<String> {
                 return Util.asBoolean(value);
             case "boolean":
                 return Util.asBoolean(value);
+            case "char":
+                return Util.asChar(value);
+            case "Character":
+                return Util.asChar(value);
             case "Date":
-                return Util.asDate(value);
+                try {
+                    return Util.asDate(value);
+                } catch (JdaoException e) {
+                }
+            case "LocalDateTime":
+                try {
+                    return Util.asLocalDateTime(value);
+                } catch (JdaoException e) {
+                }
+            case "LocalDate":
+                try {
+                    return Util.asLocalDate(value);
+                } catch (JdaoException e) {
+                }
+            case "LocalTime":
+                try {
+                    return Util.asLocalTime(value);
+                } catch (JdaoException e) {
+                }
             default:
                 return Util.asBytes(value);
         }
@@ -185,5 +231,21 @@ public class DataBean implements Iterable<String> {
     @Override
     public Iterator<String> iterator() {
         return fieldNameMap.keySet().iterator();
+    }
+
+    public Iterator<Integer> iteratorWithIndex() {
+        return fieldIndexMap.keySet().iterator();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("DataBean{").append("\n");
+        for (int i = 0; i < size(); i++) {
+            FieldBean fb = findField(i);
+            sb.append("\t").append(fb).append("\n");
+        }
+        sb.append("}");
+        return sb.toString();
     }
 }
