@@ -18,6 +18,7 @@
 package io.github.donnie4w.jdao.handle;
 
 import javax.sql.DataSource;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,7 +28,8 @@ public class Jdao {
 
     private final static String err_noinit = "the jdao DataSource was not initialized(Hint: jdao.InitDataSource(DataSource dataSource, DBType dbtype)) ";
 
-    private Jdao() {}
+    private Jdao() {
+    }
 
     private static final Map<Object, DBhandle> dbhandleMap = new ConcurrentHashMap<>();
 
@@ -44,6 +46,7 @@ public class Jdao {
 
     /**
      * jdao init DataSource
+     *
      * @param dataSource
      * @param dbtype
      */
@@ -60,12 +63,17 @@ public class Jdao {
         dbhandleMap.put(clz, newDBhandle(dataSource, dbtype));
     }
 
+    /**
+     * @param clz
+     * @return
+     */
     public static DBhandle getDBhandle(Class<?> clz) {
-        return  dbhandleMap.get(clz);
+        return dbhandleMap.get(clz);
     }
 
     /**
      * remove DataSource by class
+     *
      * @param clz
      */
     public static void removeDataSource(Class<?> clz) {
@@ -81,12 +89,17 @@ public class Jdao {
         dbhandleMap.put(packageName, newDBhandle(dataSource, dbtype));
     }
 
+    /**
+     * @param packageName
+     * @return
+     */
     public static DBhandle getDBhandle(String packageName) {
-        return  dbhandleMap.get(packageName);
+        return dbhandleMap.get(packageName);
     }
 
     /**
      * remove DataSource by packageName
+     *
      * @param packageName
      */
     public static void removeDataSource(String packageName) {
@@ -95,34 +108,69 @@ public class Jdao {
 
     /**
      * add slave DataSource
+     *
      * @param clz
      * @param dataSource
      * @param dbtype
      */
     public static void addSlaveDataSource(Class<?> clz, DataSource dataSource, DBType dbtype) {
-        SlaveSource.add(clz, dataSource, dbtype);
+        if (clz.isInterface()) {
+            Method[] methods = clz.getMethods();
+            for (Method method : methods) {
+                SlaveSource.add(clz.getName().concat(".").concat(method.getName()), dataSource, dbtype);
+            }
+        } else {
+            SlaveSource.add(clz, dataSource, dbtype);
+        }
+    }
+
+    /**
+     * @param clz
+     * @param dBhandle
+     */
+    public static void addSlaveDataSource(Class<?> clz, DBhandle dBhandle) {
+        if (clz.isInterface()) {
+            Method[] methods = clz.getMethods();
+            for (Method method : methods) {
+                SlaveSource.add(clz.getName().concat(".").concat(method.getName()), dBhandle);
+            }
+        } else {
+            SlaveSource.add(clz, dBhandle);
+        }
     }
 
     /**
      * remove slave DataSource by class
+     *
      * @param clz
      */
     public static void removeSlaveDataSource(Class<?> clz) {
         SlaveSource.remove(clz);
     }
 
+
     /**
-     * @param packageName
-     * @param dataSource
-     * @param dbtype
+     * @param packageNameOrMapperId
+     * @param dBhandle
      */
-    public static void addSlaveDataSource(String packageName, DataSource dataSource, DBType dbtype) {
-        SlaveSource.add(packageName
-                , dataSource, dbtype);
+    public static void addSlaveDataSource(String packageNameOrMapperId, DBhandle dBhandle) {
+        SlaveSource.add(packageNameOrMapperId, dBhandle);
     }
 
     /**
+     * @param packageNameOrMapperId
+     * @param dataSource
+     * @param dbtype
+     */
+    public static void addSlaveDataSource(String packageNameOrMapperId, DataSource dataSource, DBType dbtype) {
+        SlaveSource.add(packageNameOrMapperId
+                , dataSource, dbtype);
+    }
+
+
+    /**
      * remove slave DataSource by packageName
+     *
      * @param packageName
      */
     public static void removeSlaveDataSource(String packageName) {
@@ -140,11 +188,12 @@ public class Jdao {
 
     /**
      * select * from table
+     *
      * @param clz
      * @param sql
      * @param values
-     * @return
      * @param <T>
+     * @return
      * @throws JdaoException
      */
     public static <T> T executeQueryScan(Class<T> clz, String sql, Object... values) throws JdaoException {
@@ -154,12 +203,13 @@ public class Jdao {
 
     /**
      * select * from table
+     *
      * @param transaction
      * @param clz
      * @param sql
      * @param values
-     * @return
      * @param <T>
+     * @return
      * @throws JdaoException
      */
     public static <T> T executeQueryScan(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException {
@@ -169,11 +219,12 @@ public class Jdao {
 
     /**
      * select * from table
+     *
      * @param clz
      * @param sql
      * @param values
-     * @return
      * @param <T>
+     * @return
      * @throws JdaoException
      */
     public static <T> List<T> executeQueryScanList(Class<T> clz, String sql, Object... values) throws JdaoException {
@@ -183,12 +234,13 @@ public class Jdao {
 
     /**
      * select * from table
+     *
      * @param transaction
      * @param clz
      * @param sql
      * @param values
-     * @return
      * @param <T>
+     * @return
      * @throws JdaoException
      */
     public static <T> List<T> executeQueryScanList(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException {
@@ -198,6 +250,7 @@ public class Jdao {
 
     /**
      * select * from table
+     *
      * @param transaction
      * @param sql
      * @param values
@@ -211,6 +264,7 @@ public class Jdao {
 
     /**
      * select * from table
+     *
      * @param sql
      * @param values
      * @return
@@ -223,6 +277,7 @@ public class Jdao {
 
     /**
      * select * from table
+     *
      * @param transaction
      * @param sql
      * @param values
@@ -236,6 +291,7 @@ public class Jdao {
 
     /**
      * select * from table
+     *
      * @param sql
      * @param values
      * @return List<DataBean>
@@ -248,6 +304,7 @@ public class Jdao {
 
     /**
      * update  insert into  delete
+     *
      * @param transaction
      * @param sql
      * @param values
@@ -261,6 +318,7 @@ public class Jdao {
 
     /**
      * update  insert into  delete
+     *
      * @param sql
      * @param values
      * @return
@@ -273,6 +331,7 @@ public class Jdao {
 
     /**
      * insert into
+     *
      * @param transaction
      * @param sql
      * @param values
@@ -286,6 +345,7 @@ public class Jdao {
 
     /**
      * insert into
+     *
      * @param sql
      * @param values
      * @return
