@@ -28,6 +28,14 @@ public class SlaveSource {
     private static final Map<Object, List<DBhandle>> dbhandleSlaveMap = new ConcurrentHashMap<>();
 
     static void add(String packageName, DataSource dataSource, DBType dbtype) {
+        getAndset(packageName).add(Jdao.newDBhandle(dataSource, dbtype));
+    }
+
+    static void add(String packageName, DBhandle dbhandle) {
+        getAndset(packageName).add(dbhandle);
+    }
+
+    private static List<DBhandle> getAndset(String packageName) {
         if (!dbhandleSlaveMap.containsKey(packageName)) {
             synchronized (SlaveSource.class) {
                 if (!dbhandleSlaveMap.containsKey(packageName)) {
@@ -35,7 +43,18 @@ public class SlaveSource {
                 }
             }
         }
-        dbhandleSlaveMap.get(packageName).add(Jdao.newDBhandle(dataSource, dbtype));
+        return  dbhandleSlaveMap.get(packageName);
+    }
+
+    private static List<DBhandle> getAndset(Object obj) {
+        if (!dbhandleSlaveMap.containsKey(obj)) {
+            synchronized (SlaveSource.class) {
+                if (!dbhandleSlaveMap.containsKey(obj)) {
+                    dbhandleSlaveMap.put(obj, new ArrayList<DBhandle>());
+                }
+            }
+        }
+        return  dbhandleSlaveMap.get(obj);
     }
 
     static void remove(String packageName) {
@@ -46,27 +65,28 @@ public class SlaveSource {
         dbhandleSlaveMap.remove(clz);
     }
 
-    public static int size(){
+    public static int size() {
         return dbhandleSlaveMap.size();
     }
 
     static void add(Class<?> clz, DataSource dataSource, DBType dbtype) {
-        if (!dbhandleSlaveMap.containsKey(clz)) {
-            synchronized (SlaveSource.class) {
-                if (!dbhandleSlaveMap.containsKey(clz)) {
-                    dbhandleSlaveMap.put(clz, new ArrayList<DBhandle>());
-                }
-            }
-        }
-        dbhandleSlaveMap.get(clz).add(Jdao.newDBhandle(dataSource, dbtype));
+        getAndset(clz).add(Jdao.newDBhandle(dataSource, dbtype));
+    }
+
+
+    static void add(Class<?> clz, DBhandle dbHandle) {
+        getAndset(clz).add(dbHandle);
     }
 
     public static DBhandle get(Class<?> clz, String packageName) {
-        DBhandle db = getList(dbhandleSlaveMap.get(clz));
-        if (db == null) {
-            db = getList(dbhandleSlaveMap.get(packageName));
+        DBhandle dbHandle = null;
+        if (clz != null) {
+            dbHandle = getList(dbhandleSlaveMap.get(clz));
         }
-        return db;
+        if (dbHandle == null && packageName != null) {
+            dbHandle = getList(dbhandleSlaveMap.get(packageName));
+        }
+        return dbHandle;
     }
 
     static Random random = new Random();
@@ -75,7 +95,7 @@ public class SlaveSource {
         if (list != null && list.size() > 0) {
             if (list.size() > 1) {
                 return list.get(random.nextInt(list.size()));
-            }else{
+            } else {
                 return list.get(0);
             }
         }
