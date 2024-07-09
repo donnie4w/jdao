@@ -99,8 +99,7 @@ public class DataBean implements Iterable<String> {
             if (Scanner.class.isAssignableFrom(beanClass)) {
                 Scanner scanner = (Scanner) targetBean;
                 for (Map.Entry<String, FieldBean> entry : fieldNameMap.entrySet()) {
-                    String fieldName = Util.encodeFieldname(entry.getKey());
-                    scanner.scan(fieldName, entry.getValue().value());
+                    scanner.scan(entry.getKey(), entry.getValue().value());
                 }
                 return targetBean;
             }
