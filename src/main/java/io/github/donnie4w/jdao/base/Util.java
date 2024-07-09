@@ -66,52 +66,6 @@ public class Util {
         return null;
     }
 
-    public static DateTimeFormatter inferDateFormat(String dateString) {
-        DateTimeFormatter[] formatters = new DateTimeFormatter[] {
-                DateTimeFormatter.ISO_LOCAL_DATE,                // e.g. 2023-07-08
-                DateTimeFormatter.ISO_LOCAL_DATE_TIME,           // e.g. 2023-07-08T10:15:30
-                DateTimeFormatter.ISO_OFFSET_DATE_TIME,          // e.g. 2023-07-08T10:15:30+01:00
-                DateTimeFormatter.ISO_ZONED_DATE_TIME,           // e.g. 2023-07-08T10:15:30+01:00[Europe/Paris]
-                DateTimeFormatter.ISO_INSTANT,                   // e.g. 2023-07-08T10:15:30Z
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSXXX"),  // e.g. 2024-07-08 13:45:08.280951+08:00
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSXXX")  // e.g. 2024-07-08 13:45:08.280951+08:00
-        };
-
-        for (DateTimeFormatter formatter : formatters) {
-            try {
-                if (formatter == DateTimeFormatter.ISO_LOCAL_DATE) {
-                    LocalDate.parse(dateString, formatter);
-                } else if (formatter == DateTimeFormatter.ISO_LOCAL_DATE_TIME) {
-                    LocalDateTime.parse(dateString, formatter);
-                } else if (formatter == DateTimeFormatter.ISO_OFFSET_DATE_TIME ||
-                        formatter == DateTimeFormatter.ISO_ZONED_DATE_TIME ||
-                        formatter == DateTimeFormatter.ISO_INSTANT) {
-                    OffsetDateTime.parse(dateString, formatter);
-                } else {
-                    ZonedDateTime.parse(dateString, formatter);
-                }
-                return formatter;
-            } catch (DateTimeParseException e) {
-               e.printStackTrace();
-            }
-        }
-
-        throw new IllegalArgumentException("Unknown date format: " + dateString);
-    }
-
-
-    public static String replaceMicrosecondsWithS(String timestamp) {
-        Pattern pattern = Pattern.compile("\\.(\\d+)");
-        Matcher matcher = pattern.matcher(timestamp);
-        if (matcher.find()) {
-            String microseconds = matcher.group(1);
-            String replacement = "." + "S".repeat(microseconds.length());
-            return matcher.replaceFirst(replacement);
-        } else {
-            return timestamp;
-        }
-    }
-
     public static String asString(Object obj) {
         if (obj == null) {
             return null;
@@ -443,7 +397,7 @@ public class Util {
     }
 
     public static String encodeFieldname(String name) {
-        if (Const.isKey(name)) {
+        if (isKey(name)) {
             return name + "_";
         }
         return name;
@@ -452,11 +406,66 @@ public class Util {
     public static String decodeFieldname(String name) {
         if (name.endsWith("_")) {
             String keyname = name.substring(0, name.length() - 1);
-            if (Const.isKey(keyname)) {
+            if (isKey(keyname)) {
                 return keyname;
             }
         }
         return name;
+    }
+
+    public static boolean isKey(String keyName){
+        switch (keyName){
+            case "public":
+            case "protected":
+            case "private":
+            case "class":
+            case "extends":
+            case "implements":
+            case "abstract":
+            case "final":
+            case "new":
+            case "this":
+            case "super":
+            case "if":
+            case "else":
+            case "switch":
+            case "case":
+            case "default":
+            case "for":
+            case "while":
+            case "do":
+            case "break":
+            case "continue":
+            case "return":
+            case "try":
+            case "catch":
+            case "finally":
+            case "throw":
+            case "throws":
+            case "boolean":
+            case "byte":
+            case "goto":
+            case "const":
+            case "char":
+            case "short":
+            case "int":
+            case "long":
+            case "float":
+            case "double":
+            case "void":
+            case "null":
+            case "true":
+            case "false":
+            case "static":
+            case "transient":
+            case "volatile":
+            case "strictfp":
+            case "assert":
+            case "enum":
+                return  true;
+            default:
+                return  false;
+        }
     }
 
 }
