@@ -18,106 +18,145 @@
 
 package io.github.donnie4w.jdao.base;
 
-import io.github.donnie4w.jdao.handle.JdaoException;
 import org.junit.Test;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.Date;
 
 public class DateConvert {
 
-    private static final TreeMap<Integer, List<DateTimeFormatter>> formattersByLength = new TreeMap<>();
 
-    static {
-        List<DateTimeFormatter> formattersForLength10 = Collections.singletonList(DateTimeFormatter.ISO_LOCAL_DATE);
-        formattersByLength.put(10, formattersForLength10);
-
-        List<DateTimeFormatter> formattersForLength19 = Arrays.asList(
-                DateTimeFormatter.ISO_LOCAL_DATE_TIME,
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-        );
-        formattersByLength.put(19, formattersForLength19);
-
-        List<DateTimeFormatter> formattersForLength23 = Arrays.asList(
-                DateTimeFormatter.ISO_LOCAL_DATE_TIME,
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
-        );
-        formattersByLength.put(23, formattersForLength23);
-
-        List<DateTimeFormatter> formattersForLength24 = Arrays.asList(
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssX"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssXXX"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSX"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ")
-        );
-        formattersByLength.put(24, formattersForLength24);
-
-        List<DateTimeFormatter> formattersForLength29 = Arrays.asList(
-                DateTimeFormatter.ISO_OFFSET_DATE_TIME,
-                DateTimeFormatter.ISO_ZONED_DATE_TIME,
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSXXX")
-        );
-        formattersByLength.put(29, formattersForLength29);
-    }
-
-    public static Date convertToDate(String isoDateString) throws JdaoException {
-        Integer length = isoDateString.length();
-        List<DateTimeFormatter> formatters = formattersByLength.floorEntry(length).getValue();
-
-        if (formatters == null) {
-            throw new JdaoException("Unsupported date format length: " + length);
+    public static Date convertToDate(String dateStr) {
+        if (dateStr == null || dateStr.length() == 0){
+            return null;
         }
-        System.out.println("formatters length: " + length);
-        for (DateTimeFormatter formatter : formatters) {
-            try {
-                Object parsed = parseWithFormatter(formatter, isoDateString);
-                if (parsed instanceof LocalDate) {
-                    LocalDate localDate = (LocalDate) parsed;
-                    return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-                } else if (parsed instanceof LocalDateTime) {
-                    LocalDateTime localDateTime = (LocalDateTime) parsed;
-                    return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-                } else if (parsed instanceof OffsetDateTime) {
-                    OffsetDateTime offsetDateTime = (OffsetDateTime) parsed;
-                    return Date.from(offsetDateTime.toInstant());
-                } else if (parsed instanceof ZonedDateTime) {
-                    ZonedDateTime zonedDateTime = (ZonedDateTime) parsed;
-                    return Date.from(zonedDateTime.toInstant());
+
+        try {
+            StringBuilder pattern = new StringBuilder();
+            int count = 1;
+            boolean isdecimals = true;
+            boolean isLocalDate = false;
+            boolean isLocalDateTime = false;
+            boolean isOffsetDateTime = false;
+            boolean isZonedDateTime = false;
+            StringBuilder zoneSB = null;
+            ZoneId zoneId = null;
+            while (count <= dateStr.length()) {
+                char c = dateStr.charAt(count - 1);
+                switch (count) {
+                    case 4:
+                        pattern.append("yyyy");
+                        break;
+                    case 5:
+                        pattern.append(c);
+                        break;
+                    case 7:
+                        pattern.append("MM");
+                        break;
+                    case 8:
+                        pattern.append(c);
+                        break;
+                    case 10:
+                        pattern.append("dd");
+                        isLocalDate = true;
+                        break;
+                    case 11:
+                        if (c == 'T') {
+                            pattern.append("'T'");
+                        } else {
+                            pattern.append(c);
+                        }
+                        break;
+                    case 13:
+                        pattern.append("HH");
+                        break;
+                    case 14:
+                        pattern.append(c);
+                        break;
+                    case 16:
+                        pattern.append("mm");
+                        break;
+                    case 17:
+                        pattern.append(c);
+                        break;
+                    case 19:
+                        pattern.append("ss");
+                        isLocalDateTime = true;
+                        break;
+                    case 20:
+                        pattern.append(c);
+                        break;
+                    default:
+                        if (count > 20) {
+                            if (Character.isDigit(c) && isdecimals) {
+                                pattern.append("S");
+                            } else if (c == '+' || c == '-') {
+                                isOffsetDateTime = true;
+                                isdecimals = false;
+                                pattern.append("XX");
+                            } else if (c == ':') {
+                                pattern.append("X");
+                            } else if (c == 'Z') {
+                                isdecimals = false;
+                                isZonedDateTime = true;
+                                pattern.append("X");
+                            } else if (c == '[') {
+                                isdecimals = false;
+                                zoneSB = new StringBuilder();
+                            } else if (zoneSB != null && zoneId == null && c != ']') {
+                                zoneSB.append(c);
+                            } else if (c == ']' && zoneSB != null && zoneSB.length() > 0) {
+                                zoneId = ZoneId.of(zoneSB.toString());
+                            }
+                        }
                 }
-            } catch (DateTimeParseException ignored) {
-                // continue to the next format
+                count++;
             }
-        }
-        throw new IllegalArgumentException("Unsupported date format: " + isoDateString);
-    }
 
-    private static Object parseWithFormatter(DateTimeFormatter formatter, String isoDateString) {
-        if (formatter.equals(DateTimeFormatter.ISO_LOCAL_DATE)) {
-            return LocalDate.parse(isoDateString, formatter);
-        } else if (formatter.equals(DateTimeFormatter.ISO_LOCAL_DATE_TIME)) {
-            return LocalDateTime.parse(isoDateString, formatter);
-        } else if (formatter.equals(DateTimeFormatter.ISO_OFFSET_DATE_TIME)) {
-            return OffsetDateTime.parse(isoDateString, formatter);
-        } else if (formatter.equals(DateTimeFormatter.ISO_ZONED_DATE_TIME)) {
-            return ZonedDateTime.parse(isoDateString, formatter);
-        } else {
-            return LocalDateTime.parse(isoDateString, formatter);
+            if (zoneId != null) {
+                dateStr = dateStr.replace("[" + zoneSB.toString() + "]", "");
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern.toString());
+                if (isZonedDateTime) {
+                    ZonedDateTime zdt = ZonedDateTime.parse(dateStr, formatter);
+                    zdt = zdt.withZoneSameInstant(zoneId);
+                    return Date.from(Instant.from(zdt));
+                } else if (isOffsetDateTime) {
+                    OffsetDateTime offsetDateTime = OffsetDateTime.parse(dateStr, formatter);
+                    return Date.from(offsetDateTime.atZoneSameInstant(zoneId).toInstant());
+                } else if (isLocalDateTime) {
+                    LocalDateTime localDateTime = LocalDateTime.parse(dateStr, formatter);
+                    return Date.from(Instant.from(localDateTime.atZone(zoneId)));
+                } else if (isLocalDate) {
+                    LocalDate localDate = LocalDate.parse(dateStr, formatter);
+                    return Date.from(localDate.atStartOfDay(zoneId).toInstant());
+                }
+            }
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern.toString());
+            if (isZonedDateTime) {
+                ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateStr, formatter);
+                return Date.from(zonedDateTime.toInstant());
+            } else if (isOffsetDateTime) {
+                OffsetDateTime offsetDateTime = OffsetDateTime.parse(dateStr, formatter);
+                return Date.from(offsetDateTime.toInstant());
+            } else if (isLocalDateTime) {
+                LocalDateTime localDateTime = LocalDateTime.parse(dateStr, formatter);
+                return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+            } else if (isLocalDate) {
+                LocalDate localDate = LocalDate.parse(dateStr, formatter);
+                return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return null;
     }
 
     @Test
     public void testConvert() {
         String[] testDates = {
+                "2023",
                 "2023-07-08",
                 "2023-07-08T15:20:31",
                 "2023-07-08T15:20:32",
@@ -126,17 +165,14 @@ public class DateConvert {
                 "2023-07-08T15:20:35.123+02:00",
                 "2023-07-08T15:20:36.123Z",
                 "2023-07-08 15:20:37.123456",
-                "2023-07-08T15:20:38.123456",
+                "2023-07-08T15:20:38.123456[Europe/Paris]",
                 "2023-07-08T15:20:39.123456+02:00",
+                "2024-07-09 01:19:40.4622478+08:00"
         };
 
         for (String dateStr : testDates) {
-            try {
-                Date date = convertToDate(dateStr);
-                System.out.println("Converted date: " + date);
-            } catch (JdaoException e) {
-                System.out.println(e.getMessage());
-            }
+            Date date = convertToDate(dateStr);
+            System.out.println("Converted date: " + date);
         }
     }
 }
