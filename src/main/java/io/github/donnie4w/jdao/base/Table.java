@@ -89,10 +89,21 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         this.mustMaster = useMaster;
     }
 
+    /**
+     * Set up transactions and enable transactions
+     *
+     * @param transaction
+     */
     public void useTransaction(Transaction transaction) {
         this.transaction = transaction;
     }
 
+    /**
+     * Set the dataSource for this operation
+     *
+     * @param dataSource
+     * @param dbType
+     */
     public void useDataSource(DataSource dataSource, DBType dbType) {
         this.dbhandle = Jdao.newDBhandle(dataSource, dbType);
     }
@@ -133,7 +144,8 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
     }
 
     /**
-     * where
+     * where operation
+     * The function is the same as where in sql
      *
      * @param wheres
      * @return
@@ -148,6 +160,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
 
     /**
      * order by
+     * The function is the same as order by in sql
      *
      * @param sorts
      */
@@ -162,6 +175,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
 
     /**
      * group by
+     * The function is the same as group by in sql
      *
      * @param fields
      */
@@ -174,6 +188,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
 
     /**
      * having
+     * The function is the same as having in sql
      *
      * @param wheres
      */
@@ -184,7 +199,17 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
     }
 
     /**
+     * The LIMIT clause in SQL is used to constrain the number of rows returned by the query.
+     * However, not all databases use the same exact command for this purpose.
+     * Jdao, as an ORM (Object-Relational Mapping) tool, adapts to different database types (DBTypes)
+     * to ensure that the correct syntax is used for each database,
+     * guaranteeing that the SQL queries execute properly across various database systems.
+     * This means that while the concept and functionality remain consistent (i.e., limiting the result set),
+     * the specific command or syntax might vary depending on the underlying database system being used.
+     * <p>
      * limit ?
+     * <p>
+     * The function is the same as limit in sql
      *
      * @param limit
      */
@@ -193,7 +218,17 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
     }
 
     /**
+     * The LIMIT clause in SQL is used to constrain the number of rows returned by the query.
+     * However, not all databases use the same exact command for this purpose.
+     * Jdao, as an ORM (Object-Relational Mapping) tool, adapts to different database types (DBTypes)
+     * to ensure that the correct syntax is used for each database,
+     * guaranteeing that the SQL queries execute properly across various database systems.
+     * This means that while the concept and functionality remain consistent (i.e., limiting the result set),
+     * the specific command or syntax might vary depending on the underlying database system being used.
+     * <p>
      * limit ?,?
+     * <p>
+     * The function is the same as limit in sql
      *
      * @param offset
      * @param limit
@@ -360,7 +395,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
 
 
     /**
-     * select
+     * Query and return list, used in the case of returning multiple database data
      *
      * @param fs
      * @return
@@ -398,7 +433,8 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
     }
 
     /**
-     * select
+     * Query and return data objects, generally used in the case of returning a database data,
+     * if there are multiple query results, return the first
      *
      * @param fs
      * @return
@@ -436,7 +472,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
     }
 
     /**
-     * insert into
+     * Execute insert
      *
      * @return
      * @throws JdaoException
@@ -481,6 +517,9 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         return skv;
     }
 
+    /**
+     * Add batch data
+     */
     public void addBatch() {
         isinit();
         if (batchMap.size() == 0) {
@@ -497,6 +536,12 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         fieldMap.clear();
     }
 
+    /**
+     * Execute batch processing
+     *
+     * @return
+     * @throws JdaoException
+     */
     public int[] executeBatch() throws JdaoException {
         isinit();
         if (fieldMap.size() > 0) {
@@ -542,7 +587,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
     }
 
     /**
-     * update
+     * Execute update
      *
      * @return
      * @throws JdaoException
@@ -603,7 +648,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
     }
 
     /**
-     * delete
+     * Execute delete
      *
      * @return
      * @throws JdaoException
@@ -678,6 +723,12 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         commentLine = null;
     }
 
+    /**
+     * This operation enables caching
+     *
+     * @param <T>
+     * @return
+     */
     public <T> T useCache() {
         return useCache(true);
     }
@@ -694,6 +745,8 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
     }
 
     /**
+     * Set annotations for Sql
+     *
      * @param commentLine
      */
     public void setCommentLine(String commentLine) {
