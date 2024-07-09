@@ -1,11 +1,13 @@
 package io.github.donnie4w.jdao.util;
 
+import io.github.donnie4w.jdao.handle.Jdao;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -16,11 +18,10 @@ import java.sql.Types;
  * @date 2013-1-10
  * @verion 1.0
  */
+@Deprecated
 public class DaoBuilder {
 
     /**
-     * auther donnie wu
-     *
      * @param tablename
      * @param destPath
      * @param conn
@@ -28,8 +29,6 @@ public class DaoBuilder {
      * @throws UnsupportedEncodingException
      * @throws IOException
      * @throws SQLException
-     *             通过jdbc连接数据库，根据参数 tableName(表名) 生成相应的 java源文件。 生成的java文件没有package ，所以 实际使用时，需在生成的文件中自行加上相应的包名。 destPath
-     *             为java文件的目标地址。如果空值则生成的文件在根目录下(文件创建完成后会在控制台提示生成文件的绝对地址)。
      */
     public static void createFile(String tablename, String destPath, Connection conn, String charset) throws UnsupportedEncodingException, IOException, SQLException {
         createFile_(null, tablename, destPath, conn, charset, false);
@@ -43,7 +42,6 @@ public class DaoBuilder {
      * @throws UnsupportedEncodingException
      * @throws IOException
      * @throws SQLException
-     *             如果文件存在测覆盖
      */
     public static void createFileForce(String tablename, String destPath, Connection conn, String charset) throws UnsupportedEncodingException, IOException, SQLException {
         createFile_(null, tablename, destPath, conn, charset, true);
@@ -232,9 +230,9 @@ public class DaoBuilder {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        Class.forName("com.mysql.jdbc.Driver");
-        Connection conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/wuxiaodong", "root", "123456");
+    @Test
+    public void testCreate() throws Exception {
+        Connection conn = Jdao.getDefaultDBhandle().getJdbcHandle().getDataSource().getConnection();
         DaoBuilder.createFile("hstest", "", conn, "utf-8");
     }
 }
