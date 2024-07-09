@@ -65,7 +65,7 @@ public class SqlKV {
 
     public String toString() {
         if (args == null)
-            return "[SQL:" + sql + "]ARGS[]";
+            return "SQL[" + sql + "]ARGS[]";
         else {
             final StringBuilder sb = new StringBuilder();
             for (Object o : args) {
