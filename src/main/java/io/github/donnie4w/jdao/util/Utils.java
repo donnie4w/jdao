@@ -1,7 +1,9 @@
 package io.github.donnie4w.jdao.util;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 /**
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
@@ -9,33 +11,36 @@ import java.util.Date;
  * @verion 1.0
  */
 public class Utils {
+    @Deprecated
     public static String delUnderline(String str) {
-        String[] ss = str.split("_");
-        if (ss.length == 1) {
+        String[] parts = str.split("_");
+        if (parts.length == 1) {
             return str;
-        } else {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < ss.length; i++) {
-                if (i != 0) {
-                    sb.append(upperFirstChar(ss[i].toLowerCase()));
-                } else {
-                    sb.append(ss[i]);
-                }
-            }
-            return sb.toString();
         }
+        return Arrays.stream(parts, 1, parts.length)
+                .map(Utils::upperFirstChar)
+                .collect(Collectors.joining("", parts[0], ""));
     }
 
-    public static String upperFirstChar(String str) {
-        return str.substring(0, 1).toUpperCase() + str.substring(1);
+    @Deprecated
+    public static String upperFirstChar(String word) {
+        if (word == null || word.isEmpty()) {
+            return word;
+        }
+        char firstChar = word.charAt(0);
+        if (Character.isLowerCase(firstChar)) {
+            return Character.toUpperCase(firstChar) + word.substring(1);
+        }
+        return word;
     }
 
+    @Deprecated
     public static String dateFormat() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String ret = sdf.format(new Date());
-        return ret.toUpperCase();
+        return sdf.format(new Date());
     }
 
+    @Deprecated
     public static boolean isContainsLowerCase(String str) {
         if (str == null)
             return false;
