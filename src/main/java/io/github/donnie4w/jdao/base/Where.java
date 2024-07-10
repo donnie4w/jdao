@@ -51,7 +51,6 @@ public class Where<T> {
             sb.append(") ");
             expression = expression + sb.toString().replaceFirst(" and ", " or (");
         }
-
         return new OR<T>(expression, value);
     }
 
