@@ -25,11 +25,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
@@ -46,24 +42,7 @@ public class Util {
     }
 
     public static Date asDate(Object obj) throws JdaoException {
-        if (obj instanceof java.util.Date) {
-            return (Date) obj;
-        } else if (obj instanceof java.time.LocalDateTime) {
-            LocalDateTime ldt = LocalDateTime.now();
-            return Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
-        } else if (obj instanceof java.time.LocalDate) {
-            LocalDate ld = LocalDate.now();
-            return Date.from(ld.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-        } else if (obj instanceof java.time.LocalTime) {
-            LocalDate ld = LocalDate.now();
-            LocalTime lt = LocalTime.now();
-            return Date.from(lt.atDate(ld).atZone(ZoneId.systemDefault()).toInstant());
-        } else if (obj instanceof String) {
-            return DateConvert.convertToDate((String)obj);
-        } else if (obj instanceof byte[]) {
-            return DateConvert.convertToDate(new String((byte[]) obj));
-        }
-        return null;
+        return DateUtil.asDate(obj);
     }
 
     public static String asString(Object obj) {
@@ -374,14 +353,14 @@ public class Util {
         return 0;
     }
 
-    private static  ZonedDateTime convertToZonedDateTime(Date date) {
+    private static ZonedDateTime convertToZonedDateTime(Date date) {
         if (date != null) {
             return date.toInstant().atZone(ZoneId.systemDefault());
         }
         return null;
     }
 
-    public static  LocalDateTime asLocalDateTime(Object obj) throws JdaoException {
+    public static LocalDateTime asLocalDateTime(Object obj) throws JdaoException {
         ZonedDateTime zonedDateTime = convertToZonedDateTime(asDate(obj));
         return zonedDateTime != null ? zonedDateTime.toLocalDateTime() : null;
     }
@@ -413,8 +392,8 @@ public class Util {
         return name;
     }
 
-    public static boolean isKey(String keyName){
-        switch (keyName){
+    public static boolean isKey(String keyName) {
+        switch (keyName) {
             case "public":
             case "protected":
             case "private":
@@ -462,9 +441,9 @@ public class Util {
             case "strictfp":
             case "assert":
             case "enum":
-                return  true;
+                return true;
             default:
-                return  false;
+                return false;
         }
     }
 
