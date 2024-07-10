@@ -75,16 +75,6 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
 
     public abstract void toJdao();
 
-//    private static void getArrayObj(List<Object> list, Array a) {
-//        for (Object o : a.getArray()) {
-//            if (o instanceof Array) {
-//                getArrayObj(list, (Array) o);
-//            } else {
-//                list.add(o);
-//            }
-//        }
-//    }
-
     public void useMaster(boolean useMaster) {
         this.mustMaster = useMaster;
     }
@@ -274,17 +264,11 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
                 } else {
                     sbWhere.append(kv.getKey());
                 }
-
                 Object o = kv.getValue();
-                if (o != null) {
-                    if (o.getClass().isArray()) {
-                        for (int j = 0; j < java.lang.reflect.Array.getLength(o); j++) {
-                            Object element = java.lang.reflect.Array.get(o, j);
-                            list.add(element);
-                        }
-                    } else {
-                        list.add(o);
-                    }
+                if (o != null) if (o instanceof Array) {
+                    parseArray(list, (Array) o);
+                } else {
+                    list.add(o);
                 }
             }
             sb.append(sbWhere);
@@ -297,11 +281,8 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
             for (ObjKV kv : having) {
                 sbhaving.append(kv.getKey());
                 Object o = kv.getValue();
-                if (o.getClass().isArray()) {
-                    for (int j = 0; j < java.lang.reflect.Array.getLength(o); j++) {
-                        Object element = java.lang.reflect.Array.get(o, j);
-                        list.add(element);
-                    }
+                if (o instanceof Array) {
+                    parseArray(list, (Array) o);
                 } else {
                     list.add(o);
                 }
@@ -410,7 +391,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         if (this.isloggerOn) {
             logger.log("[SELETE SQL][" + skv.getSql() + "]" + Arrays.toString(skv.getArgs()));
         }
-        String domain = JdaoCache.getCacheDomain(clazz.getPackageName(), clazz);
+        String domain = JdaoCache.getDomain(clazz.getPackageName(), clazz);
         boolean iscache = (isCache == 1 || domain != null) && isCache != 2;
         Object o = null;
         if (iscache) {
@@ -450,7 +431,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
             logger.log("[SELETE SQL][" + skv.getSql() + "]" + Arrays.toString(skv.getArgs()));
         }
         Object o = null;
-        String domain = JdaoCache.getCacheDomain(clazz.getPackageName(), clazz);
+        String domain = JdaoCache.getDomain(clazz.getPackageName(), clazz);
         boolean iscache = (isCache == 1 || domain != null) && isCache != 2;
         if (iscache) {
             o = JdaoCache.getCache(domain, clazz, Condition.newInstance(skv));
@@ -622,15 +603,13 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
                     sbWhere.append(kv.getKey());
                 }
                 Object o = kv.getValue();
-                if (o != null) {
-                    if (o.getClass().isArray()) {
-                        for (int j = 0; j < java.lang.reflect.Array.getLength(o); j++) {
-                            list.add(java.lang.reflect.Array.get(o, j));
-                        }
-                    } else {
-                        list.add(o);
-                    }
+
+                if (o != null) if (o instanceof Array) {
+                    parseArray(list, (Array) o);
+                } else {
+                    list.add(o);
                 }
+
             }
             sb.append(sbWhere);
         }
@@ -677,14 +656,10 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
                 }
 
                 Object o = kv.getValue();
-                if (o != null) {
-                    if (o.getClass().isArray()) {
-                        for (int j = 0; j < java.lang.reflect.Array.getLength(o); j++) {
-                            list.add(java.lang.reflect.Array.get(o, j));
-                        }
-                    } else {
-                        list.add(o);
-                    }
+                if (o != null) if (o instanceof Array) {
+                    parseArray(list, (Array) o);
+                } else {
+                    list.add(o);
                 }
             }
             sb.append(sbWhere);
@@ -734,6 +709,12 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
     }
 
 
+    /**
+     * Set whether this table object uses cache
+     * @param use
+     * @return
+     * @param <T>
+     */
     public <T> T useCache(boolean use) {
         isinit();
         if (use) {
@@ -752,6 +733,20 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
     public void setCommentLine(String commentLine) {
         isinit();
         this.commentLine = commentLine.matches(".{0,}\\*/.{0,}") ? null : commentLine;
+    }
+
+    /**
+     * @param list
+     * @param a
+     */
+    private static void parseArray(List<Object> list, Array a) {
+        for (Object o : a.getArray()) {
+            if (o instanceof Array) {
+                parseArray(list, (Array) o);
+            } else {
+                list.add(o);
+            }
+        }
     }
 
     private void isinit() {
