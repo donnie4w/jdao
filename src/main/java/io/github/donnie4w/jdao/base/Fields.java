@@ -127,7 +127,7 @@ public class Fields<T> implements Field<T> {
     }
 
     /**
-     * in (?)
+     * in (?...)
      */
     public Where<T> IN(Object... objects) {
         StringBuilder sb = new StringBuilder();
@@ -140,7 +140,7 @@ public class Fields<T> implements Field<T> {
     }
 
     /**
-     * not in (?)
+     * not in (?...)
      */
     public Where<T> NOTIN(Object... objects) {
         StringBuilder sb = new StringBuilder();
@@ -252,7 +252,7 @@ public class Fields<T> implements Field<T> {
 
     /**
      * Implementation function wrapping
-     * e.g.  ID.FnWarp("max")  mean:  max("id")
+     * e.g.  ID.FnWarp("max")  mean:  max(`id`)
      *
      * @param function
      * @return
