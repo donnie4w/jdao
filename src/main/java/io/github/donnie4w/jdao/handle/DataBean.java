@@ -204,24 +204,27 @@ public class DataBean implements Iterable<String> {
                     return Util.asDate(value);
                 } catch (JdaoException e) {
                 }
+                break;
             case "LocalDateTime":
                 try {
                     return Util.asLocalDateTime(value);
                 } catch (JdaoException e) {
                 }
+                break;
             case "LocalDate":
                 try {
                     return Util.asLocalDate(value);
                 } catch (JdaoException e) {
                 }
+                break;
             case "LocalTime":
                 try {
                     return Util.asLocalTime(value);
                 } catch (JdaoException e) {
                 }
-            default:
-                return Util.asBytes(value);
+                break;
         }
+        return Util.asBytes(value);
     }
 
     /**
