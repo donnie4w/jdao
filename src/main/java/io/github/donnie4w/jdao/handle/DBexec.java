@@ -56,8 +56,7 @@ public class DBexec {
                     int columncount = rs.getMetaData().getColumnCount();
                     T object = classType.getConstructor().newInstance();
                     for (int i = 1; i <= columncount; i++) {
-                        String columnName = Utils.delUnderline(rs.getMetaData().getColumnLabel(i));
-                        object.scan(columnName, rs.getObject(i));
+                        object.scan(rs.getMetaData().getColumnLabel(i), rs.getObject(i));
                     }
                     retList.add(object);
                 }
@@ -94,8 +93,7 @@ public class DBexec {
                     object = classType.getConstructor().newInstance();
                     int columncount = rs.getMetaData().getColumnCount();
                     for (int i = 1; i <= columncount; i++) {
-                        String columnName = Utils.delUnderline(rs.getMetaData().getColumnLabel(i));
-                        object.scan(columnName, rs.getObject(i));
+                        object.scan(rs.getMetaData().getColumnLabel(i), rs.getObject(i));
                     }
                 }
             }
