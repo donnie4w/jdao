@@ -19,7 +19,6 @@
 package io.github.donnie4w.jdao.handle;
 
 import io.github.donnie4w.jdao.base.Table;
-import io.github.donnie4w.jdao.util.Utils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
