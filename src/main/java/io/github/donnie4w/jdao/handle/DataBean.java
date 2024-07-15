@@ -18,9 +18,9 @@
 package io.github.donnie4w.jdao.handle;
 
 import io.github.donnie4w.jdao.base.FieldBean;
-import io.github.donnie4w.jdao.base.Log;
 import io.github.donnie4w.jdao.base.Scanner;
 import io.github.donnie4w.jdao.base.Util;
+import io.github.donnie4w.jdao.util.Logger;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -28,14 +28,8 @@ import java.util.*;
 
 public class DataBean implements Iterable<String> {
 
-    private final static Log logger = Log.newInstance();
-
     private final Map<String, FieldBean> fieldNameMap = new HashMap<>();
     private final Map<Integer, FieldBean> fieldIndexMap = new HashMap<>();
-
-    public void logger(boolean on) {
-        logger.logOn(on);
-    }
 
     public void put(String fieldName, int fieldIndex, Object fieldValue) {
         FieldBean fb = new FieldBean(fieldName, fieldIndex, fieldValue);
@@ -111,7 +105,7 @@ public class DataBean implements Iterable<String> {
                     if (value != null) {
                         Object compatibleValue = convertIfCompatible(value, fieldType);
                         if (compatibleValue == null) {
-                            logger.log("[IncompatibleType][Field: " + field.getName() + ", ExpectedType: " + fieldType.getName() + ", ActualType: " + value.getClass().getName() + "]");
+                            Logger.severe("[IncompatibleType][Field: " + field.getName() + ", ExpectedType: " + fieldType.getName() + ", ActualType: " + value.getClass().getName() + "]");
                             continue;
                         }
                         String setterMethodName = "set" + capitalize(field.getName());
@@ -119,7 +113,7 @@ public class DataBean implements Iterable<String> {
                             Method setterMethod = beanClass.getMethod(setterMethodName, fieldType);
                             setterMethod.invoke(targetBean, compatibleValue);
                         } catch (NoSuchMethodException e) {
-                            logger.log("[NoSuchMethodException][", setterMethodName, "]");
+                            Logger.severe("[NoSuchMethodException][", setterMethodName, "]");
                         }
                     }
                 }
@@ -132,18 +126,18 @@ public class DataBean implements Iterable<String> {
                         Class<?> fieldType = field.getType();
                         Object compatibleValue = convertIfCompatible(value, fieldType);
                         if (compatibleValue == null) {
-                            logger.log("[IncompatibleType][Field: " + fieldName + ", ExpectedType: " + fieldType.getName() + ", ActualType: " + value.getClass().getName() + "]");
+                            Logger.severe("[IncompatibleType][Field: " + entry.getKey() + ", ExpectedType: " + fieldType.getName() + ", ActualType: " + value.getClass().getName() + "]");
                             continue;
                         }
-                        String setterMethodName = "set" + capitalize(fieldName);
+                        String setterMethodName = "set" + capitalize(entry.getKey());
                         try {
                             Method setterMethod = beanClass.getMethod(setterMethodName, fieldType);
                             setterMethod.invoke(targetBean, compatibleValue);
                         } catch (NoSuchMethodException e) {
-                            logger.log("[NoSuchMethodException][", setterMethodName, "]");
+                            Logger.severe("[NoSuchMethodException][", setterMethodName, "]");
                         }
                     } catch (Exception e) {
-                        logger.log("[NoSuchFieldException][", fieldName, "]");
+                        Logger.severe("[NoSuchFieldException][", entry.getKey(), "]");
                     }
                 }
             }
@@ -153,11 +147,15 @@ public class DataBean implements Iterable<String> {
         }
     }
 
-    private static String capitalize(String str) {
-        if (str == null || str.length() == 0) {
-            return str;
+    private static String capitalize(String word) {
+        if (word == null || word.isEmpty()) {
+            return word;
         }
-        return str.substring(0, 1).toUpperCase() + str.substring(1);
+        char firstChar = word.charAt(0);
+        if (Character.isLowerCase(firstChar)) {
+            return Character.toUpperCase(firstChar) + word.substring(1);
+        }
+        return word;
     }
 
     private Object convertIfCompatible(Object value, Class<?> fieldType) {
