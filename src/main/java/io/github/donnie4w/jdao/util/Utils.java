@@ -1,3 +1,4 @@
+
 package io.github.donnie4w.jdao.util;
 
 import java.text.SimpleDateFormat;
@@ -53,5 +54,20 @@ public class Utils {
             }
         }
         return false;
+    }
+
+    //java8
+    public static String getPackageName(Class<?> clazz) {
+        String className = clazz.getName();
+        int lastDotIndex = className.lastIndexOf('.');
+        if (lastDotIndex != -1) {
+            return className.substring(0, lastDotIndex);
+        } else {
+            return "";
+        }
+    }
+
+    public static boolean stringValid(String str) {
+        return str != null && str.trim().length() > 0;
     }
 }
