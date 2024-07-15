@@ -17,6 +17,8 @@
  */
 package io.github.donnie4w.jdao.handle;
 
+import io.github.donnie4w.jdao.util.Logger;
+
 import javax.sql.DataSource;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -360,6 +362,10 @@ public class Jdao {
         if (obj == null) {
             throw new JdaoRuntimeException(message);
         }
+    }
+
+    public static void setLogger(boolean on){
+        Logger.setLogger(on);
     }
 
 }
