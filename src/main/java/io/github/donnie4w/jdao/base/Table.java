@@ -19,6 +19,8 @@
 package io.github.donnie4w.jdao.base;
 
 import io.github.donnie4w.jdao.handle.*;
+import io.github.donnie4w.jdao.util.Logger;
+import io.github.donnie4w.jdao.util.Utils;
 
 import javax.sql.DataSource;
 import java.io.Serializable;
@@ -29,12 +31,9 @@ import java.util.*;
  * @date 2013-1-10
  */
 public abstract class Table<T extends Table<?>> implements Scanner, Serializable {
-    @java.io.Serial
     private static final long serialVersionUID = 6118092300004961000L;
 
     private static final String AND = " and ";
-    private static final Log logger = Log.newInstance();
-
     private transient List<ObjKV<String, Object>> where;
     private transient List<ObjKV<String, Object>> having;
     private transient Map<Fields<T>, Object> fieldMap;
@@ -43,7 +42,6 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
     private transient Map<Fields<T>, List<Object>> batchMap;
     private transient int[] limitArg;
     private transient Fields<T>[] fields;
-    private transient boolean isloggerOn = false;
     private transient byte isCache = 0;
     private transient String commentLine = null;
     private transient Transaction transaction = null;
@@ -102,7 +100,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         if (this.dbhandle != null) {
             return this.dbhandle;
         }
-        DBhandle dbhandle = getDBhandle(this.clazz, this.clazz.getPackageName(), qureyType && !mustMaster);
+        DBhandle dbhandle = getDBhandle(this.clazz,  Utils.getPackageName(this.clazz), qureyType && !mustMaster);
         if (dbhandle == null) {
             throw new JdaoRuntimeException("DataSource not found");
         }
@@ -388,27 +386,25 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
             fs = fields;
         }
         SqlKV skv = encodeSqlKV(fs);
-        if (this.isloggerOn) {
-            logger.log("[SELETE SQL][" + skv.getSql() + "]" + Arrays.toString(skv.getArgs()));
-        }
-        String domain = JdaoCache.getDomain(clazz.getPackageName(), clazz);
+        if (Logger.isVaild())
+            Logger.info("[SELETE SQL][" + skv.getSql() + "]" + Arrays.toString(skv.getArgs()));
+
+        String domain = JdaoCache.getDomain(Utils.getPackageName(clazz), clazz);
         boolean iscache = (isCache == 1 || domain != null) && isCache != 2;
         Object o = null;
         if (iscache) {
-            o = JdaoCache.getCache(domain, clazz, Condition.newInstance(skv));
+            o = JdaoCache.getCache(domain, clazz, Condition.newInstance(skv,"list"));
             if (o != null) {
-                if (this.isloggerOn) {
-                    logger.log("[GET CACHE]:" + skv);
-                }
+                if (Logger.isVaild())
+                    Logger.info("[GET CACHE]:" + skv);
                 return (List<T>) o;
             }
         }
         o = getDBhandle(true).executeQueryList(transaction, clazz, skv.getSql(), skv.getArgs());
         if (iscache) {
-            JdaoCache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv), o);
-            if (this.isloggerOn) {
-                logger.log("[SET CACHE]:" + skv);
-            }
+            JdaoCache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv,"list"), o);
+            if (Logger.isVaild())
+                Logger.info("[SET CACHE]:" + skv);
         }
         return (List<T>) o;
     }
@@ -427,27 +423,24 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
             fs = fields;
         }
         SqlKV skv = encodeSqlKV(fs);
-        if (this.isloggerOn) {
-            logger.log("[SELETE SQL][" + skv.getSql() + "]" + Arrays.toString(skv.getArgs()));
-        }
+        if (Logger.isVaild())
+            Logger.info("[SELETE SQL][" + skv.getSql() + "]" + Arrays.toString(skv.getArgs()));
         Object o = null;
-        String domain = JdaoCache.getDomain(clazz.getPackageName(), clazz);
+        String domain = JdaoCache.getDomain(Utils.getPackageName(clazz), clazz);
         boolean iscache = (isCache == 1 || domain != null) && isCache != 2;
         if (iscache) {
-            o = JdaoCache.getCache(domain, clazz, Condition.newInstance(skv));
+            o = JdaoCache.getCache(domain, clazz, Condition.newInstance(skv,"one"));
             if (o != null) {
-                if (this.isloggerOn) {
-                    logger.log("[GET CACHE]:" + skv);
-                }
+                if (Logger.isVaild())
+                    Logger.info("[GET CACHE]:" + skv);
                 return (T) o;
             }
         }
         o = getDBhandle(true).executeQuery(transaction, clazz, skv.getSql(), skv.getArgs());
         if (iscache) {
-            JdaoCache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv), o);
-            if (this.isloggerOn) {
-                logger.log("[SET CACHE]:" + skv);
-            }
+            JdaoCache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv,"one"), o);
+            if (Logger.isVaild())
+                Logger.info("[SET CACHE]:" + skv);
         }
         return (T) o;
     }
@@ -487,12 +480,13 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         }
         sb1.append(sb2).append(")");
         String sql = sb1.toString();
-        if (this.isloggerOn) {
+        if (Logger.isVaild()) {
             StringBuilder sb = new StringBuilder();
             for (Object o : values) {
                 sb.append(o).append(",");
             }
-            logger.log("[INSERT SQL][" + sql + "][" + sb.substring(0, sb.length() - 1) + "]");
+            sb.setLength(sb.length() - 1);
+            Logger.info("[INSERT SQL][" + sql + "][" + sb + "]");
         }
         SqlKV skv = new SqlKV(sql, values);
         return skv;
@@ -561,9 +555,9 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
             }
             list.add(o);
         }
-        if (isloggerOn) {
-            logger.log("[BATCH SQL][" + sb1 + "]" + Arrays.toString(list.toArray()));
-        }
+        if (Logger.isVaild())
+            Logger.info("[BATCH SQL][" + sb1 + "]" + Arrays.toString(list.toArray()));
+
         return getDBhandle(false).executeBatch(transaction, sb1.toString(), list);
     }
 
@@ -616,12 +610,13 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         String sql = sb.toString();
         Object[] values = new Object[list.size()];
         list.toArray(values);
-        if (this.isloggerOn) {
+        if (Logger.isVaild()) {
             StringBuilder s = new StringBuilder();
             for (Object o : values) {
                 s.append(o).append(",");
             }
-            logger.log("[UPDATE SQL][" + sql + "][" + s.substring(0, s.length() - 1) + "]");
+            s.setLength(s.length() - 1);
+            Logger.info("[UPDATE SQL][" + sql + "][" + s + "]");
         }
         return getDBhandle(false).executeUpdate(transaction, sql, list.toArray(values));
     }
@@ -666,24 +661,20 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
             values = new Object[list.size()];
             list.toArray(values);
         }
-        if (this.isloggerOn) {
+        if (Logger.isVaild()) {
             if (values != null && values.length > 0) {
                 StringBuilder s = new StringBuilder();
                 for (Object o : values) {
                     s.append(o).append(",");
                 }
-                logger.log("[DELETE SQL][" + sb + "][" + s.substring(0, s.length() - 1) + "]");
+                s.setLength(s.length() - 1);
+                Logger.info("[DELETE SQL][" + sb + "][" + s + "]");
             } else {
-                logger.log("[DELETE SQL][" + sb + "]");
+                Logger.info("[DELETE SQL][" + sb + "]");
             }
         }
         return getDBhandle(false).executeUpdate(transaction, sb.toString(), values);
 
-    }
-
-    public void logger(boolean on) {
-        isinit();
-        this.isloggerOn = on;
     }
 
     public void reset() {
@@ -711,9 +702,10 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
 
     /**
      * Set whether this table object uses cache
+     *
      * @param use
-     * @return
      * @param <T>
+     * @return
      */
     public <T> T useCache(boolean use) {
         isinit();
