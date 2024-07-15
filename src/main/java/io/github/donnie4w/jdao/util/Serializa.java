@@ -26,8 +26,8 @@ import java.io.*;
 public class Serializa {
 
     public static byte[] encode(Table object) throws JdaoException {
-        ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
-        try (ObjectOutputStream out = new ObjectOutputStream(byteArrayOut)) {
+        try (ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
+             ObjectOutputStream out = new ObjectOutputStream(byteArrayOut)) {
             out.writeObject(object);
             return byteArrayOut.toByteArray();
         } catch (IOException e) {
