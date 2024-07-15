@@ -19,9 +19,9 @@
 package io.github.donnie4w.jdao.handle;
 
 import io.github.donnie4w.jdao.base.Condition;
-import io.github.donnie4w.jdao.base.Log;
 import io.github.donnie4w.jdao.base.Table;
 import io.github.donnie4w.jdao.mapper.MapperParser;
+import io.github.donnie4w.jdao.util.Logger;
 
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
@@ -32,7 +32,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Cacher implements Cache {
 
-    private final static Log log = Log.newInstance(true, Cacher.class);
     private final Map<String, CacheHandle> cacheMap = new ConcurrentHashMap();
     private final Map<Object, String> rmap = new ConcurrentHashMap();
     private final CacheHandle defaultCacheHandle = new CacheHandle();
@@ -290,10 +289,10 @@ public class Cacher implements Cache {
                     Thread.sleep(SLEEP_INTERVAL_MS);
                 }
             } catch (InterruptedException e) {
-                log.log("Cache cleanup thread interrupted.");
+                Logger.severe("Cache cleanup thread interrupted.");
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
-                log.log("Error occurred during cache cleanup.", e.toString());
+                Logger.severe("Error occurred during cache cleanup.", e.toString());
             }
         }
     }
