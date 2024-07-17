@@ -73,8 +73,9 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
 
     public abstract void toJdao();
 
-    public void useMaster(boolean useMaster) {
+    public <T> T useMaster(boolean useMaster) {
         this.mustMaster = useMaster;
+        return (T) this;
     }
 
     /**
@@ -82,8 +83,9 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      *
      * @param transaction
      */
-    public void useTransaction(Transaction transaction) {
+    public <T> T useTransaction(Transaction transaction) {
         this.transaction = transaction;
+        return (T) this;
     }
 
     /**
@@ -92,8 +94,20 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      * @param dataSource
      * @param dbType
      */
-    public void useDataSource(DataSource dataSource, DBType dbType) {
+    public  <T> T useDataSource(DataSource dataSource, DBType dbType) {
         this.dbhandle = Jdao.newDBhandle(dataSource, dbType);
+        return (T) this;
+    }
+
+
+    /**
+     * @param dbhandle
+     * @return
+     * @param <T>
+     */
+    public  <T> T useDBhandle(DBhandle dbhandle) {
+        this.dbhandle = dbhandle;
+        return (T) this;
     }
 
     private DBhandle getDBhandle(boolean qureyType) {
@@ -110,8 +124,8 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
     static DBhandle getDBhandle(Class<?> clz, String packageName, boolean queryType) {
         DBhandle dbhandle = null;
 
-        if (SlaveSource.size() > 0 && queryType) {
-            dbhandle = SlaveSource.get(clz, packageName);
+        if (JdaoSlave.size() > 0 && queryType) {
+            dbhandle = JdaoSlave.get(clz, packageName,null);
             if (dbhandle != null) {
                 return dbhandle;
             }
