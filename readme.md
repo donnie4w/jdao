@@ -1,164 +1,200 @@
-### Jdao  基于Java的持久层框架，零配置，零SQL操作持久层
+## JDAO —— Java Persistence Framework
 
-------------
+### Introduction
 
-- 用最简单的方式操作数据库
-- 支持全对象方式读写数据；
-- 支持事务，缓存，批处理等操作；
-- 支持原生sql 操作;
-- 支持注册多数据源，设置对象，类，包名对应不同数据源；
-- 支持自动生成数据表对应的java Bean对象；
-- jdao使用非常简单方便，可用于快速构建持久层封装服务；
+JDAO is an innovative persistence layer solution aimed at reducing programming workload, increasing productivity and performance, supporting multiple data sources, and enabling data read-write separation while establishing a standard for persistence layer programming. By leveraging JDAO, developers can reduce more than 50% of the persistence layer programming workload, standardize programming practices, minimize errors, and facilitate maintenance and extension.
 
-------------
+### [Official Website](https://tlnet.top/jdao)
 
-# 基本使用
+### [User Documentation](https://tlnet.top/jdaodoc)
 
-#### Jdao 数据表对应的javaBean：
+### Key Features
 
-	import io.github.donnie4w.jdao.base.DefName;
-	import io.github.donnie4w.jdao.base.Table;
-	import io.github.donnie4w.jdao.type.*;
-	 public class Hstest2 extends Table<Hstest2> {
-			public LONG id;
-			public STRING name;
-			public SHORT age;
-			public DATE createtime;
-			public DOUBLE money;
-			public BINARY binary;
-			public FLOAT real;
-			//当变量(或类名)与表不对应时，用注解DefName修正
-			@DefName(name = "level") 
-			public INT level2;
-	}
+1. **Code Generation**: Run the JDAO code generation tool to create standardized entity classes for database tables, similar to Thrift/Protobuf.
+2. **Efficient Serialization**: The standardized entity classes implement efficient serialization and deserialization, achieving nearly 10 times the performance of standard library methods, while the serialized data size is only 20% of that produced by standard methods.
+3. **Data Read-Write Separation**: JDAO supports binding multiple data sources and associating them with tables, classes, and mapping interfaces. It also supports data read-write separation.
+4. **Data Caching**: JDAO supports data caching with detailed control over cache data lifecycle and reclamation.
+5. **Wide Compatibility**: JDAO theoretically supports all databases that implement the JDBC interface.
+6. **Advanced Features**: Supports transactions, stored procedures, batch processing, and other database operations.
 
-#### 与数据表 hstest2  表名列名一一对应
+### A New Solution Addressing Hibernate and MyBatis Pain Points
 
-| Field  | Type  |   |
-| ------------ | ------------ | ------------ |
-| id  | bigint  | NOT NULL AUTO_INCREMENT  |
-|  name | varchar(100)  |  NULL |
-|  age |  tinyint | NULL  |
-|  createtime | timestamp  |  NULL|
-|  money |  double | NULL  |
-|  binary |  binary(100) |  NULL |
-|  real |  float | NULL  |
-|  level |  int | NULL  |
+#### Common Issues with Hibernate
 
-####  hstest2 可直接操作数据：
-	
-	设置数据源(一切操作从设置数据源开始)
-	这里使用druid 演示：
-	Properties p = new Properties()
-	p.load(new FileReader("druid.properties"));
-	DataSource ds = DruidDataSourceFactory.createDataSource(p);
-	DaoFactory.registDefaultDataSource(ds);
-	以上完成jdao 数据源的设置操作，该数据源默认适用全部持久层对象
+1. **Over-Encapsulation**: Hibernate provides a high level of abstraction (including HQL), which helps developers focus on business logic rather than underlying SQL. While this is a more advanced programming model, the high degree of automation reduces the need for understanding SQL, but it also obscures the specific behaviors of the underlying database, potentially leading to performance bottlenecks that are difficult to identify and optimize.
+2. **Complexity**: The configuration and learning curve are steep, which can introduce unnecessary complexity in large projects, especially when fine-grained control is needed.
+3. **Performance Issues**: The use of reflection and proxy mechanisms can impact performance in high-concurrency scenarios, particularly during large-scale data processing.
 
-##### 插入数据
-	Hstest2 h = new Hstest2();
-	h.money.setValue(11.2);
-	h.age.setValue((short) 22);
-	h.name.setValue("tom");
-	h.binary.setValue("hello".getBytes(StandardCharsets.UTF_8));
-	h.createtime.setValue(new Date());
-	h.real.setValue(33.3f);
-	h.level2.setValue(33);
-	h.insert();
-	以上完成插入数据的操作
+#### Common Issues with MyBatis
 
-##### 查询数据
+1. **SQL Maintenance**: MyBatis allows SQL to be separated from Java code through XML configuration files, increasing flexibility and enabling developers to write and optimize SQL directly. However, separating all SQL from the code can lead to a large number of SQL configurations, increasing complexity and maintenance workload. In a team environment, excessive SQL or XML files may also cause version control and merge conflicts.
+2. **Repetitive Work**: In MyBatis, each DAO requires similar SQL statements and result mapping logic. This repetitive work not only increases development time but also introduces errors, complicating code maintenance, especially for common CRUD operations.
 
-	Hstest2 h = new Hstest2();
-	h.where(h.id.GE(1),h.name.LIKE("tom"));
-	List<Hstest2> list = h.select(h.id,h.name);
-	for (Hstest2 ht : list) {
-				System.out.println(ht.id.getValue());
-	}
-	以上对应查询sql：
-	select id,name from hstest2 where `id`>=1 and `name` like %'tom'%
+### JDAO's Innovative Solutions
 
-##### 事务操作
-	Transaction t = new Transaction(DataSourceTest.getDataSourceByDruid());
-	Hstest hstest = new Hstest();
-	hstest.setTransaction(t);  //使用事务t
-	hstest.rowname.setValue("wu");
-	hstest.value.setValue("dong");
-	hstest.insert();
-	Hstest hstest2 = new Hstest();
-	hstest2.setTransaction(t); //使用事务t
-	hstest2.rowname.setValue("wu2");
-	hstest2.value.setValue("dong2");
-	hstest2.insert();
-	t.commit();   //提交
-	//t.rollBack(); //回滚
-	//t.close();    //关闭事务
+The JDAO framework combines the abstraction level of Hibernate with the flexibility of MyBatis, aiming to provide a powerful yet intuitive persistence layer solution.
 
-##### 批处理
+1. **Standardized Entity Classes for Single Table CRUD Operations**: Over 90% of single table operations in databases can be handled through entity classes. These CRUD operations typically do not require complex SQL optimizations and can be generated by entity classes, reducing error rates and improving maintainability. Utilizing caching and read-write separation mechanisms, the persistence layer is more efficient and convenient. The standardized entity class data operation format is not simply a combination of Java object functions but more akin to object-oriented SQL operations, making them easier to understand.
+2. **Executing Complex SQL**: In practice, complex SQL, especially multi-table joins, often require optimization, which necessitates an understanding of table structures, indexes, and other database properties. Constructing complex SQL using Java objects can increase comprehension difficulty, and developers might not know the final executed SQL, increasing risk and maintenance difficulty. Therefore, JDAO suggests using its CRUD interfaces for complex SQL operations. JDAO offers flexible data transformation and efficient JavaBean mapping, avoiding the overhead of excessive reflection.
+3. **Compatibility with MyBatis Mapping Files**: For complex SQL operations, JDAO provides corresponding CRUD interfaces. It also supports XML-configured SQL mapping for interface calls, similar to MyBatis. However, unlike MyBatis, which requires mapping all SQL operations, JDAO recommends mapping only complex SQL or CRUD operations that standardized entity classes cannot handle. JDAO's SQL configuration files reference MyBatis formats and implement a new parser, making parameter types more tolerant and flexible (refer to the documentation for details).
 
-	Hstest ht = new Hstest();
-	ht.rowname.setValue("1111");
-	ht.value.setValue("2222");
-	ht.addBatch();  //加入批处理
-	ht.rowname.setValue("3333");
-	ht.value.setValue("4444");
-	ht.addBatch(); //加入批处理
-	ht.endBatch(); //批处理结束并执行
+### Core Components
 
-##### java 支持对象对数据库 增删改查的全部操作，返回相应的对象
-##### 数据表操作全部映射为简单的对象操作
+The JDAO framework closely follows the standard JDBC interface in its interface definitions and implementations, with intuitive naming conventions.
 
-------------
+#### 1. Jdao
+The primary core entry point, providing the following functions:
+- Setting data sources
+- SQL CRUD functions
 
+#### 2. JdaoCache
+Cache entry point, supporting the following functions:
+- Binding or removing packages, classes, and other attributes to enable or disable their query caching
 
-#### 复杂的SQL操作，jdao支持原生sql操作，使用DBUtil
-	第一步，设置数据源，如上面数据源设置即可
-	例如：
-	DBUtil dt = new DBUtil()
-	int id = dt.execute("insert into hstest(`value`,`rowname`)values(?,?)", "11", "aa");
-	增删改 使用 execute方法
-	————————————————————————
-	DBUtil dt = new DBUtil()
-	dt.selects("select * from hstest where id>?", 0)
-	List<DBUtil> list = dt.rsList();
-	for (DBUtil r : list) {
-	      System.out.println(r.getString("value"));
-	}
-	查询数据使用 select,  返回一行使用selectSingle
-	
+#### 3. JdaoSlave
+Read-write separation entry point, supporting the following functions:
+- Binding or removing packages, classes, and other attributes to enable or disable their read-write separation
 
+#### 4. JdaoMapper
+Mapping SQL to interfaces, supporting the following functions:
+- Directly invoking JDAO interfaces to execute SQL
+- Mapping SQL through XML files
 
-------------
+### Installation
 
-##### maven 配置，jdao本身无其他的依赖
+```xml
+<dependency>
+	<groupId>io.github.donnie4w</groupId>
+	<artifactId>jdao</artifactId>
+	<version>2.0.1</version>
+	<scope>compile</scope>
+</dependency>
+```
 
-			<dependency>
-				<groupId>io.github.donnie4w</groupId>
-				<artifactId>jdao</artifactId>
-				<version>2.0.0</version>
-			</dependency>
+### Quick Start
 
-------------
+#### 1. Configure Data Source
 
+```java
+Jdao.init(dataSource, Jdao.MYSQL);
+// dataSource is the data source
+// Jdao.MYSQL is the database type
+```
 
-1. [jdao项目地址：https://github.com/donnie4w/jdao](https://github.com/donnie4w/jdao "jdao项目地址：https://github.com/donnie4w/jdao")
-2. [jdao项目地址2：https://gitee.com/donnie4w/jdao](https://gitee.com/donnie4w/jdao "jdao项目地址2：https://gitee.com/donnie4w/jdao")
+#### 2. Generate Table Entity Classes
 
-3. [jdao使用demo地址：https://github.com/donnie4w/jdaodemo](https://github.com/donnie4w/jdaodemo "jdao使用demo地址：https://github.com/donnie4w/jdaodemo")
-4. [jdao使用demo地址2：https://gitee.com/donnie4w/jdaodemo](https://gitee.com/donnie4w/jdaodemo "jdao使用demo地址2：https://gitee.com/donnie4w/jdaodemo")
+Use the JDAO code generation tool to generate standardized entity classes for database tables.
 
-------------
+#### 3. Entity Class Operations
 
+```java
+// Set data source
+Jdao.init(dataSource, Jdao.MYSQL);
 
+// Read
+Hstest t = new Hstest();
+t.where(Hstest.ID.GT(1));
+t.limit(20, 10);
+List<Hstest> list = t.selects(Hstest.Id);
+for (Hstest hstest : list) {
+    System.out.println(hstest);
+}
+// [SELECT SQL] select id from hstest where id > 1 limit 20, 10 
 
+// Update
+Hstest t = new Hstest();
+t.setValue("hello world");
+t.where(Hstest.ID.EQ(1));
+t.update();
+// [UPDATE SQL] update hstest set value = "hello world" where id = 1
 
+// Delete
+Hstest t = new Hstest();
+t.where(Hstest.ID.EQ(1));
+t.delete();
+// [DELETE SQL] delete from hstest where id = 1
 
+// Insert
+Hstest hs = new Hstest();
+hs.setRowname("hello world");
+hs.setValue("123456789");
+hs.insert();
+// [INSERT SQL] insert into hstest (rowname, value) values ("hello world", "123456789")
+```
 
+#### 4. Jdao
 
+###### CRUD Operations
 
+```java
+// Query, returns a single result
+Hstest hs = Jdao.executeQuery(Hstest.class, "select * from Hstest order by id desc limit 1");
+System.out.println(hs);
 
+// Insert
+int i = Jdao.executeUpdate("insert into hstest2 (rowname, value) values (?, ?)", "helloWorld", "123456789");
 
+// Update
+int i = Jdao.executeUpdate("update hstest set value = ? where id = 1", "hello");
 
+// Delete
+int i = Jdao.executeUpdate("delete from hstest where id = ?", 1);
+```
 
+#### 5. JdaoCache 
 
+###### Configure Cache
+
+```java
+// Bind Hstest.class to enable cache with a duration of 100 milliseconds
+JdaoCache.bindClass(Hstest.class, new CacheHandle(100));
+Hstest t = new Hstest();
+t.where(Hstest.ID.EQ(3));
+Hstest hs = t.select();
+System.out.println(hs);
+
+// Return cached data
+Hstest t2 = new Hstest();
+t2.where(Hstest.ID.EQ(3));
+Hstest hs2 = t2.select();
+System.out.println(hs2);
+```
+
+#### 6. JdaoSlave 
+
+###### Read-Write Separation
+
+```java
+JdaoSlave.bindClass(Hstest.class, DataSourceFactory.getDataSourceByMysql(), DBType.POSTGRESQL);
+// Here the main database is MySQL, the slave database is PostgreSQL, and Hstest reads from PostgreSQL
+Hstest t = new Hstest();
+t.where(Hstest.ID.EQ(3));
+Hstest hs = t.select();
+System.out.println(hs);
+```
+
+#### 7. JdaoMapper 
+
+###### Use XML for SQL Mapping
+
+```xml
+<!-- MyBatis-style XML configuration file -->
+<mapper namespace="io.github.donnie4w.jdao.action.Mapperface">
+    <select id="selectHstestById" parameterType="int" resultType="io.github.donnie4w.jdao.dao.Hstest">
+        SELECT * FROM hstest WHERE id &lt; #{id} AND age &lt; #{age}
+    </select>
+</mapper>
+```
+
+```java
+// Data source
+Jdao.init(DataSourceFactory.getDataSourceBySqlite(), DBType.SQLITE);
+// Read and parse XML configuration
+JdaoMapper.build("mapper.xml");
+
+JdaoMapper jdaoMapper = JdaoMapper.newInstance();
+Hstest hs = jdaoMapper.selectOne("io.github.donnie4w.jdao.action.Mapperface.selectHstestById", 2, 26);
+
+System.out.println(hs);
+```
 
