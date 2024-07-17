@@ -15,20 +15,29 @@
  *
  * github.com/donnie4w/jdao
  */
+
 package io.github.donnie4w.jdao.handle;
 
 import io.github.donnie4w.jdao.util.Logger;
 
 import javax.sql.DataSource;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * author: donnie4w <donnie4w@gmail.com>
+ * <p>
+ * This is the core class of Jdao, providing jdao data CRUD operation functions,
+ * transaction, batch processing and other operation functions,
+ * data source object DBhandle creation and acquisition,
+ * multi-data source add and delete functions
+ */
 public class Jdao {
-    private final static String VERTION = "2.0.1";
 
-    private final static String err_noinit = "the jdao DataSource was not initialized(Hint: jdao.InitDataSource(DataSource dataSource, DBType dbtype)) ";
+    final static String VERTION = "2.0.1";
+
+    private final static String err_noinit = "the jdao DataSource was not initialized(Hint: jdao.init(dataSource, dbtype)) ";
 
     private Jdao() {
     }
@@ -38,6 +47,8 @@ public class Jdao {
     private static DBhandle defaultDBhandle;
 
     /**
+     * new DBhandle  by data source
+     *
      * @param dataSource
      * @param dbtype
      * @return
@@ -47,16 +58,18 @@ public class Jdao {
     }
 
     /**
-     * jdao init DataSource
+     * jdao init DataSource and return DBhandle
      *
      * @param dataSource
      * @param dbtype
      */
-    public static void initDataSource(DataSource dataSource, DBType dbtype) {
+    public static void init(DataSource dataSource, DBType dbtype) {
         defaultDBhandle = newDBhandle(dataSource, dbtype);
     }
 
     /**
+     * Sets the data source of the class that will be used by the class operation
+     *
      * @param clz
      * @param dataSource
      * @param dbtype
@@ -66,12 +79,25 @@ public class Jdao {
     }
 
     /**
+     * Check whether the class has a set data source and return the data source
+     *
      * @param clz
      * @return
      */
     public static DBhandle getDBhandle(Class<?> clz) {
         return dbhandleMap.get(clz);
     }
+
+    /**
+     * Check whether the package has a set data source and return the data source
+     *
+     * @param packageName
+     * @return DBhandle
+     */
+    public static DBhandle getDBhandle(String packageName) {
+        return dbhandleMap.get(packageName);
+    }
+
 
     /**
      * remove DataSource by class
@@ -83,6 +109,9 @@ public class Jdao {
     }
 
     /**
+     * For the package where the dao resides, set the data source,
+     * and use the data source for the operations corresponding to the dao in the package
+     *
      * @param packageName
      * @param dataSource
      * @param dbtype
@@ -91,13 +120,6 @@ public class Jdao {
         dbhandleMap.put(packageName, newDBhandle(dataSource, dbtype));
     }
 
-    /**
-     * @param packageName
-     * @return
-     */
-    public static DBhandle getDBhandle(String packageName) {
-        return dbhandleMap.get(packageName);
-    }
 
     /**
      * remove DataSource by packageName
@@ -109,80 +131,20 @@ public class Jdao {
     }
 
     /**
-     * add slave DataSource
+     * Gets the new transaction operation object
      *
-     * @param clz
-     * @param dataSource
-     * @param dbtype
+     * @return
+     * @throws JdaoException
      */
-    public static void addSlaveDataSource(Class<?> clz, DataSource dataSource, DBType dbtype) {
-        if (clz.isInterface()) {
-            Method[] methods = clz.getMethods();
-            for (Method method : methods) {
-                SlaveSource.add(clz.getName().concat(".").concat(method.getName()), dataSource, dbtype);
-            }
-        } else {
-            SlaveSource.add(clz, dataSource, dbtype);
-        }
+    public static Transaction newTransaction() throws JdaoException {
+        return defaultDBhandle.getJdbcHandle().newTransaction();
     }
 
     /**
-     * @param clz
-     * @param dBhandle
-     */
-    public static void addSlaveDataSource(Class<?> clz, DBhandle dBhandle) {
-        if (clz.isInterface()) {
-            Method[] methods = clz.getMethods();
-            for (Method method : methods) {
-                SlaveSource.add(clz.getName().concat(".").concat(method.getName()), dBhandle);
-            }
-        } else {
-            SlaveSource.add(clz, dBhandle);
-        }
-    }
-
-    /**
-     * remove slave DataSource by class
+     * reture the default DBhandle , which set with function initDataSource
      *
-     * @param clz
+     * @return
      */
-    public static void removeSlaveDataSource(Class<?> clz) {
-        SlaveSource.remove(clz);
-    }
-
-
-    /**
-     * @param packageNameOrMapperId
-     * @param dBhandle
-     */
-    public static void addSlaveDataSource(String packageNameOrMapperId, DBhandle dBhandle) {
-        SlaveSource.add(packageNameOrMapperId, dBhandle);
-    }
-
-    /**
-     * @param packageNameOrMapperId
-     * @param dataSource
-     * @param dbtype
-     */
-    public static void addSlaveDataSource(String packageNameOrMapperId, DataSource dataSource, DBType dbtype) {
-        SlaveSource.add(packageNameOrMapperId
-                , dataSource, dbtype);
-    }
-
-
-    /**
-     * remove slave DataSource by packageName
-     *
-     * @param packageName
-     */
-    public static void removeSlaveDataSource(String packageName) {
-        SlaveSource.remove(packageName);
-    }
-
-    public static Transaction getTransaction() throws JdaoException {
-        return defaultDBhandle.getJdbcHandle().getTransaction();
-    }
-
     public static DBhandle getDefaultDBhandle() {
         return defaultDBhandle;
     }
@@ -195,12 +157,12 @@ public class Jdao {
      * @param sql
      * @param values
      * @param <T>
-     * @return
+     * @return List<T>
      * @throws JdaoException
      */
-    public static <T> T executeQueryScan(Class<T> clz, String sql, Object... values) throws JdaoException {
+    public static <T> T executeQuery(Class<T> clz, String sql, Object... values) throws JdaoException {
         notnull(defaultDBhandle, err_noinit);
-        return defaultDBhandle.executeQueryScan(null, clz, sql, values);
+        return defaultDBhandle.executeQuery(clz, sql, values);
     }
 
     /**
@@ -211,12 +173,12 @@ public class Jdao {
      * @param sql
      * @param values
      * @param <T>
-     * @return
+     * @return List<T>
      * @throws JdaoException
      */
-    public static <T> T executeQueryScan(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException {
+    public static <T> T executeQuery(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException {
         notnull(defaultDBhandle, err_noinit);
-        return defaultDBhandle.executeQueryScan(transaction, clz, sql, values);
+        return defaultDBhandle.executeQuery(transaction, clz, sql, values);
     }
 
     /**
@@ -226,12 +188,12 @@ public class Jdao {
      * @param sql
      * @param values
      * @param <T>
-     * @return
+     * @return List<T>
      * @throws JdaoException
      */
-    public static <T> List<T> executeQueryScanList(Class<T> clz, String sql, Object... values) throws JdaoException {
+    public static <T> List<T> executeQueryList(Class<T> clz, String sql, Object... values) throws JdaoException {
         notnull(defaultDBhandle, err_noinit);
-        return defaultDBhandle.executeQueryScanList(null, clz, sql, values);
+        return defaultDBhandle.executeQueryList(clz, sql, values);
     }
 
     /**
@@ -242,12 +204,12 @@ public class Jdao {
      * @param sql
      * @param values
      * @param <T>
-     * @return
+     * @return List<T>
      * @throws JdaoException
      */
-    public static <T> List<T> executeQueryScanList(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException {
+    public static <T> List<T> executeQueryList(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException {
         notnull(defaultDBhandle, err_noinit);
-        return defaultDBhandle.executeQueryScanList(transaction, clz, sql, values);
+        return defaultDBhandle.executeQueryList(transaction, clz, sql, values);
     }
 
     /**
@@ -256,7 +218,7 @@ public class Jdao {
      * @param transaction
      * @param sql
      * @param values
-     * @return
+     * @return DataBean
      * @throws JdaoException
      */
     public static DataBean executeQueryBean(Transaction transaction, String sql, Object... values) throws JdaoException {
@@ -269,7 +231,7 @@ public class Jdao {
      *
      * @param sql
      * @param values
-     * @return
+     * @return DataBean
      * @throws JdaoException
      */
     public static DataBean executeQueryBean(String sql, Object... values) throws JdaoException {
@@ -283,7 +245,7 @@ public class Jdao {
      * @param transaction
      * @param sql
      * @param values
-     * @return
+     * @return List<DataBean>
      * @throws JdaoException
      */
     public static List<DataBean> executeQueryBeans(Transaction transaction, String sql, Object... values) throws JdaoException {
@@ -364,7 +326,7 @@ public class Jdao {
         }
     }
 
-    public static void setLogger(boolean on){
+    public static void setLogger(boolean on) {
         Logger.setLogger(on);
     }
 
