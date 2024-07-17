@@ -17,6 +17,11 @@
  */
 package io.github.donnie4w.jdao.handle;
 
+/**
+ *  author donnie4w <donnie4w@gmail.com>
+ *  Database transaction interface for transactional manipulation of data
+ *
+ */
 public interface Transaction extends JdbcHandle {
 
     void commit() throws JdaoException;
