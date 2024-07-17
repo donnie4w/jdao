@@ -18,8 +18,6 @@
 
 package io.github.donnie4w.jdao.handle;
 
-import io.github.donnie4w.jdao.base.Table;
-
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -60,7 +58,7 @@ public class JdbcHandler implements JdbcHandle {
      * @return
      */
     @Override
-    public Tx getTransaction() throws JdaoException{
+    public Tx newTransaction() throws JdaoException{
         return new Tx(dataSource);
     }
 
@@ -105,7 +103,7 @@ public class JdbcHandler implements JdbcHandle {
      * @throws JdaoException
      */
     @Override
-    public <T extends Table<?>> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException {
+    public <T> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException {
         try (Connection conn = dataSource.getConnection()) {
             return DBexec.executeQueryList(claz,conn,sql,values);
         } catch (SQLException ex) {
@@ -122,7 +120,7 @@ public class JdbcHandler implements JdbcHandle {
      * @throws JdaoException
      */
     @Override
-    public <T extends Table<?>> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException {
+    public <T> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException {
         try (Connection conn = dataSource.getConnection()) {
             return DBexec.executeQuery(claz,conn,sql,values);
         } catch (SQLException ex) {
