@@ -22,10 +22,22 @@ import io.github.donnie4w.jdao.base.Scanner;
 import io.github.donnie4w.jdao.base.Util;
 import io.github.donnie4w.jdao.util.Logger;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
+/**
+ * donnie4w <donnie4w@gmail.com>
+ *
+ * Encapsulated class for database query results ,
+ * supports conversion to custom Javabeans.  e.g. dataBean.scan(Hstest.class)
+ *
+ */
 public class DataBean implements Iterable<String> {
 
     private final Map<String, FieldBean> fieldNameMap = new HashMap<>();
@@ -119,26 +131,7 @@ public class DataBean implements Iterable<String> {
                 }
             } else {
                 for (Map.Entry<String, FieldBean> entry : fieldNameMap.entrySet()) {
-                    String fieldName = Util.encodeFieldname(entry.getKey());
-                    Object value = entry.getValue().value();
-                    try {
-                        Field field = beanClass.getDeclaredField(fieldName);
-                        Class<?> fieldType = field.getType();
-                        Object compatibleValue = convertIfCompatible(value, fieldType);
-                        if (compatibleValue == null) {
-                            Logger.severe("[IncompatibleType][Field: " + entry.getKey() + ", ExpectedType: " + fieldType.getName() + ", ActualType: " + value.getClass().getName() + "]");
-                            continue;
-                        }
-                        String setterMethodName = "set" + capitalize(entry.getKey());
-                        try {
-                            Method setterMethod = beanClass.getMethod(setterMethodName, fieldType);
-                            setterMethod.invoke(targetBean, compatibleValue);
-                        } catch (NoSuchMethodException e) {
-                            Logger.severe("[NoSuchMethodException][", setterMethodName, "]");
-                        }
-                    } catch (Exception e) {
-                        Logger.severe("[NoSuchFieldException][", entry.getKey(), "]");
-                    }
+                    scanToClass(beanClass, targetBean, entry.getKey(), entry.getValue().value());
                 }
             }
             return targetBean;
@@ -146,6 +139,39 @@ public class DataBean implements Iterable<String> {
             throw new JdaoException(e);
         }
     }
+
+
+    static <T> T scanToClass(Class<T> beanClass, T targetBean, String columnName, Object value) throws JdaoException {
+        String setterMethodName = "set" + capitalize(columnName);
+        try {
+            Method setterMethod = null;
+            for (Method method : beanClass.getDeclaredMethods()) {
+                if (method.getName().equals(setterMethodName) && method.getParameterCount() == 1) {
+                    setterMethod = method;
+                    break;
+                }
+            }
+
+            if (setterMethod == null) {
+                Logger.severe("No setter method found for column: " + columnName);
+                return targetBean;
+            }
+
+            Class<?> fieldType = setterMethod.getParameterTypes()[0];
+            Object compatibleValue = convertIfCompatible(value, fieldType);
+
+            if (compatibleValue == null) {
+                Logger.severe("[IncompatibleType][Field: " + columnName + ", ExpectedType: " + fieldType.getName() + ", ActualType: " + value.getClass().getName() + "]");
+                return targetBean;
+            }
+
+            setterMethod.invoke(targetBean, compatibleValue);
+        } catch (Exception e) {
+            throw new JdaoException(e);
+        }
+        return targetBean;
+    }
+
 
     private static String capitalize(String word) {
         if (word == null || word.isEmpty()) {
@@ -158,7 +184,7 @@ public class DataBean implements Iterable<String> {
         return word;
     }
 
-    private Object convertIfCompatible(Object value, Class<?> fieldType) {
+    static Object convertIfCompatible(Object value, Class<?> fieldType) {
         if (fieldType.isInstance(value)) {
             return value;
         }
@@ -231,10 +257,6 @@ public class DataBean implements Iterable<String> {
     @Override
     public Iterator<String> iterator() {
         return fieldNameMap.keySet().iterator();
-    }
-
-    public Iterator<Integer> iteratorWithIndex() {
-        return fieldIndexMap.keySet().iterator();
     }
 
     @Override
