@@ -21,15 +21,15 @@ import io.github.donnie4w.jdao.base.Condition;
 import io.github.donnie4w.jdao.base.Table;
 
 public class JdaoCache {
-    private static final Cache cache = new Cacher();
+    private static final Cache cache = Cache.newInstance();
 
     /**
      * register cache by dao package
      *
      * @param packageName
      */
-    public static void register(String packageName) {
-        cache.register(packageName);
+    public static void bindPackage(String packageName) {
+        cache.bindPackage(packageName);
     }
 
     /**
@@ -38,8 +38,8 @@ public class JdaoCache {
      * @param packageName
      * @param cacheHandle
      */
-    public static void register(String packageName, CacheHandle cacheHandle) {
-        cache.register(packageName, cacheHandle);
+    public static void bindPackage(String packageName, CacheHandle cacheHandle) {
+        cache.bindPackage(packageName, cacheHandle);
     }
 
     /**
@@ -47,8 +47,8 @@ public class JdaoCache {
      *
      * @param clazz
      */
-    public static void register(Class<? extends Table> clazz) {
-        cache.register(clazz);
+    public static void bindClass(Class<? extends Table> clazz) {
+        cache.bindClass(clazz);
     }
 
     /**
@@ -56,8 +56,8 @@ public class JdaoCache {
      *
      * @param clazz
      */
-    public static void register(Class<? extends Table> clazz, CacheHandle cacheHandle) {
-        cache.register(clazz, cacheHandle);
+    public static void bindClass(Class<? extends Table> clazz, CacheHandle cacheHandle) {
+        cache.bindClass(clazz, cacheHandle);
     }
 
     /**
@@ -65,8 +65,8 @@ public class JdaoCache {
      *
      * @param packageName
      */
-    public static void remove(String packageName) {
-        cache.remove(packageName);
+    public static void removePackage(String packageName) {
+        cache.removePackage(packageName);
     }
 
     /**
@@ -74,8 +74,8 @@ public class JdaoCache {
      *
      * @param clazz
      */
-    public static void remove(Class<? extends Table> clazz) {
-        cache.remove(clazz);
+    public static void removeClass(Class<? extends Table> clazz) {
+        cache.removeClass(clazz);
     }
 
     /**
@@ -83,8 +83,8 @@ public class JdaoCache {
      *
      * @param mapperface
      */
-    public static void registerMapper(Class<?> mapperface) {
-        cache.registerMapper(mapperface);
+    public static void bindMapper(Class<?> mapperface) {
+        cache.bindMapper(mapperface);
     }
 
     /**
@@ -93,8 +93,8 @@ public class JdaoCache {
      * @param mapperface
      * @param cacheHandle
      */
-    public static void registerMapper(Class<?> mapperface, CacheHandle cacheHandle) {
-        cache.registerMapper(mapperface, cacheHandle);
+    public static void bindMapper(Class<?> mapperface, CacheHandle cacheHandle) {
+        cache.bindMapper(mapperface, cacheHandle);
     }
 
     /**
@@ -102,8 +102,8 @@ public class JdaoCache {
      *
      * @param namespace
      */
-    public static void registerMapper(String namespace) {
-        cache.registerMapper(namespace);
+    public static void bindMapper(String namespace) {
+        cache.bindMapper(namespace);
     }
 
     /**
@@ -112,8 +112,8 @@ public class JdaoCache {
      * @param namespace
      * @param cacheHandle
      */
-    public static void registerMapper(String namespace, CacheHandle cacheHandle) {
-        cache.registerMapper(namespace, cacheHandle);
+    public static void bindMapper(String namespace, CacheHandle cacheHandle) {
+        cache.bindMapper(namespace, cacheHandle);
     }
 
     /**
@@ -121,8 +121,8 @@ public class JdaoCache {
      *
      * @param namespace
      */
-    public static void registerMapper(String namespace, String id) {
-        cache.registerMapper(namespace, id);
+    public static void bindMapper(String namespace, String id) {
+        cache.bindMapper(namespace, id);
     }
 
     /**
@@ -132,8 +132,8 @@ public class JdaoCache {
      * @param id
      * @param cacheHandle
      */
-    public static void registerMapper(String namespace, String id, CacheHandle cacheHandle) {
-        cache.registerMapper(namespace, id, cacheHandle);
+    public static void bindMapper(String namespace, String id, CacheHandle cacheHandle) {
+        cache.bindMapper(namespace, id, cacheHandle);
     }
 
     /**
