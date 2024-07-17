@@ -17,8 +17,6 @@
  */
 package io.github.donnie4w.jdao.handle;
 
-import io.github.donnie4w.jdao.base.Table;
-
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -54,6 +52,10 @@ public class Tx implements Transaction {
         }
     }
 
+    /**
+     * The transaction commits and closes the transaction connection
+     * @throws JdaoException
+     */
     public void commit() throws JdaoException {
         try {
             this.connection.commit();
@@ -63,9 +65,13 @@ public class Tx implements Transaction {
         }
     }
 
+    /**
+     * The transaction rollbacks and closes the transaction connection
+     * @throws JdaoException
+     */
     public void rollback() throws JdaoException {
         try {
-            this.connection.rollback();
+            this.connection.rollback(); 
             this.close();
         } catch (SQLException e) {
             throw new JdaoException(e);
@@ -82,7 +88,7 @@ public class Tx implements Transaction {
 
 
     /**
-     * @return
+     * @return DataSource
      */
     @Override
     public DataSource getDataSource() {
@@ -90,17 +96,18 @@ public class Tx implements Transaction {
     }
 
     /**
-     * @return
+     * new Transaction Object
+     * @return Transaction
      */
     @Override
-    public Tx getTransaction() throws JdaoException {
-        return this;
+    public Transaction newTransaction() throws JdaoException {
+        return new Tx(this.dataSource);
     }
 
     /**
      * @param sql
      * @param values
-     * @return
+     * @return DataBean
      * @throws JdaoException
      */
     @Override
@@ -111,7 +118,7 @@ public class Tx implements Transaction {
     /**
      * @param sql
      * @param values
-     * @return
+     * @return List<DataBean>
      * @throws JdaoException
      */
     @Override
@@ -124,11 +131,11 @@ public class Tx implements Transaction {
      * @param sql
      * @param values
      * @param <T>
-     * @return
+     * @return  List<T>
      * @throws JdaoException
      */
     @Override
-    public <T extends Table<?>> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException {
+    public <T> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException {
         return DBexec.executeQueryList(claz, connection, sql, values);
     }
 
@@ -137,18 +144,18 @@ public class Tx implements Transaction {
      * @param sql
      * @param values
      * @param <T>
-     * @return
+     * @return T
      * @throws JdaoException
      */
     @Override
-    public <T extends Table<?>> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException {
+    public <T> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException {
         return DBexec.executeQuery(claz, connection, sql, values);
     }
 
     /**
      * @param sql
      * @param values
-     * @return
+     * @return int
      * @throws JdaoException
      */
     @Override
@@ -159,7 +166,7 @@ public class Tx implements Transaction {
     /**
      * @param sql
      * @param values
-     * @return
+     * @return int[]
      * @throws JdaoException
      */
     @Override
