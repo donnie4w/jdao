@@ -17,8 +17,6 @@
  */
 package io.github.donnie4w.jdao.handle;
 
-import io.github.donnie4w.jdao.base.Table;
-
 import javax.sql.DataSource;
 import java.util.List;
 
@@ -31,9 +29,11 @@ public interface JdbcHandle {
 
     DataSource getDataSource();
 
-     Transaction getTransaction() throws JdaoException;
+     Transaction newTransaction() throws JdaoException;
 
     /**
+     * auther donnie4w
+     *
      * @param sql
      * @param values
      * @return
@@ -51,7 +51,7 @@ public interface JdbcHandle {
 
 
     /**
-     * auther donnie wu
+     * auther donnie4w
      *
      * @param <T>
      * @param claz
@@ -59,10 +59,10 @@ public interface JdbcHandle {
      * @param values
      * @throws JdaoException
      */
-    <T extends Table<?>> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException;
+    <T> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException;
 
     /**
-     * auther donnie wu
+     * auther donnie4w
      *
      * @param <T>
      * @param claz
@@ -70,10 +70,10 @@ public interface JdbcHandle {
      * @param values
      * @throws JdaoException
      */
-    <T extends Table<?>> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException;
+    <T> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException;
 
     /**
-     * auther donnie wu
+     * auther donnie4w
      *
      * @param sql
      * @param values
@@ -83,7 +83,7 @@ public interface JdbcHandle {
 
 
     /**
-     * auther donnie wu
+     * auther donnie4w
      *
      * @param sql
      * @param values
