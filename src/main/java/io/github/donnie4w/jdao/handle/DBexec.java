@@ -40,7 +40,7 @@ public class DBexec {
      * @return
      * @throws JdaoException
      */
-    static <T extends Table<?>> List<T> executeQueryList(Class<T> classType, Connection con, String sql, Object... values) throws JdaoException {
+    static <T> List<T> executeQueryList(Class<T> classType, Connection con, String sql, Object... values) throws JdaoException {
         List<T> retList = new ArrayList<T>();
         ResultSet rs = null;
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -53,11 +53,15 @@ public class DBexec {
             if (rs != null) {
                 while (rs.next()) {
                     int columncount = rs.getMetaData().getColumnCount();
-                    T object = classType.getConstructor().newInstance();
+                    T targetBean = classType.getDeclaredConstructor().newInstance();
                     for (int i = 1; i <= columncount; i++) {
-                        object.scan(rs.getMetaData().getColumnLabel(i), rs.getObject(i));
+                        if (targetBean instanceof Table) {
+                            ((Table) targetBean).scan(rs.getMetaData().getColumnLabel(i), rs.getObject(i));
+                        } else {
+                            DataBean.scanToClass(classType, targetBean, rs.getMetaData().getColumnLabel(i), rs.getObject(i));
+                        }
                     }
-                    retList.add(object);
+                    retList.add(targetBean);
                 }
             }
             return retList;
@@ -77,10 +81,10 @@ public class DBexec {
      * @return
      * @throws JdaoException
      */
-    static <T extends Table<?>> T executeQuery(Class<T> classType, Connection con, String sql, Object[] values) throws JdaoException {
+    static <T> T executeQuery(Class<T> classType, Connection con, String sql, Object[] values) throws JdaoException {
         ResultSet rs = null;
-        T object = null;
         try (PreparedStatement ps = con.prepareStatement(sql)) {
+            T targetBean = classType.getDeclaredConstructor().newInstance();
             if (values != null) {
                 for (int i = 1; i <= values.length; i++) {
                     ps.setObject(i, values[i - 1]);
@@ -89,14 +93,17 @@ public class DBexec {
             rs = ps.executeQuery();
             if (rs != null) {
                 if (rs.next()) {
-                    object = classType.getConstructor().newInstance();
                     int columncount = rs.getMetaData().getColumnCount();
                     for (int i = 1; i <= columncount; i++) {
-                        object.scan(rs.getMetaData().getColumnLabel(i), rs.getObject(i));
+                        if (targetBean instanceof Table) {
+                            ((Table) targetBean).scan(rs.getMetaData().getColumnLabel(i), rs.getObject(i));
+                        } else {
+                            DataBean.scanToClass(classType, targetBean, rs.getMetaData().getColumnLabel(i), rs.getObject(i));
+                        }
                     }
                 }
             }
-            return object;
+            return targetBean;
         } catch (Exception e) {
             throw new JdaoException(e);
         } finally {
