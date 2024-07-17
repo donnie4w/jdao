@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Cacher implements Cache {
+public class Cacher extends Cache {
 
     private final Map<String, CacheHandle> cacheMap = new ConcurrentHashMap();
     private final Map<Object, String> rmap = new ConcurrentHashMap();
@@ -41,80 +41,80 @@ public class Cacher implements Cache {
         new ClearThread().start();
     }
 
-    public void register(String packageName) {
+    public void bindPackage(String packageName) {
         rmap.put(packageName, defaultCacheHandle.getDomain());
     }
 
-    public void register(String packageName, CacheHandle cacheHandle) {
+    public void bindPackage(String packageName, CacheHandle cacheHandle) {
         rmap.put(packageName, cacheHandle.getDomain());
         cacheMap.put(cacheHandle.getDomain(), cacheHandle);
     }
 
-    public void register(Class<? extends Table> clazz) {
+    public void bindClass(Class<? extends Table> clazz) {
         rmap.put(clazz, defaultCacheHandle.getDomain());
     }
 
-    public void register(Class<? extends Table> clazz, CacheHandle cacheHandle) {
+    public void bindClass(Class<? extends Table> clazz, CacheHandle cacheHandle) {
         rmap.put(clazz, cacheHandle.getDomain());
         cacheMap.put(cacheHandle.getDomain(), cacheHandle);
     }
 
-    public void remove(String packageName) {
+    public void removePackage(String packageName) {
         rmap.remove(packageName);
     }
 
-    public void remove(Class<?> clazz) {
+    public void removeClass(Class<?> clazz) {
         rmap.remove(clazz);
     }
 
-    public boolean registerMapper(Class<?> mapperface) {
+    public boolean bindMapper(Class<?> mapperface) {
         if (mapperface.isInterface()) {
             for (Method m : mapperface.getMethods()) {
-                registerMapper(mapperface.getName(), m.getName());
+                bindMapper(mapperface.getName(), m.getName());
             }
             return true;
         }
         return false;
     }
 
-    public boolean registerMapper(Class<?> mapperface, CacheHandle cacheHandle) {
+    public boolean bindMapper(Class<?> mapperface, CacheHandle cacheHandle) {
         if (mapperface.isInterface()) {
             for (Method m : mapperface.getMethods()) {
-                registerMapper(mapperface.getName(), m.getName(), cacheHandle);
+                bindMapper(mapperface.getName(), m.getName(), cacheHandle);
             }
             return true;
         }
         return false;
     }
 
-    public boolean registerMapper(String namespace) {
+    public boolean bindMapper(String namespace) {
         List<String> list = MapperParser.getMapperIds(namespace);
         if (list != null) {
             for (String name : list) {
-                register(namespace.concat(".").concat(name));
+                bindPackage(namespace.concat(".").concat(name));
             }
             return true;
         }
         return false;
     }
 
-    public boolean registerMapper(String namespace, CacheHandle cacheHandle) {
+    public boolean bindMapper(String namespace, CacheHandle cacheHandle) {
         List<String> list = MapperParser.getMapperIds(namespace);
         if (list != null) {
             for (String name : list) {
-                register(namespace.concat(".").concat(name), cacheHandle);
+                bindPackage(namespace.concat(".").concat(name), cacheHandle);
             }
             return true;
         }
         return false;
     }
 
-    public boolean registerMapper(String namespace, String id) {
+    public boolean bindMapper(String namespace, String id) {
         List<String> list = MapperParser.getMapperIds(namespace);
         if (list != null) {
             for (String name : list) {
                 if (id.equals(name)) {
-                    register(namespace.concat(".").concat(name));
+                    bindPackage(namespace.concat(".").concat(name));
                     return true;
                 }
             }
@@ -122,12 +122,12 @@ public class Cacher implements Cache {
         return false;
     }
 
-    public boolean registerMapper(String namespace, String id, CacheHandle cacheHandle) {
+    public boolean bindMapper(String namespace, String id, CacheHandle cacheHandle) {
         List<String> list = MapperParser.getMapperIds(namespace);
         if (list != null) {
             for (String name : list) {
                 if (id.equals(name)) {
-                    register(namespace.concat(".").concat(name), cacheHandle);
+                    bindPackage(namespace.concat(".").concat(name), cacheHandle);
                     return true;
                 }
             }
@@ -145,13 +145,13 @@ public class Cacher implements Cache {
         List<String> list = MapperParser.getMapperIds(namespace);
         if (list != null) {
             for (String name : list) {
-                remove(namespace.concat(".").concat(name));
+                removePackage(namespace.concat(".").concat(name));
             }
         }
     }
 
     public void removeMapper(String namespace, String id) {
-        remove(namespace.concat(".").concat(id));
+        removePackage(namespace.concat(".").concat(id));
     }
 
 
