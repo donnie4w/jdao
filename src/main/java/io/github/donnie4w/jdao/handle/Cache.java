@@ -21,44 +21,49 @@ package io.github.donnie4w.jdao.handle;
 import io.github.donnie4w.jdao.base.Condition;
 import io.github.donnie4w.jdao.base.Table;
 
-public interface Cache {
-    void register(String packageName);
+public abstract class Cache {
 
-    void register(String packageName, CacheHandle cacheHandle);
+    static Cache newInstance(){
+        return new Cacher();
+    }
 
-    void register(Class<? extends Table> clazz);
+    abstract void bindPackage(String packageName);
 
-    void register(Class<? extends Table> clazz, CacheHandle cacheHandle);
+    abstract void bindPackage(String packageName, CacheHandle cacheHandle);
 
-    void remove(String packageName);
+    abstract void bindClass(Class<? extends Table> clazz);
 
-    void remove(Class<?> clazz);
+    abstract void bindClass(Class<? extends Table> clazz, CacheHandle cacheHandle);
 
-    boolean registerMapper(Class<?> mapperface);
+    abstract void removePackage(String packageName);
 
-    boolean registerMapper(Class<?> mapperface, CacheHandle cacheHandle);
+    abstract void removeClass(Class<?> clazz);
 
-    boolean registerMapper(String namespace);
+    abstract boolean bindMapper(Class<?> mapperface);
 
-    boolean registerMapper(String namespace, CacheHandle cacheHandle);
+    abstract boolean bindMapper(Class<?> mapperface, CacheHandle cacheHandle);
 
-    boolean registerMapper(String namespace, String id);
+    abstract boolean bindMapper(String namespace);
 
-    boolean registerMapper(String namespace, String id, CacheHandle cacheHandle);
+    abstract boolean bindMapper(String namespace, CacheHandle cacheHandle);
 
-    void removeMapper(Class<?> mapperface);
+    abstract boolean bindMapper(String namespace, String id);
 
-    void removeMapper(String namespace);
+    abstract boolean bindMapper(String namespace, String id, CacheHandle cacheHandle);
 
-    void removeMapper(String namespace, String id);
+    abstract void removeMapper(Class<?> mapperface);
 
-    String getDomain(String packageName, Class<?> clazz);
+    abstract void removeMapper(String namespace);
 
-    Object getCache(String domain, Class<?> clazz, Condition condition);
+    abstract void removeMapper(String namespace, String id);
 
-    void setCache(String domain, Class<Table<?>> clazz, Condition condition, Object result);
+    abstract String getDomain(String packageName, Class<?> clazz);
 
-    void clearCache(String domain);
+    abstract Object getCache(String domain, Class<?> clazz, Condition condition);
 
-    void clearCache(String domain, Class<?> clazz, String node);
+    abstract void setCache(String domain, Class<Table<?>> clazz, Condition condition, Object result);
+
+    abstract void clearCache(String domain);
+
+    abstract void clearCache(String domain, Class<?> clazz, String node);
 }
