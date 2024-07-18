@@ -18,6 +18,7 @@
 package io.github.donnie4w.jdao.handle;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -29,66 +30,68 @@ public interface JdbcHandle {
 
     DataSource getDataSource();
 
-     Transaction newTransaction() throws JdaoException;
-
-    /**
-     * auther donnie4w
-     *
-     * @param sql
-     * @param values
-     * @return
-     * @throws JdaoException
-     */
-    DataBean executeQueryBean(String sql, Object... values) throws JdaoException;
+    Transaction newTransaction() throws SQLException;
 
     /**
      * @param sql
      * @param values
      * @return
-     * @throws JdaoException
+     * @throws SQLException
      */
-    List<DataBean> executeQueryBeans(String sql, Object... values) throws JdaoException;
+    DataBean executeQueryBean(String sql, Object... values) throws SQLException;
+
+    /**
+     *
+     * @param sql
+     * @param values
+     * @return
+     * @throws JdaoException
+     * @throws SQLException
+     */
+    List<DataBean> executeQueryBeans(String sql, Object... values) throws JdaoException, SQLException;
 
 
     /**
-     * auther donnie4w
-     *
-     * @param <T>
      * @param claz
      * @param sql
      * @param values
+     * @return
+     * @param <T>
      * @throws JdaoException
+     * @throws JdaoClassException
+     * @throws SQLException
      */
-    <T> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException;
+    <T> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException;
 
     /**
-     * auther donnie4w
-     *
-     * @param <T>
      * @param claz
      * @param sql
      * @param values
+     * @return
+     * @param <T>
      * @throws JdaoException
+     * @throws JdaoClassException
+     * @throws SQLException
      */
-    <T> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException;
+    <T> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException;
 
     /**
-     * auther donnie4w
-     *
      * @param sql
      * @param values
+     * @return
      * @throws JdaoException
+     * @throws SQLException
      */
-    int executeUpdate(String sql, Object... values) throws JdaoException;
+    int executeUpdate(String sql, Object... values) throws JdaoException, SQLException;
 
 
     /**
-     * auther donnie4w
-     *
      * @param sql
      * @param values
+     * @return
      * @throws JdaoException
+     * @throws SQLException
      */
-    int[] executeBatch(String sql, List<Object[]> values) throws JdaoException;
+    int[] executeBatch(String sql, List<Object[]> values) throws JdaoException, SQLException;
 
 }
