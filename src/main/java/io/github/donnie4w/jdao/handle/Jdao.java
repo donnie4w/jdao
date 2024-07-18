@@ -21,6 +21,7 @@ package io.github.donnie4w.jdao.handle;
 import io.github.donnie4w.jdao.util.Logger;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -136,7 +137,7 @@ public class Jdao {
      * @return
      * @throws JdaoException
      */
-    public static Transaction newTransaction() throws JdaoException {
+    public static Transaction newTransaction() throws SQLException {
         return defaultDBhandle.getJdbcHandle().newTransaction();
     }
 
@@ -160,7 +161,7 @@ public class Jdao {
      * @return List<T>
      * @throws JdaoException
      */
-    public static <T> T executeQuery(Class<T> clz, String sql, Object... values) throws JdaoException {
+    public static <T> T executeQuery(Class<T> clz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         notnull(defaultDBhandle, err_noinit);
         return defaultDBhandle.executeQuery(clz, sql, values);
     }
@@ -176,7 +177,7 @@ public class Jdao {
      * @return List<T>
      * @throws JdaoException
      */
-    public static <T> T executeQuery(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException {
+    public static <T> T executeQuery(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         notnull(defaultDBhandle, err_noinit);
         return defaultDBhandle.executeQuery(transaction, clz, sql, values);
     }
@@ -191,7 +192,7 @@ public class Jdao {
      * @return List<T>
      * @throws JdaoException
      */
-    public static <T> List<T> executeQueryList(Class<T> clz, String sql, Object... values) throws JdaoException {
+    public static <T> List<T> executeQueryList(Class<T> clz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         notnull(defaultDBhandle, err_noinit);
         return defaultDBhandle.executeQueryList(clz, sql, values);
     }
@@ -207,7 +208,7 @@ public class Jdao {
      * @return List<T>
      * @throws JdaoException
      */
-    public static <T> List<T> executeQueryList(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException {
+    public static <T> List<T> executeQueryList(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         notnull(defaultDBhandle, err_noinit);
         return defaultDBhandle.executeQueryList(transaction, clz, sql, values);
     }
@@ -221,7 +222,7 @@ public class Jdao {
      * @return DataBean
      * @throws JdaoException
      */
-    public static DataBean executeQueryBean(Transaction transaction, String sql, Object... values) throws JdaoException {
+    public static DataBean executeQueryBean(Transaction transaction, String sql, Object... values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
         return defaultDBhandle.executeQueryBean(transaction, sql, values);
     }
@@ -234,7 +235,7 @@ public class Jdao {
      * @return DataBean
      * @throws JdaoException
      */
-    public static DataBean executeQueryBean(String sql, Object... values) throws JdaoException {
+    public static DataBean executeQueryBean(String sql, Object... values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
         return defaultDBhandle.executeQueryBean(null, sql, values);
     }
@@ -248,7 +249,7 @@ public class Jdao {
      * @return List<DataBean>
      * @throws JdaoException
      */
-    public static List<DataBean> executeQueryBeans(Transaction transaction, String sql, Object... values) throws JdaoException {
+    public static List<DataBean> executeQueryBeans(Transaction transaction, String sql, Object... values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
         return defaultDBhandle.executeQueryBeans(transaction, sql, values);
     }
@@ -261,7 +262,7 @@ public class Jdao {
      * @return List<DataBean>
      * @throws JdaoException
      */
-    public static List<DataBean> executeQueryBeans(String sql, Object... values) throws JdaoException {
+    public static List<DataBean> executeQueryBeans(String sql, Object... values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
         return defaultDBhandle.executeQueryBeans(null, sql, values);
     }
@@ -275,7 +276,7 @@ public class Jdao {
      * @return int
      * @throws JdaoException
      */
-    public static int executeUpdate(Transaction transaction, String sql, Object... values) throws JdaoException {
+    public static int executeUpdate(Transaction transaction, String sql, Object... values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
         return defaultDBhandle.executeUpdate(transaction, sql, values);
     }
@@ -288,7 +289,7 @@ public class Jdao {
      * @return
      * @throws JdaoException
      */
-    public static int executeUpdate(String sql, Object... values) throws JdaoException {
+    public static int executeUpdate(String sql, Object... values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
         return defaultDBhandle.executeUpdate(null, sql, values);
     }
@@ -302,7 +303,7 @@ public class Jdao {
      * @return
      * @throws JdaoException
      */
-    public static int[] executeBatch(Transaction transaction, String sql, List<Object[]> values) throws JdaoException {
+    public static int[] executeBatch(Transaction transaction, String sql, List<Object[]> values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
         return defaultDBhandle.executeBatch(transaction, sql, values);
     }
@@ -315,7 +316,7 @@ public class Jdao {
      * @return
      * @throws JdaoException
      */
-    public static int[] executeBatch(String sql, List<Object[]> values) throws JdaoException {
+    public static int[] executeBatch(String sql, List<Object[]> values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
         return defaultDBhandle.executeBatch(null, sql, values);
     }
