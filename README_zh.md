@@ -1,4 +1,4 @@
-## JDAO —— java持久层框架
+## JDAO —— java持久层框架  [[Englist](https://github.com/donnie4w/jdao/blob/master/readme.md)]
 
 ### 简介
 
@@ -10,6 +10,7 @@ Jdao是一种创新的持久层解决方案。主要目的在于 减少编程量
 ### [使用文档](https://tlnet.top/jdaodoc)
 
 ### 主要特点
+
 1. **生成代码**：运行jdao代码生成工具，创建数据库表的标准化实体类。类似thrift/protobuf。
 2. **高效序列化**：表的标准化实体类实现了高效的序列化与反序列化。比标准库序列化方法高近10倍，而序列化体积只有其20%。
 3. **支持数据读写分离**：jdao支持绑定多数据源，并支持数据源绑定表，类，映射接口等属性。并支持数据读写分离
@@ -182,7 +183,7 @@ System.out.println(hs2);
 ###### 读写分离
 
 ```java
-JdaoSlave.bindClass(Hstest.class, DataSourceFactory.getDataSourceByMysql(), DBType.POSTGRESQL);
+JdaoSlave.bindClass(Hstest.class, DataSourceFactory.getDataSourceByPostgreSql(), DBType.POSTGRESQL);
 //这里主数据库为mysql，备数据库为postgreSql，Hstest读取数据源为postgreSql
 Hstest t = new Hstest();
 t.where(Hstest.ID.EQ(3));
