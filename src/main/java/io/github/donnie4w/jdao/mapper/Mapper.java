@@ -18,45 +18,55 @@
 
 package io.github.donnie4w.jdao.mapper;
 
+import io.github.donnie4w.jdao.handle.JdaoClassException;
 import io.github.donnie4w.jdao.handle.JdaoException;
 import io.github.donnie4w.jdao.handle.Transaction;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public interface Mapper {
 
     boolean isAutocommit();
 
-    void setAutocommit(boolean on) throws JdaoException;
+    /**
+     * @param on
+     * @throws JdaoException
+     */
+    void setAutocommit(boolean on) throws SQLException;
 
+    /**
+     *
+     * @param transaction
+     */
     void useTransaction(Transaction transaction);
 
-    void rollback() throws JdaoException;
+    void rollback() throws SQLException;
 
-    void commit() throws JdaoException;
+    void commit() throws SQLException;
 
-    <T> T selectOne(String mapperId, Object... param) throws JdaoException;
+    <T> T selectOne(String mapperId, Object... param) throws JdaoException, JdaoClassException, SQLException;
 
-    <T> T selectOne(String mapperId, Object param) throws JdaoException;
+    <T> T selectOne(String mapperId, Object param) throws JdaoException, JdaoClassException, SQLException;
 
-    <T> T[] selectArray(String mapperId, Object... param) throws JdaoException;
+    <T> T[] selectArray(String mapperId, Object... param) throws JdaoException, JdaoClassException, SQLException;
 
-    <T> T[] selectArray(String mapperId, Object param) throws JdaoException;
+    <T> T[] selectArray(String mapperId, Object param) throws JdaoException, JdaoClassException, SQLException;
 
-    <T> List<T> selectList(String mapperId, Object... param) throws JdaoException;
+    <T> List<T> selectList(String mapperId, Object... param) throws JdaoException, JdaoClassException, SQLException;
 
-    <T> List<T> selectList(String mapperId, Object param) throws JdaoException;
+    <T> List<T> selectList(String mapperId, Object param) throws JdaoException, JdaoClassException, SQLException;
 
-    int insert(String mapperId, Object... param) throws JdaoException;
+    int insert(String mapperId, Object... param) throws JdaoException, SQLException;
 
-    int insert(String mapperId, Object param) throws JdaoException;
+    int insert(String mapperId, Object param) throws JdaoException, SQLException;
 
-    int update(String mapperId, Object... param) throws JdaoException;
+    int update(String mapperId, Object... param) throws JdaoException, SQLException;
 
-    int update(String mapperId, Object param) throws JdaoException;
+    int update(String mapperId, Object param) throws JdaoException, SQLException;
 
-    int delete(String mapperId, Object... param) throws JdaoException;
+    int delete(String mapperId, Object... param) throws JdaoException, SQLException;
 
-    int delete(String mapperId, Object param) throws JdaoException;
+    int delete(String mapperId, Object param) throws JdaoException, SQLException;
 
 }
