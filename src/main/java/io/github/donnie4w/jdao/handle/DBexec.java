@@ -20,9 +20,11 @@ package io.github.donnie4w.jdao.handle;
 
 import io.github.donnie4w.jdao.base.Table;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,11 +38,13 @@ public class DBexec {
      * @param con
      * @param sql
      * @param values
-     * @param <T>
      * @return
+     * @param <T>
      * @throws JdaoException
+     * @throws SQLException
+     * @throws JdaoClassException
      */
-    static <T> List<T> executeQueryList(Class<T> classType, Connection con, String sql, Object... values) throws JdaoException {
+    static <T> List<T> executeQueryList(Class<T> classType, Connection con, String sql, Object... values) throws JdaoException, SQLException, JdaoClassException {
         List<T> retList = new ArrayList<T>();
         ResultSet rs = null;
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -65,8 +69,11 @@ public class DBexec {
                 }
             }
             return retList;
-        } catch (Exception e) {
-            throw new JdaoException(e);
+        } catch (SQLException e) {
+            throw e;
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
+                 InvocationTargetException e) {
+            throw new JdaoClassException(e);
         } finally {
             Closer.closeAll(rs);
         }
@@ -77,11 +84,13 @@ public class DBexec {
      * @param con
      * @param sql
      * @param values
-     * @param <T>
      * @return
+     * @param <T>
+     * @throws SQLException
+     * @throws JdaoClassException
      * @throws JdaoException
      */
-    static <T> T executeQuery(Class<T> classType, Connection con, String sql, Object[] values) throws JdaoException {
+    static <T> T executeQuery(Class<T> classType, Connection con, String sql, Object[] values) throws SQLException, JdaoClassException, JdaoException {
         ResultSet rs = null;
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             T targetBean = classType.getDeclaredConstructor().newInstance();
@@ -104,8 +113,11 @@ public class DBexec {
                 }
             }
             return targetBean;
-        } catch (Exception e) {
-            throw new JdaoException(e);
+        } catch (SQLException e) {
+            throw e;
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
+                 InvocationTargetException e) {
+            throw new JdaoClassException(e);
         } finally {
             Closer.closeAll(rs);
         }
@@ -117,9 +129,9 @@ public class DBexec {
      * @param sql
      * @param values
      * @return
-     * @throws JdaoException
+     * @throws SQLException
      */
-    static List<DataBean> executequeryBeans(Connection con, String sql, Object... values) throws JdaoException {
+    static List<DataBean> executequeryBeans(Connection con, String sql, Object... values) throws SQLException {
         List<DataBean> retList = new ArrayList<DataBean>();
         ResultSet rs = null;
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -141,8 +153,8 @@ public class DBexec {
                 }
             }
             return retList;
-        } catch (Exception e) {
-            throw new JdaoException(e);
+        } catch (SQLException e) {
+            throw e;
         } finally {
             Closer.closeAll(rs);
         }
@@ -153,9 +165,9 @@ public class DBexec {
      * @param sql
      * @param values
      * @return
-     * @throws JdaoException
+     * @throws SQLException
      */
-    static DataBean executequeryBean(Connection con, String sql, Object[] values) throws JdaoException {
+    static DataBean executequeryBean(Connection con, String sql, Object[] values) throws SQLException {
         ResultSet rs = null;
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             if (values != null) {
@@ -176,8 +188,8 @@ public class DBexec {
                 }
             }
             return null;
-        } catch (Exception e) {
-            throw new JdaoException(e);
+        } catch (SQLException e) {
+            throw e;
         } finally {
             Closer.closeAll(rs);
         }
@@ -188,9 +200,9 @@ public class DBexec {
      * @param sql
      * @param values
      * @return
-     * @throws JdaoException
+     * @throws SQLException
      */
-    static int[] executeBatch(Connection con, String sql, List<Object[]> values) throws JdaoException {
+    static int[] executeBatch(Connection con, String sql, List<Object[]> values) throws SQLException {
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             if (values != null) {
                 for (Object[] args : values) {
@@ -201,8 +213,8 @@ public class DBexec {
                 }
             }
             return ps.executeBatch();
-        } catch (Exception e) {
-            throw new JdaoException(e);
+        } catch (SQLException e) {
+            throw e;
         }
     }
 
@@ -211,9 +223,9 @@ public class DBexec {
      * @param sql
      * @param values
      * @return
-     * @throws JdaoException
+     * @throws SQLException
      */
-    static int executeUpdate(Connection con, String sql, Object... values) throws JdaoException {
+    static int executeUpdate(Connection con, String sql, Object... values) throws SQLException {
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             if (values != null) {
                 for (int i = 1; i <= values.length; i++) {
@@ -221,8 +233,8 @@ public class DBexec {
                 }
             }
             return ps.executeUpdate();
-        } catch (Exception e) {
-            throw new JdaoException(e);
+        } catch (SQLException e) {
+            throw e;
         }
     }
 
