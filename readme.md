@@ -1,4 +1,4 @@
-## JDAO —— Java Persistence Framework
+## JDAO —— Java Persistence Framework   [[中文](https://github.com/donnie4w/jdao/blob/master/README_zh.md)]
 
 ### Introduction
 
@@ -43,19 +43,23 @@ The JDAO framework combines the abstraction level of Hibernate with the flexibil
 The JDAO framework closely follows the standard JDBC interface in its interface definitions and implementations, with intuitive naming conventions.
 
 #### 1. Jdao
+
 The primary core entry point, providing the following functions:
 - Setting data sources
 - SQL CRUD functions
 
 #### 2. JdaoCache
+
 Cache entry point, supporting the following functions:
 - Binding or removing packages, classes, and other attributes to enable or disable their query caching
 
 #### 3. JdaoSlave
+
 Read-write separation entry point, supporting the following functions:
 - Binding or removing packages, classes, and other attributes to enable or disable their read-write separation
 
 #### 4. JdaoMapper
+
 Mapping SQL to interfaces, supporting the following functions:
 - Directly invoking JDAO interfaces to execute SQL
 - Mapping SQL through XML files
@@ -165,7 +169,7 @@ System.out.println(hs2);
 ###### Read-Write Separation
 
 ```java
-JdaoSlave.bindClass(Hstest.class, DataSourceFactory.getDataSourceByMysql(), DBType.POSTGRESQL);
+JdaoSlave.bindClass(Hstest.class, DataSourceFactory.getDataSourceByPostgreSql(), DBType.POSTGRESQL);
 // Here the main database is MySQL, the slave database is PostgreSQL, and Hstest reads from PostgreSQL
 Hstest t = new Hstest();
 t.where(Hstest.ID.EQ(3));
