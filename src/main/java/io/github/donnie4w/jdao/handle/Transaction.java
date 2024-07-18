@@ -17,6 +17,8 @@
  */
 package io.github.donnie4w.jdao.handle;
 
+import java.sql.SQLException;
+
 /**
  *  author donnie4w <donnie4w@gmail.com>
  *  Database transaction interface for transactional manipulation of data
@@ -24,7 +26,13 @@ package io.github.donnie4w.jdao.handle;
  */
 public interface Transaction extends JdbcHandle {
 
-    void commit() throws JdaoException;
+    /**
+     * @throws SQLException
+     */
+    void commit() throws SQLException;
 
-    void rollback() throws JdaoException;
+    /**
+     * @throws SQLException
+     */
+    void rollback() throws SQLException;
 }
