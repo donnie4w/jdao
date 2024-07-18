@@ -27,9 +27,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class JdbcHandler implements JdbcHandle {
 
-    private static volatile Map<DataSource,JdbcHandler> instanceMap = new ConcurrentHashMap<>();
+    private static final Map<DataSource, JdbcHandler> instanceMap = new ConcurrentHashMap<>();
 
-    private DataSource dataSource;
+    private final DataSource dataSource;
 
     private JdbcHandler(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -39,16 +39,13 @@ public class JdbcHandler implements JdbcHandle {
         if (instanceMap.get(dataSource) == null) {
             synchronized (JdbcHandler.class) {
                 if (instanceMap.get(dataSource) == null) {
-                    instanceMap.put(dataSource,new JdbcHandler(dataSource));
+                    instanceMap.put(dataSource, new JdbcHandler(dataSource));
                 }
             }
         }
         return instanceMap.get(dataSource);
     }
 
-    /**
-     * @return
-     */
     @Override
     public DataSource getDataSource() {
         return this.dataSource;
@@ -56,9 +53,10 @@ public class JdbcHandler implements JdbcHandle {
 
     /**
      * @return
+     * @throws SQLException
      */
     @Override
-    public Tx newTransaction() throws JdaoException{
+    public Tx newTransaction() throws SQLException {
         return new Tx(dataSource);
     }
 
@@ -66,14 +64,14 @@ public class JdbcHandler implements JdbcHandle {
      * @param sql
      * @param values
      * @return
-     * @throws JdaoException
+     * @throws SQLException
      */
     @Override
-    public DataBean executeQueryBean(String sql, Object... values) throws JdaoException {
+    public DataBean executeQueryBean(String sql, Object... values) throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
-            return DBexec.executequeryBean(conn,sql,values);
+            return DBexec.executequeryBean(conn, sql, values);
         } catch (SQLException ex) {
-           throw new JdaoException(ex);
+            throw ex;
         }
     }
 
@@ -81,50 +79,53 @@ public class JdbcHandler implements JdbcHandle {
      * @param sql
      * @param values
      * @return
-     * @throws JdaoException
+     * @throws SQLException
      */
     @Override
-    public List<DataBean> executeQueryBeans(String sql, Object... values) throws JdaoException {
+    public List<DataBean> executeQueryBeans(String sql, Object... values) throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
-            return DBexec.executequeryBeans(conn,sql,values);
+            return DBexec.executequeryBeans(conn, sql, values);
         } catch (SQLException ex) {
-          throw new JdaoException(ex);
+            throw ex;
         }
     }
 
-
-
-    /**
-     * @param claz
-     * @param sql
-     * @param values
-     * @param <T>
-     * @return
-     * @throws JdaoException
-     */
-    @Override
-    public <T> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException {
-        try (Connection conn = dataSource.getConnection()) {
-            return DBexec.executeQueryList(claz,conn,sql,values);
-        } catch (SQLException ex) {
-            throw new JdaoException(ex);
-        }
-    }
 
     /**
      * @param claz
      * @param sql
      * @param values
+     * @return
      * @param <T>
-     * @return
      * @throws JdaoException
+     * @throws JdaoClassException
+     * @throws SQLException
      */
     @Override
-    public <T> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException {
+    public <T> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         try (Connection conn = dataSource.getConnection()) {
-            return DBexec.executeQuery(claz,conn,sql,values);
-        } catch (SQLException ex) {
-            throw new JdaoException(ex);
+            return DBexec.executeQueryList(claz, conn, sql, values);
+        } catch (SQLException | JdaoClassException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * @param claz
+     * @param sql
+     * @param values
+     * @return
+     * @param <T>
+     * @throws JdaoException
+     * @throws JdaoClassException
+     * @throws SQLException
+     */
+    @Override
+    public <T> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
+        try (Connection conn = dataSource.getConnection()) {
+            return DBexec.executeQuery(claz, conn, sql, values);
+        } catch (SQLException | JdaoClassException ex) {
+            throw ex;
         }
     }
 
@@ -133,13 +134,14 @@ public class JdbcHandler implements JdbcHandle {
      * @param values
      * @return
      * @throws JdaoException
+     * @throws SQLException
      */
     @Override
-    public int executeUpdate(String sql, Object... values) throws JdaoException {
+    public int executeUpdate(String sql, Object... values) throws JdaoException, SQLException {
         try (Connection conn = dataSource.getConnection()) {
-            return DBexec.executeUpdate(conn,sql,values);
+            return DBexec.executeUpdate(conn, sql, values);
         } catch (SQLException ex) {
-            throw new JdaoException(ex);
+            throw ex;
         }
     }
 
@@ -147,14 +149,14 @@ public class JdbcHandler implements JdbcHandle {
      * @param sql
      * @param values
      * @return
-     * @throws JdaoException
+     * @throws SQLException
      */
     @Override
-    public int[] executeBatch(String sql, List<Object[]> values) throws JdaoException {
+    public int[] executeBatch(String sql, List<Object[]> values) throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
-            return DBexec.executeBatch(conn,sql,values);
+            return DBexec.executeBatch(conn, sql, values);
         } catch (SQLException ex) {
-            throw new JdaoException(ex);
+            throw ex;
         }
     }
 
