@@ -24,6 +24,7 @@ import io.github.donnie4w.jdao.util.Utils;
 
 import javax.sql.DataSource;
 import java.io.Serializable;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -394,7 +395,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      * @return
      * @throws JdaoException
      */
-    public List<T> selects(Field<T>... fs) throws JdaoException {
+    public List<T> selects(Field<T>... fs) throws JdaoException, JdaoClassException, SQLException {
         isinit();
         if (fs == null) {
             fs = fields;
@@ -431,7 +432,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      * @return
      * @throws JdaoException
      */
-    public T select(Fields<T>... fs) throws JdaoException {
+    public T select(Fields<T>... fs) throws JdaoException, JdaoClassException, SQLException {
         isinit();
         if (fs == null) {
             fs = fields;
@@ -465,7 +466,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      * @return
      * @throws JdaoException
      */
-    public int insert() throws JdaoException {
+    public int insert() throws JdaoException, SQLException {
         isinit();
         SqlKV kv = save_();
         return getDBhandle(false).executeUpdate(transaction, kv.getSql(), kv.getArgs());
@@ -531,7 +532,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      * @return
      * @throws JdaoException
      */
-    public int[] executeBatch() throws JdaoException {
+    public int[] executeBatch() throws JdaoException, SQLException {
         isinit();
         if (fieldMap.size() > 0) {
             addBatch();
@@ -581,7 +582,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      * @return
      * @throws JdaoException
      */
-    public int update() throws JdaoException {
+    public int update() throws JdaoException, SQLException {
         isinit();
         StringBuilder sb = new StringBuilder();
         if (commentLine != null) {
@@ -641,7 +642,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      * @return
      * @throws JdaoException
      */
-    public int delete() throws JdaoException {
+    public int delete() throws JdaoException, SQLException {
         isinit();
         StringBuilder sb = new StringBuilder();
         if (commentLine != null) {
