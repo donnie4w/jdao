@@ -1,5 +1,6 @@
 package io.github.donnie4w.jdao.handle;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -23,52 +24,9 @@ public interface DBhandle {
      * @return
      * @throws JdaoException
      */
-    Transaction getTransaction() throws JdaoException;
+    Transaction getTransaction() throws SQLException;
 
     JdbcHandle getJdbcHandle();
-
-//    /**
-//     * @param transaction
-//     * @param clz
-//     * @param sql
-//     * @param values
-//     * @return
-//     * @param <T>
-//     * @throws JdaoException
-//     */
-//    public <T> List<T> executeQueryScanList(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException;
-//
-//    /**
-//     * @param clz
-//     * @param sql
-//     * @param values
-//     * @return
-//     * @param <T>
-//     * @throws JdaoException
-//     */
-//    public <T> List<T> executeQueryScanList(Class<T> clz, String sql, Object... values) throws JdaoException;
-//
-//    /**
-//     *
-//     * @param transaction
-//     * @param clz
-//     * @param sql
-//     * @param values
-//     * @return
-//     * @param <T>
-//     * @throws JdaoException
-//     */
-//    public <T> T executeQueryScan(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException;
-//
-//    /**
-//     * @param clz
-//     * @param sql
-//     * @param values
-//     * @return
-//     * @param <T>
-//     * @throws JdaoException
-//     */
-//    public <T> T executeQueryScan(Class<T> clz, String sql, Object... values) throws JdaoException;
 
     /**
      * executeQuery transactional operation and returns DataBean,
@@ -80,7 +38,7 @@ public interface DBhandle {
      * @return
      * @throws JdaoException
      */
-    DataBean executeQueryBean(Transaction transaction, String sql, Object... values) throws JdaoException;
+    DataBean executeQueryBean(Transaction transaction, String sql, Object... values) throws JdaoException, SQLException;
 
     /**
      * executeQuery Non-transactional operation and returns DataBean,
@@ -91,7 +49,7 @@ public interface DBhandle {
      * @return
      * @throws JdaoException
      */
-    DataBean executeQueryBean(String sql, Object... values) throws JdaoException;
+    DataBean executeQueryBean(String sql, Object... values) throws JdaoException, SQLException;
 
     /**
      * @param transaction
@@ -100,7 +58,7 @@ public interface DBhandle {
      * @return
      * @throws JdaoException
      */
-    List<DataBean> executeQueryBeans(Transaction transaction, String sql, Object... values) throws JdaoException;
+    List<DataBean> executeQueryBeans(Transaction transaction, String sql, Object... values) throws JdaoException, SQLException;
 
     /**
      * @param sql
@@ -108,7 +66,7 @@ public interface DBhandle {
      * @return
      * @throws JdaoException
      */
-    List<DataBean> executeQueryBeans(String sql, Object... values) throws JdaoException;
+    List<DataBean> executeQueryBeans(String sql, Object... values) throws JdaoException, SQLException;
 
     /**
      * executeQuery transactional operation and returns multiple pieces of data,
@@ -122,7 +80,7 @@ public interface DBhandle {
      * @return
      * @throws JdaoException
      */
-    <T> List<T> executeQueryList(Transaction transaction, Class<T> claz, String sql, Object... values) throws JdaoException;
+    <T> List<T> executeQueryList(Transaction transaction, Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException;
 
     /**
      * executeQuery Non-transactional operation and returns multiple pieces of data,
@@ -135,7 +93,7 @@ public interface DBhandle {
      * @return
      * @throws JdaoException
      */
-    <T> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException;
+    <T> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException;
 
     /**
      * executeQuery Non-transactional operation and returns one piece of data,
@@ -149,7 +107,7 @@ public interface DBhandle {
      * @return
      * @throws JdaoException
      */
-    <T> T executeQuery(Transaction transaction, Class<T> claz, String sql, Object... values) throws JdaoException;
+    <T> T executeQuery(Transaction transaction, Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException;
 
     /**
      * executeQuery Non-transactional operation and returns one piece of data,
@@ -162,7 +120,7 @@ public interface DBhandle {
      * @return
      * @throws JdaoException
      */
-    <T> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException;
+    <T> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException;
 
     /**
      * executeUpdate transactional operation
@@ -173,7 +131,7 @@ public interface DBhandle {
      * @return
      * @throws JdaoException
      */
-    int executeUpdate(Transaction transaction, String sql, Object... values) throws JdaoException;
+    int executeUpdate(Transaction transaction, String sql, Object... values) throws JdaoException, SQLException;
 
     /**
      * executeUpdate Non-transactional operation
@@ -183,7 +141,7 @@ public interface DBhandle {
      * @return
      * @throws JdaoException
      */
-    int executeUpdate(String sql, Object... values) throws JdaoException;
+    int executeUpdate(String sql, Object... values) throws JdaoException, SQLException;
 
     /**
      * Batch transactional operations
@@ -194,7 +152,7 @@ public interface DBhandle {
      * @return
      * @throws JdaoException
      */
-    int[] executeBatch(Transaction transaction, String sql, List<Object[]> values) throws JdaoException;
+    int[] executeBatch(Transaction transaction, String sql, List<Object[]> values) throws JdaoException, SQLException;
 
     /**
      * Batch Non-transactional operations
@@ -204,5 +162,5 @@ public interface DBhandle {
      * @return
      * @throws JdaoException
      */
-    int[] executeBatch(String sql, List<Object[]> values) throws JdaoException;
+    int[] executeBatch(String sql, List<Object[]> values) throws JdaoException, SQLException;
 }
