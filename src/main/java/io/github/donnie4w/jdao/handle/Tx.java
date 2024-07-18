@@ -33,62 +33,44 @@ public class Tx implements Transaction {
     Connection connection;
     DataSource dataSource;
 
-    public Tx(Connection connection) throws JdaoException {
-        try {
-            this.connection = connection;
-            this.connection.setAutoCommit(false);
-        } catch (Exception e) {
-            throw new JdaoException(e);
-        }
+    public Tx(Connection connection) throws SQLException {
+        this.connection = connection;
+        this.connection.setAutoCommit(false);
     }
 
-    public Tx(DataSource dataSource) throws JdaoException {
-        try {
-            this.dataSource = dataSource;
-            this.connection = dataSource.getConnection();
-            this.connection.setAutoCommit(false);
-        } catch (Exception e) {
-            throw new JdaoException(e);
-        }
+    public Tx(DataSource dataSource) throws SQLException {
+        this.dataSource = dataSource;
+        this.connection = dataSource.getConnection();
+        this.connection.setAutoCommit(false);
     }
 
     /**
      * The transaction commits and closes the transaction connection
-     * @throws JdaoException
+     *
+     * @throws SQLException
      */
-    public void commit() throws JdaoException {
-        try {
-            this.connection.commit();
-            this.close();
-        } catch (SQLException e) {
-            throw new JdaoException(e);
-        }
+    public void commit() throws SQLException {
+        this.connection.commit();
+        this.close();
     }
 
     /**
      * The transaction rollbacks and closes the transaction connection
-     * @throws JdaoException
+     *
+     * @throws SQLException
      */
-    public void rollback() throws JdaoException {
-        try {
-            this.connection.rollback(); 
-            this.close();
-        } catch (SQLException e) {
-            throw new JdaoException(e);
-        }
+    public void rollback() throws SQLException {
+        this.connection.rollback();
+        this.close();
     }
 
-    void close() throws JdaoException {
-        try {
-            this.connection.close();
-        } catch (SQLException e) {
-            throw new JdaoException(e);
-        }
+    void close() throws SQLException {
+        this.connection.close();
     }
 
 
     /**
-     * @return DataSource
+     * @return
      */
     @Override
     public DataSource getDataSource() {
@@ -97,32 +79,34 @@ public class Tx implements Transaction {
 
     /**
      * new Transaction Object
-     * @return Transaction
+     *
+     * @return
+     * @throws SQLException
      */
     @Override
-    public Transaction newTransaction() throws JdaoException {
+    public Transaction newTransaction() throws SQLException {
         return new Tx(this.dataSource);
     }
 
     /**
      * @param sql
      * @param values
-     * @return DataBean
-     * @throws JdaoException
+     * @return
+     * @throws SQLException
      */
     @Override
-    public DataBean executeQueryBean(String sql, Object... values) throws JdaoException {
+    public DataBean executeQueryBean(String sql, Object... values) throws SQLException {
         return DBexec.executequeryBean(connection, sql, values);
     }
 
     /**
      * @param sql
      * @param values
-     * @return List<DataBean>
-     * @throws JdaoException
+     * @return
+     * @throws SQLException
      */
     @Override
-    public List<DataBean> executeQueryBeans(String sql, Object... values) throws JdaoException {
+    public List<DataBean> executeQueryBeans(String sql, Object... values) throws SQLException {
         return DBexec.executequeryBeans(connection, sql, values);
     }
 
@@ -131,11 +115,13 @@ public class Tx implements Transaction {
      * @param sql
      * @param values
      * @param <T>
-     * @return  List<T>
+     * @return
      * @throws JdaoException
+     * @throws JdaoClassException
+     * @throws SQLException
      */
     @Override
-    public <T> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException {
+    public <T> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         return DBexec.executeQueryList(claz, connection, sql, values);
     }
 
@@ -144,33 +130,35 @@ public class Tx implements Transaction {
      * @param sql
      * @param values
      * @param <T>
-     * @return T
+     * @return
      * @throws JdaoException
+     * @throws JdaoClassException
+     * @throws SQLException
      */
     @Override
-    public <T> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException {
+    public <T> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         return DBexec.executeQuery(claz, connection, sql, values);
     }
 
     /**
      * @param sql
      * @param values
-     * @return int
-     * @throws JdaoException
+     * @return
+     * @throws SQLException
      */
     @Override
-    public int executeUpdate(String sql, Object... values) throws JdaoException {
+    public int executeUpdate(String sql, Object... values) throws SQLException {
         return DBexec.executeUpdate(connection, sql, values);
     }
 
     /**
      * @param sql
      * @param values
-     * @return int[]
-     * @throws JdaoException
+     * @return
+     * @throws SQLException
      */
     @Override
-    public int[] executeBatch(String sql, List<Object[]> values) throws JdaoException {
+    public int[] executeBatch(String sql, List<Object[]> values) throws SQLException {
         return DBexec.executeBatch(connection, sql, values);
     }
 }
