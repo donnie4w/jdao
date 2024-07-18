@@ -28,6 +28,7 @@ import io.github.donnie4w.jdao.util.Logger;
 import javax.sql.DataSource;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,14 +44,14 @@ public class MapperHandler extends JdaoMapper {
         return transaction == null;
     }
 
-    public void setAutocommit(boolean on) throws JdaoException {
+    public void setAutocommit(boolean on) throws SQLException {
         if (on) {
             if (this.transaction == null) {
                 DBhandle dBhandle = getDBhandle(null, false);
                 if (dBhandle != null) {
                     this.transaction = dBhandle.getTransaction();
                 }else{
-                    throw new JdaoException("No data source was found");
+                    throw new SQLException("No data source was found");
                 }
             }
         } else {
@@ -62,14 +63,14 @@ public class MapperHandler extends JdaoMapper {
         this.transaction = transaction;
     }
 
-    public void rollback() throws JdaoException {
+    public void rollback() throws SQLException {
         if (transaction != null) {
             transaction.rollback();
             transaction = null;
         }
     }
 
-    public void commit() throws JdaoException {
+    public void commit() throws SQLException {
         if (transaction != null) {
             transaction.commit();
             transaction = null;
@@ -113,7 +114,7 @@ public class MapperHandler extends JdaoMapper {
         this.dBhandle = Jdao.newDBhandle(dataSource, dbType);
     }
 
-    public <T> T selectOne(String mapperId, Object... args) throws JdaoException {
+    public <T> T selectOne(String mapperId, Object... args) throws JdaoException, JdaoClassException, SQLException {
         ParamBean pb = MapperParser.getParamBean(mapperId);
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
@@ -121,7 +122,7 @@ public class MapperHandler extends JdaoMapper {
         return _selectOne(mapperId, pb.getResultClass(), pb.getOutputType(), pb.getSql(), args);
     }
 
-    public <T> T selectOne(String mapperId, Object param) throws JdaoException {
+    public <T> T selectOne(String mapperId, Object param) throws JdaoException, JdaoClassException, SQLException {
         ParamBean pb = MapperParser.getParamBean(mapperId);
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
@@ -135,7 +136,7 @@ public class MapperHandler extends JdaoMapper {
     }
 
 
-    private <T> T _selectOne(String mapperId, Class resultclass, String outputType, String sql, Object... args) throws JdaoException {
+    private <T> T _selectOne(String mapperId, Class resultclass, String outputType, String sql, Object... args) throws JdaoException, JdaoClassException, SQLException {
         String domain = JdaoCache.getDomain(mapperId, this.getClass());
         SqlKV skv = null;
         Object result = null;
@@ -168,7 +169,7 @@ public class MapperHandler extends JdaoMapper {
         return (T) result;
     }
 
-    public <T> T[] selectArray(String mapperId, Object... args) throws JdaoException {
+    public <T> T[] selectArray(String mapperId, Object... args) throws JdaoException, JdaoClassException, SQLException {
         List<T> list = selectList(mapperId, args);
         if (list != null && !list.isEmpty()) {
             Class<?> elementType = list.get(0).getClass();
@@ -178,7 +179,7 @@ public class MapperHandler extends JdaoMapper {
         return null;
     }
 
-    public <T> T[] selectArray(String mapperId, Object param) throws JdaoException {
+    public <T> T[] selectArray(String mapperId, Object param) throws JdaoException, JdaoClassException, SQLException {
         List<T> list = selectList(mapperId, param);
         if (list != null && !list.isEmpty()) {
             Class<?> elementType = list.get(0).getClass();
@@ -188,7 +189,7 @@ public class MapperHandler extends JdaoMapper {
         return null;
     }
 
-    public <T> List<T> selectList(String mapperId, Object... args) throws JdaoException {
+    public <T> List<T> selectList(String mapperId, Object... args) throws JdaoException, JdaoClassException, SQLException {
         ParamBean pb = MapperParser.getParamBean(mapperId);
         if (pb == null)
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
@@ -199,7 +200,7 @@ public class MapperHandler extends JdaoMapper {
         return _selectList(mapperId, pb.getResultClass(), pb.getOutputType(), pb.getSql(), args);
     }
 
-    public <T> List<T> selectList(String mapperId, Object param) throws JdaoException {
+    public <T> List<T> selectList(String mapperId, Object param) throws JdaoException, JdaoClassException, SQLException {
         ParamBean pb = MapperParser.getParamBean(mapperId);
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
@@ -211,7 +212,7 @@ public class MapperHandler extends JdaoMapper {
         return _selectList(mapperId, pb.getResultClass(), pb.getOutputType(), pb.getSql(), args);
     }
 
-    private <T> List<T> _selectList(String mapperId, Class resultclass, String outputType, String sql, Object... args) throws JdaoException {
+    private <T> List<T> _selectList(String mapperId, Class resultclass, String outputType, String sql, Object... args) throws JdaoException, JdaoClassException, SQLException {
 
         String domain = JdaoCache.getDomain(mapperId, this.getClass());
         Object result = null;
@@ -254,7 +255,7 @@ public class MapperHandler extends JdaoMapper {
     }
 
 
-    public int insert(String mapperId, Object... args) throws JdaoException {
+    public int insert(String mapperId, Object... args) throws JdaoException, SQLException {
         ParamBean pb = MapperParser.getParamBean(mapperId);
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
@@ -265,7 +266,7 @@ public class MapperHandler extends JdaoMapper {
         return getDBhandle(mapperId, false).executeUpdate(transaction, pb.getSql(), args);
     }
 
-    public int insert(String mapperId, Object param) throws JdaoException {
+    public int insert(String mapperId, Object param) throws JdaoException, SQLException {
         ParamBean pb = MapperParser.getParamBean(mapperId);
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
@@ -277,7 +278,7 @@ public class MapperHandler extends JdaoMapper {
         return getDBhandle(mapperId, false).executeUpdate(transaction, pb.getSql(), args);
     }
 
-    public int update(String mapperId, Object... args) throws JdaoException {
+    public int update(String mapperId, Object... args) throws JdaoException, SQLException {
         ParamBean pb = MapperParser.getParamBean(mapperId);
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
@@ -288,7 +289,7 @@ public class MapperHandler extends JdaoMapper {
         return getDBhandle(mapperId, false).executeUpdate(transaction, pb.getSql(), args);
     }
 
-    public int update(String mapperId, Object param) throws JdaoException {
+    public int update(String mapperId, Object param) throws JdaoException, SQLException {
         ParamBean pb = MapperParser.getParamBean(mapperId);
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
@@ -300,7 +301,7 @@ public class MapperHandler extends JdaoMapper {
         return getDBhandle(mapperId, false).executeUpdate(transaction, pb.getSql(), args);
     }
 
-    public int delete(String mapperId, Object... args) throws JdaoException {
+    public int delete(String mapperId, Object... args) throws JdaoException, SQLException {
         ParamBean pb = MapperParser.getParamBean(mapperId);
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
@@ -311,7 +312,7 @@ public class MapperHandler extends JdaoMapper {
         return getDBhandle(mapperId, false).executeUpdate(transaction, pb.getSql(), args);
     }
 
-    public int delete(String mapperId, Object param) throws JdaoException {
+    public int delete(String mapperId, Object param) throws JdaoException, SQLException {
         ParamBean pb = MapperParser.getParamBean(mapperId);
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
