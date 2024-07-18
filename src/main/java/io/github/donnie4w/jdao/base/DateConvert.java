@@ -18,6 +18,7 @@
 
 package io.github.donnie4w.jdao.base;
 
+import io.github.donnie4w.jdao.handle.JdaoException;
 import org.junit.Test;
 
 import java.time.*;
@@ -27,7 +28,7 @@ import java.util.Date;
 public class DateConvert {
 
 
-    public static Date convertToDate(String dateStr) {
+    public static Date convertToDate(String dateStr) throws JdaoException {
         if (dateStr == null || dateStr.length() == 0){
             return null;
         }
@@ -148,13 +149,13 @@ public class DateConvert {
                 return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+           throw new JdaoException(e);
         }
         return null;
     }
 
     @Test
-    public void testConvert() {
+    public void testConvert() throws JdaoException {
         String[] testDates = {
                 "2023",
                 "2023-07-08",
