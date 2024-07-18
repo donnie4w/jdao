@@ -19,6 +19,7 @@
 package io.github.donnie4w.jdao.handle;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class DBhandler implements DBhandle {
     }
 
     @Override
-    public Transaction getTransaction() throws JdaoException {
+    public Transaction getTransaction() throws SQLException {
         return this.jdbcHandle.newTransaction();
     }
 
@@ -44,7 +45,7 @@ public class DBhandler implements DBhandle {
         return jdbcHandle;
     }
 
-    public <T> List<T> executeQueryScanList(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException {
+    public <T> List<T> executeQueryScanList(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException, SQLException {
         List<DataBean> list = executeQueryBeans(transaction, sql, values);
         if (list != null) {
             List<T> results = new ArrayList<>();
@@ -56,47 +57,12 @@ public class DBhandler implements DBhandle {
         return null;
     }
 
-//    /**
-//     * @param clz
-//     * @param sql
-//     * @param values
-//     * @param <T>
-//     * @return
-//     * @throws JdaoException
-//     */
-//    @Override
-//    public <T> List<T> executeQueryScanList(Class<T> clz, String sql, Object... values) throws JdaoException {
-//        return executeQueryScanList(null, clz, sql, values);
-//    }
-
-//    public <T> T executeQueryScan(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException {
-//        DataBean db = executeQueryBean(transaction, sql, values);
-//        if (db != null) {
-//            return db.scan(clz);
-//        }
-//        return null;
-//    }
-
-//    /**
-//     * @param clz
-//     * @param sql
-//     * @param values
-//     * @param <T>
-//     * @return
-//     * @throws JdaoException
-//     */
-//    @Override
-//    public <T> T executeQueryScan(Class<T> clz, String sql, Object... values) throws JdaoException {
-//        return executeQueryScan(null, clz, sql, values);
-//    }
-
-
     /**
      * @param sql
      * @param values
      * @return
      */
-    public DataBean executeQueryBean(Transaction transaction, String sql, Object... values) throws JdaoException {
+    public DataBean executeQueryBean(Transaction transaction, String sql, Object... values) throws JdaoException, SQLException {
         if (transaction != null) {
             return transaction.executeQueryBean(sql, values);
         }
@@ -110,7 +76,7 @@ public class DBhandler implements DBhandle {
      * @throws JdaoException
      */
     @Override
-    public DataBean executeQueryBean(String sql, Object... values) throws JdaoException {
+    public DataBean executeQueryBean(String sql, Object... values) throws JdaoException, SQLException {
         return executeQueryBean(null, sql, values);
     }
 
@@ -119,7 +85,7 @@ public class DBhandler implements DBhandle {
      * @param values
      * @return
      */
-    public List<DataBean> executeQueryBeans(Transaction transaction, String sql, Object... values) throws JdaoException {
+    public List<DataBean> executeQueryBeans(Transaction transaction, String sql, Object... values) throws JdaoException, SQLException {
         if (transaction != null) {
             return transaction.executeQueryBeans(sql, values);
         }
@@ -133,7 +99,7 @@ public class DBhandler implements DBhandle {
      * @throws JdaoException
      */
     @Override
-    public List<DataBean> executeQueryBeans(String sql, Object... values) throws JdaoException {
+    public List<DataBean> executeQueryBeans(String sql, Object... values) throws JdaoException, SQLException {
         return executeQueryBeans(null, sql, values);
     }
 
@@ -146,7 +112,7 @@ public class DBhandler implements DBhandle {
      * @param sql
      * @param values
      */
-    public <T> List<T> executeQueryList(Transaction transaction, Class<T> claz, String sql, Object... values) throws JdaoException {
+    public <T> List<T> executeQueryList(Transaction transaction, Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         if (transaction != null) {
             return transaction.executeQueryList(claz, sql, values);
         }
@@ -162,7 +128,7 @@ public class DBhandler implements DBhandle {
      * @throws JdaoException
      */
     @Override
-    public <T> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException {
+    public <T> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         return executeQueryList(null, claz, sql, values);
     }
 
@@ -174,7 +140,7 @@ public class DBhandler implements DBhandle {
      * @param sql
      * @param values
      */
-    public <T> T executeQuery(Transaction transaction, Class<T> claz, String sql, Object... values) throws JdaoException {
+    public <T> T executeQuery(Transaction transaction, Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         if (transaction != null) {
             return transaction.executeQuery(claz, sql, values);
         }
@@ -190,7 +156,7 @@ public class DBhandler implements DBhandle {
      * @throws JdaoException
      */
     @Override
-    public <T> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException {
+    public <T> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         return jdbcHandle.executeQuery(claz, sql, values);
     }
 
@@ -200,7 +166,7 @@ public class DBhandler implements DBhandle {
      * @param sql
      * @param values
      */
-    public int executeUpdate(Transaction transaction, String sql, Object... values) throws JdaoException {
+    public int executeUpdate(Transaction transaction, String sql, Object... values) throws JdaoException, SQLException {
         if (transaction != null) {
             return transaction.executeUpdate(sql, values);
         }
@@ -214,7 +180,7 @@ public class DBhandler implements DBhandle {
      * @throws JdaoException
      */
     @Override
-    public int executeUpdate(String sql, Object... values) throws JdaoException {
+    public int executeUpdate(String sql, Object... values) throws JdaoException, SQLException {
         return jdbcHandle.executeUpdate(sql, values);
     }
 
@@ -224,7 +190,7 @@ public class DBhandler implements DBhandle {
      * @param sql
      * @param values
      */
-    public int[] executeBatch(Transaction transaction, String sql, List<Object[]> values) throws JdaoException {
+    public int[] executeBatch(Transaction transaction, String sql, List<Object[]> values) throws JdaoException, SQLException {
         if (transaction != null) {
             return transaction.executeBatch(sql, values);
         }
@@ -238,7 +204,7 @@ public class DBhandler implements DBhandle {
      * @throws JdaoException
      */
     @Override
-    public int[] executeBatch(String sql, List<Object[]> values) throws JdaoException {
+    public int[] executeBatch(String sql, List<Object[]> values) throws JdaoException, SQLException {
         return jdbcHandle.executeBatch(sql, values);
     }
 
