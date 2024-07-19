@@ -211,6 +211,37 @@ JdaoMapper jdaoMapper = JdaoMapper.newInstance()
 Hstest hs = jdaoMapper.selectOne("io.github.donnie4w.jdao.action.Mapperface.selectHstestById", 2, 26);
 
 System.out.println(hs);
-
 ```
+##### mapper映射为java接口
 
+```java
+public interface Mapperface {
+    List<Hstest> selectAllHstest();
+    List<Hstest> selectHstest(int id, int age);
+    Hstest selectHstestByMap(Map map);
+    List<Hstest> selectHstestByList(int id, int age);
+    Hstest[] selectHstestByList(List list);
+    Hstest selectHstestById(int id, int age);
+    List<Hstest> selectHstestById(Integer id, Integer age);
+    Hstest1 selectHstest1(int limit);
+    List<Hstest1> selectHstest1(long limit);
+    int insertHstest1(Hstest1 hs);
+    int updateHstest1(Hstest1 hs);
+    int deleteHstest1(Hstest1 hs);
+}
+
+
+@Test
+public void selectMapperFace() throws JdaoException, JdaoClassException, SQLException {
+    JdaoMapper jdaoMapper = JdaoMapper.newInstance();
+    Mapperface mapper = jdaoMapper.getMapper(Mapperface.class);
+
+    List<Hstest> list = mapper.selectHstestById(Integer.valueOf(5), Integer.valueOf(20));
+    for (Hstest hs : list) {
+        System.out.println(hs);
+    }
+
+    Hstest hstest = mapper.selectHstestById(5, 20);
+    System.out.println(hstest);
+}
+```
