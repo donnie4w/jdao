@@ -570,9 +570,13 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
             }
             list.add(o);
         }
-        if (Logger.isVaild())
-            Logger.info("[BATCH SQL][" + sb1 + "]" + Arrays.toString(list.toArray()));
-
+        if (Logger.isVaild()){
+            List<String> plist = new ArrayList();
+            for (Object[] objects : list) {
+                plist.add(Arrays.toString(objects));
+            }
+            Logger.info("[BATCH SQL][" + sb1 + "]" + Arrays.toString(plist.toArray()));
+        }
         return getDBhandle(false).executeBatch(transaction, sb1.toString(), list);
     }
 
