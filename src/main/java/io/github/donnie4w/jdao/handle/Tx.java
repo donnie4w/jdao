@@ -17,6 +17,8 @@
  */
 package io.github.donnie4w.jdao.handle;
 
+import io.github.donnie4w.jdao.util.Logger;
+
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -52,6 +54,9 @@ public class Tx implements Transaction {
     public void commit() throws SQLException {
         this.connection.commit();
         this.close();
+        if (Logger.isVaild()){
+            Logger.info("[Transaction commit and connection close successfully]");
+        }
     }
 
     /**
@@ -62,6 +67,9 @@ public class Tx implements Transaction {
     public void rollback() throws SQLException {
         this.connection.rollback();
         this.close();
+        if (Logger.isVaild()){
+            Logger.info("[Transaction rollback and connection close successfully]");
+        }
     }
 
     void close() throws SQLException {
