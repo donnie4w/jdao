@@ -101,21 +101,21 @@ public class Fields<T> implements Field<T> {
     /**
      * like %value%
      */
-    public Where<T> LIKE(String value) {
+    public Where<T> LIKE(Object value) {
         return new Where<T>(AND + fieldName + " like ? ", "%" + value + "%");
     }
 
     /**
      * like value%
      */
-    public Where<T> lLIKE(String value) {
+    public Where<T> LLIKE(Object value) {
         return new Where<T>(AND + fieldName + " like ? ", value + "%");
     }
 
     /**
      * like %value
      */
-    public Where<T> rLIKE(String value) {
+    public Where<T> RLIKE(Object value) {
         return new Where<T>(AND + fieldName + " like  ? ", "%" + value);
     }
 
