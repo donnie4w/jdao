@@ -19,14 +19,12 @@
 package io.github.donnie4w.jdao.base;
 
 import io.github.donnie4w.jdao.handle.JdaoException;
-import org.junit.Test;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class DateConvert {
-
 
     public static Date convertToDate(String dateStr) throws JdaoException {
         if (dateStr == null || dateStr.length() == 0){
@@ -152,28 +150,5 @@ public class DateConvert {
            throw new JdaoException(e);
         }
         return null;
-    }
-
-    @Test
-    public void testConvert() throws JdaoException {
-        String[] testDates = {
-                "2023",
-                "2023-07-08",
-                "2023-07-08T15:20:31",
-                "2023-07-08T15:20:32",
-                "2023-07-08T15:20:33.12",
-                "2023-07-08T15:20:34.123",
-                "2023-07-08T15:20:35.123+02:00",
-                "2023-07-08T15:20:36.123Z",
-                "2023-07-08 15:20:37.123456",
-                "2023-07-08T15:20:38.123456[Europe/Paris]",
-                "2023-07-08T15:20:39.123456+02:00",
-                "2024-07-09 01:19:40.4622478+08:00"
-        };
-
-        for (String dateStr : testDates) {
-            Date date = convertToDate(dateStr);
-            System.out.println("Converted date: " + date);
-        }
     }
 }
