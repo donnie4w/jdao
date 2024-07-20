@@ -1,4 +1,4 @@
-## JDAO —— java持久层框架  [[Englist](https://github.com/donnie4w/jdao/blob/master/readme.md)]
+## JDAO —— java持久层框架  [[English](https://github.com/donnie4w/jdao/blob/master/readme.md)]
 
 ### 简介
 
