@@ -74,7 +74,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
 
     public abstract void toJdao();
 
-    public <T> T useMaster(boolean useMaster) {
+    public T useMaster(boolean useMaster) {
         this.mustMaster = useMaster;
         return (T) this;
     }
@@ -84,7 +84,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      *
      * @param transaction
      */
-    public <T> T useTransaction(Transaction transaction) {
+    public T useTransaction(Transaction transaction) {
         this.transaction = transaction;
         return (T) this;
     }
@@ -95,7 +95,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      * @param dataSource
      * @param dbType
      */
-    public  <T> T useDataSource(DataSource dataSource, DBType dbType) {
+    public T useDataSource(DataSource dataSource, DBType dbType) {
         this.dbhandle = Jdao.newDBhandle(dataSource, dbType);
         return (T) this;
     }
@@ -104,9 +104,8 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
     /**
      * @param dbhandle
      * @return
-     * @param <T>
      */
-    public  <T> T useDBhandle(DBhandle dbhandle) {
+    public T useDBhandle(DBhandle dbhandle) {
         this.dbhandle = dbhandle;
         return (T) this;
     }
@@ -115,7 +114,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         if (this.dbhandle != null) {
             return this.dbhandle;
         }
-        DBhandle dbhandle = getDBhandle(this.clazz,  Utils.getPackageName(this.clazz), qureyType && !mustMaster);
+        DBhandle dbhandle = getDBhandle(this.clazz, Utils.getPackageName(this.clazz), qureyType && !mustMaster);
         if (dbhandle == null) {
             throw new JdaoRuntimeException("DataSource not found");
         }
@@ -126,7 +125,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         DBhandle dbhandle = null;
 
         if (JdaoSlave.size() > 0 && queryType) {
-            dbhandle = JdaoSlave.get(clz, packageName,null);
+            dbhandle = JdaoSlave.get(clz, packageName, null);
             if (dbhandle != null) {
                 return dbhandle;
             }
@@ -153,12 +152,12 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      * @param wheres
      * @return
      */
-    public List<ObjKV<String, Object>> where(Where<T>... wheres) {
+    public T where(Where<T>... wheres) {
         isinit();
         for (Where<T> w : wheres) {
             where.add(new ObjKV<>(w.getExpression(), w.getValue()));
         }
-        return where;
+        return (T) this;
     }
 
     /**
@@ -167,13 +166,14 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      *
      * @param sorts
      */
-    public void orderBy(Sort<T>... sorts) {
+    public T orderBy(Sort<T>... sorts) {
         for (Sort s : sorts) {
             if (orderSb.length() > 0) {
                 orderSb.append(",");
             }
             orderSb.append(s.getFieldName());
         }
+        return (T) this;
     }
 
     /**
@@ -182,11 +182,12 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      *
      * @param fields
      */
-    public void groupBy(Fields<T>... fields) {
+    public T groupBy(Fields<T>... fields) {
         for (Fields<T> f : fields) {
             if (groupSb.length() > 0) groupSb.append(",");
             groupSb.append(f.getFieldName());
         }
+        return (T) this;
     }
 
     /**
@@ -195,10 +196,11 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      *
      * @param wheres
      */
-    public void having(Where<T>... wheres) {
+    public T having(Where<T>... wheres) {
         for (Where<T> w : wheres) {
             having.add(new ObjKV<>(w.getExpression(), w.getValue()));
         }
+        return (T) this;
     }
 
     /**
@@ -216,8 +218,9 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      *
      * @param limit
      */
-    public void limit(int limit) {
+    public T limit(int limit) {
         limitArg = new int[]{limit};
+        return (T) this;
     }
 
     /**
@@ -236,8 +239,9 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
      * @param offset
      * @param limit
      */
-    public void limit(int offset, int limit) {
+    public T limit(int offset, int limit) {
         limitArg = new int[]{offset, limit};
+        return (T) this;
     }
 
     private SqlKV encodeSqlKV(Field<T>... fields) throws JdaoException {
@@ -408,7 +412,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         boolean iscache = (isCache == 1 || domain != null) && isCache != 2;
         Object o = null;
         if (iscache) {
-            o = JdaoCache.getCache(domain, clazz, Condition.newInstance(skv,"list"));
+            o = JdaoCache.getCache(domain, clazz, Condition.newInstance(skv, "list"));
             if (o != null) {
                 if (Logger.isVaild())
                     Logger.info("[GET CACHE]:" + skv);
@@ -417,7 +421,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         }
         o = getDBhandle(true).executeQueryList(transaction, clazz, skv.getSql(), skv.getArgs());
         if (iscache) {
-            JdaoCache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv,"list"), o);
+            JdaoCache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv, "list"), o);
             if (Logger.isVaild())
                 Logger.info("[SET CACHE]:" + skv);
         }
@@ -444,7 +448,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         String domain = JdaoCache.getDomain(Utils.getPackageName(clazz), clazz);
         boolean iscache = (isCache == 1 || domain != null) && isCache != 2;
         if (iscache) {
-            o = JdaoCache.getCache(domain, clazz, Condition.newInstance(skv,"one"));
+            o = JdaoCache.getCache(domain, clazz, Condition.newInstance(skv, "one"));
             if (o != null) {
                 if (Logger.isVaild())
                     Logger.info("[GET CACHE]:" + skv);
@@ -453,7 +457,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
         }
         o = getDBhandle(true).executeQuery(transaction, clazz, skv.getSql(), skv.getArgs());
         if (iscache) {
-            JdaoCache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv,"one"), o);
+            JdaoCache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv, "one"), o);
             if (Logger.isVaild())
                 Logger.info("[SET CACHE]:" + skv);
         }
@@ -570,7 +574,7 @@ public abstract class Table<T extends Table<?>> implements Scanner, Serializable
             }
             list.add(o);
         }
-        if (Logger.isVaild()){
+        if (Logger.isVaild()) {
             List<String> plist = new ArrayList();
             for (Object[] objects : list) {
                 plist.add(Arrays.toString(objects));
