@@ -1,7 +1,6 @@
 package io.github.donnie4w.jdao.util;
 
 import io.github.donnie4w.jdao.handle.Jdao;
-import org.junit.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -228,11 +227,5 @@ public class DaoBuilder {
         } else {
             return null;
         }
-    }
-
-    @Test
-    public void testCreate() throws Exception {
-        Connection conn = Jdao.getDefaultDBhandle().getJdbcHandle().getDataSource().getConnection();
-        DaoBuilder.createFile("hstest", "", conn, "utf-8");
     }
 }
