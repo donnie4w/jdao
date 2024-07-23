@@ -3,6 +3,7 @@
 ### Introduction
 
 JDAO is an innovative persistence layer solution aimed at reducing programming workload, increasing productivity and performance, supporting multiple data sources, and enabling data read-write separation while establishing a standard for persistence layer programming. By leveraging JDAO, developers can reduce more than 50% of the persistence layer programming workload, standardize programming practices, minimize errors, and facilitate maintenance and extension.
+Even if you haven't used Jdao before, you can instantly understand the meaning of its code and related data behavior just by looking at it. Moreover, you can grasp its usage within minutes, thanks to its simplicity.
 
 ### [Official Website](https://tlnet.top/jdao)
 
@@ -11,7 +12,7 @@ JDAO is an innovative persistence layer solution aimed at reducing programming w
 ### Key Features
 
 1. **Code Generation**: Run the JDAO code generation tool to create standardized entity classes for database tables, similar to Thrift/Protobuf.
-2. **Efficient Serialization**: The standardized entity classes implement efficient serialization and deserialization, achieving nearly 10 times the performance of standard library methods, while the serialized data size is only 20% of that produced by standard methods.
+2. **Efficient Serialization**: The standardized entity classes implement efficient serialization and deserialization, achieving  3-12 times the performance of standard library methods, while the serialized data size is only 20% of that produced by standard methods.
 3. **Data Read-Write Separation**: JDAO supports binding multiple data sources and associating them with tables, classes, and mapping interfaces. It also supports data read-write separation.
 4. **Data Caching**: JDAO supports data caching with detailed control over cache data lifecycle and reclamation.
 5. **Wide Compatibility**: JDAO theoretically supports all databases that implement the JDBC interface.
