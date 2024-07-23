@@ -33,17 +33,18 @@ public class Serializer {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
              DataOutputStream dos = new DataOutputStream(bos)) {
             for (Map.Entry<String, Object> entry : data.entrySet()) {
-                dos.writeByte(entry.getKey().getBytes().length);
-                dos.write(entry.getKey().getBytes());
-
                 Object value = entry.getValue();
+                if (value == null) {
+                    continue;
+                }
                 SeriaType type = SeriaType.fromClass(value.getClass());
-
                 if (type == null) {
                     continue;
                 }
-
+                dos.writeByte(entry.getKey().getBytes().length);
+                dos.write(entry.getKey().getBytes());
                 dos.writeByte(type.getCode());
+
                 switch (type) {
                     case BOOLEAN:
                         dos.writeByte(((Boolean) value) ? 1 : 0);
