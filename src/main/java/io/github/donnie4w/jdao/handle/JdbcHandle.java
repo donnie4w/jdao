@@ -17,9 +17,12 @@
  */
 package io.github.donnie4w.jdao.handle;
 
+import io.github.donnie4w.jdao.base.Params;
+
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
@@ -93,5 +96,14 @@ public interface JdbcHandle {
      * @throws SQLException
      */
     int[] executeBatch(String sql, List<Object[]> values) throws JdaoException, SQLException;
+
+
+    /**
+     * @param procedureName
+     * @param params
+     * @return
+     * @throws SQLException
+     */
+    Map<Integer, Object> executeCall(String procedureCallMethod, Params... params) throws SQLException;
 
 }
