@@ -18,6 +18,8 @@
 
 package io.github.donnie4w.jdao.handle;
 
+import io.github.donnie4w.jdao.base.Params;
+import io.github.donnie4w.jdao.base.Table;
 import io.github.donnie4w.jdao.util.Logger;
 
 import javax.sql.DataSource;
@@ -75,7 +77,7 @@ public class Jdao {
      * @param dataSource
      * @param dbtype
      */
-    public static void setDataSource(Class<?> clz, DataSource dataSource, DBType dbtype) {
+    public static void setDataSource(Class<? extends Table<?>> clz, DataSource dataSource, DBType dbtype) {
         dbhandleMap.put(clz, newDBhandle(dataSource, dbtype));
     }
 
@@ -319,6 +321,19 @@ public class Jdao {
     public static int[] executeBatch(String sql, List<Object[]> values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
         return defaultDBhandle.executeBatch(null, sql, values);
+    }
+
+
+    /**
+     * Store Procedure operations
+     * @param procedureName  StoreProcedure Name
+     * @param params
+     * @return
+     * @throws SQLException
+     */
+    public static Map<Integer, Object> executeCall(String procedureName, Params... params) throws SQLException {
+        notnull(defaultDBhandle, err_noinit);
+        return defaultDBhandle.executeCall(procedureName, params);
     }
 
     private static void notnull(Object obj, String message) {
