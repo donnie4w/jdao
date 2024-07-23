@@ -2,10 +2,10 @@
 
 ### 简介
 
-Jdao是一种创新的持久层解决方案。主要目的在于 减少编程量，提高生产力，提高性能，支持多数据源整合操作，支持数据读写分离，制定持久层编程规范。
-灵活运用Jdao，可以在持久层设计上，减少50%以上的编程量，同时形成持久层的统一编程规范，减少持久层错误，同时易于维护和扩展。
-即使你从未接触过Jdao，看到Jdao代码，也能马上知道它的代码表达的意思和相关的数据行为。
-即使你从未接触过Jdao，也可以在几分钟内，掌握它的用法，这是它的简洁带来的优势。
+Jdao是一种创新的持久层解决方案。主要目的在于 减少编程量，提高生产力，提高性能，支持多数据源整合操作，支持数据读写分离，制定持久层编程规范。 灵活运用Jdao，可以在持久层设计上，减少30%甚至50%以上的编程量，同时形成持久层的统一编程规范，减少持久层错误，同时易于维护和扩展。
+* Jdao设计结构简洁且严谨，接口与函数命名符合JDBC使用习惯，所有操作均能见名知意。
+* 即使你从未接触过Jdao，看到Jdao代码，也能马上知道它的代码表达的意思和相关的数据行为。
+* 即使你从未接触过Jdao，也可以在几分钟内，掌握它的用法，这是它的简洁带来的优势。
 
 ### [官网](https://tlnet.top/jdaoen)
 
@@ -75,7 +75,9 @@ JDAO 框架在接口定义与实现上非常接近标准 JDBC 接口，具有直
 - 直接调用 Jdao 接口操作 SQL
 - 通过 XML 文件进行 SQL 映射
 
-### 安装
+## 快速入门
+
+### 1.  安装
 
 ```bash
 # 使用 Maven 安装
@@ -88,9 +90,9 @@ JDAO 框架在接口定义与实现上非常接近标准 JDBC 接口，具有直
 
 ```
 
-## 快速入门
 
-### 1. 配置数据源
+
+### 2. 配置数据源
 
 ```java
 Jdao.init(dataSource,Jdao.MYSQL);
@@ -98,11 +100,11 @@ Jdao.init(dataSource,Jdao.MYSQL);
 // Jdao.MYSQL 为数据库类型
 ```
 
-### 2. 生成表实体类
+### 3. 生成表实体类
 
 使用 Jdao 代码生成工具生成数据库表的标准化实体类。
 
-### 3. 实体类操作
+### 4. 实体类操作
 
 ```java
 //  数据源设置
@@ -139,7 +141,7 @@ hs.insert();
 //[INSERT SQL] insert to hstest (rowname,value) values("hello world","123456789")
 ```
 
-### 4. Jdao
+### 5. Jdao
 
 ###### CRUD操作
 
@@ -158,7 +160,7 @@ int  i = Jdao.executeUpdate("update hstest set value=? where id=1", "hello");
 int  i = Jdao.executeUpdate("delete from hstest where id = ?", 1);
 ```
 
-### 5. JdaoCache 
+### 6. JdaoCache 
 
 ###### 配置缓存
 
@@ -178,7 +180,7 @@ System.out.println(hs2);
 
 ```
 
-### 6. JdaoSlave 
+### 7. JdaoSlave 
 
 ###### 读写分离
 
@@ -191,7 +193,7 @@ Hstest hs = t.select();
 System.out.println(hs);
 ```
 
-### 7. JdaoMapper
+### 8. JdaoMapper
 
 使用 XML 映射 SQL
 
