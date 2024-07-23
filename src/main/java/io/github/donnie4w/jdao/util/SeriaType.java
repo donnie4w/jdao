@@ -70,6 +70,9 @@ public enum SeriaType {
         typeMapping.put(char.class, CHAR);
         typeMapping.put(byte[].class, BYTE_ARRAY);
         typeMapping.put(java.util.Date.class, DATE);
+        typeMapping.put(java.sql.Date.class, DATE);
+        typeMapping.put(java.sql.Time.class, DATE);
+        typeMapping.put(java.sql.Timestamp.class, DATE);
         typeMapping.put(BigInteger.class, BIGINTEGER);
         typeMapping.put(BigDecimal.class, BIGDECIMAL);
 
