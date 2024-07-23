@@ -18,15 +18,17 @@
 
 package io.github.donnie4w.jdao.handle;
 
+import io.github.donnie4w.jdao.base.InOut;
+import io.github.donnie4w.jdao.base.Out;
+import io.github.donnie4w.jdao.base.Params;
 import io.github.donnie4w.jdao.base.Table;
 
 import java.lang.reflect.InvocationTargetException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DBexec {
 
@@ -38,8 +40,8 @@ public class DBexec {
      * @param con
      * @param sql
      * @param values
-     * @return
      * @param <T>
+     * @return
      * @throws JdaoException
      * @throws SQLException
      * @throws JdaoClassException
@@ -59,18 +61,19 @@ public class DBexec {
                     int columncount = rs.getMetaData().getColumnCount();
                     T targetBean = classType.getDeclaredConstructor().newInstance();
                     for (int i = 1; i <= columncount; i++) {
-                        if (targetBean instanceof Table) {
-                            ((Table) targetBean).scan(rs.getMetaData().getColumnLabel(i), rs.getObject(i));
-                        } else {
-                            DataBean.scanToClass(classType, targetBean, rs.getMetaData().getColumnLabel(i), rs.getObject(i));
+                        Object value = rs.getObject(i);
+                        if (value != null) {
+                            if (targetBean instanceof Table) {
+                                ((Table) targetBean).scan(rs.getMetaData().getColumnLabel(i), value);
+                            } else {
+                                DataBean.scanToClass(classType, targetBean, rs.getMetaData().getColumnLabel(i), value);
+                            }
                         }
                     }
                     retList.add(targetBean);
                 }
             }
             return retList;
-        } catch (SQLException e) {
-            throw e;
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
                  InvocationTargetException e) {
             throw new JdaoClassException(e);
@@ -84,8 +87,8 @@ public class DBexec {
      * @param con
      * @param sql
      * @param values
-     * @return
      * @param <T>
+     * @return
      * @throws SQLException
      * @throws JdaoClassException
      * @throws JdaoException
@@ -104,17 +107,18 @@ public class DBexec {
                 if (rs.next()) {
                     int columncount = rs.getMetaData().getColumnCount();
                     for (int i = 1; i <= columncount; i++) {
-                        if (targetBean instanceof Table) {
-                            ((Table) targetBean).scan(rs.getMetaData().getColumnLabel(i), rs.getObject(i));
-                        } else {
-                            DataBean.scanToClass(classType, targetBean, rs.getMetaData().getColumnLabel(i), rs.getObject(i));
+                        Object value = rs.getObject(i);
+                        if (value != null) {
+                            if (targetBean instanceof Table) {
+                                ((Table) targetBean).scan(rs.getMetaData().getColumnLabel(i), value);
+                            } else {
+                                DataBean.scanToClass(classType, targetBean, rs.getMetaData().getColumnLabel(i), value);
+                            }
                         }
                     }
                 }
             }
             return targetBean;
-        } catch (SQLException e) {
-            throw e;
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
                  InvocationTargetException e) {
             throw new JdaoClassException(e);
@@ -153,8 +157,6 @@ public class DBexec {
                 }
             }
             return retList;
-        } catch (SQLException e) {
-            throw e;
         } finally {
             Closer.closeAll(rs);
         }
@@ -188,8 +190,6 @@ public class DBexec {
                 }
             }
             return null;
-        } catch (SQLException e) {
-            throw e;
         } finally {
             Closer.closeAll(rs);
         }
@@ -213,8 +213,6 @@ public class DBexec {
                 }
             }
             return ps.executeBatch();
-        } catch (SQLException e) {
-            throw e;
         }
     }
 
@@ -233,9 +231,30 @@ public class DBexec {
                 }
             }
             return ps.executeUpdate();
-        } catch (SQLException e) {
-            throw e;
         }
     }
 
+    static Map<Integer, Object> executeCall(Connection con, String procedureCallMethod, Params... params) throws SQLException {
+        try (CallableStatement stmt = con.prepareCall(procedureCallMethod)) {
+            List<Integer> indexList = new ArrayList();
+            for (int i = 0; i < params.length; i++) {
+                if (params[i] instanceof Out) {
+                    indexList.add(i + 1);
+                    stmt.registerOutParameter(i + 1, params[i].getTypes());
+                } else if (params[i] instanceof InOut) {
+                    indexList.add(i + 1);
+                    stmt.registerOutParameter(i + 1, params[i].getTypes());
+                    stmt.setObject(i + 1, params[i].getValue());
+                } else {
+                    stmt.setObject(i + 1, params[i].getValue());
+                }
+            }
+            stmt.execute();
+            Map<Integer, Object> valuesMap = new HashMap();
+            for (Integer i : indexList) {
+                valuesMap.put(i, stmt.getObject(i));
+            }
+            return valuesMap;
+        }
+    }
 }
