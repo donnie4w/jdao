@@ -119,6 +119,9 @@ public class MapperHandler extends JdaoMapper {
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
         }
+        if (Logger.isVaild())
+            Logger.info("[Mapper Id] " + mapperId + " \nSELECTONE SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
+
         return _selectOne(mapperId, pb.getResultClass(), pb.getOutputType(), pb.getSql(), args);
     }
 
