@@ -31,7 +31,7 @@ import java.util.*;
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
  * @date 2013-1-10
  */
-public abstract class Table<T extends Table<?>> implements Scanner, Serializable {
+public abstract class Table<T extends Table<?>> implements Scanner<T>, Serializable ,JdaoSerializa{
     private static final long serialVersionUID = 6118092300004961000L;
 
     private static final String AND = " and ";
