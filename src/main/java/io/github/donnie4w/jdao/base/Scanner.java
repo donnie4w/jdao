@@ -19,6 +19,8 @@ package io.github.donnie4w.jdao.base;
 
 import io.github.donnie4w.jdao.handle.JdaoException;
 
-public interface Scanner {
-   void scan(String fieldname, Object obj) throws JdaoException;
+public interface Scanner<T> {
+    T copy(T h);
+
+    void scan(String fieldname, Object obj) throws JdaoException;
 }
