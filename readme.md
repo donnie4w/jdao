@@ -2,8 +2,11 @@
 
 ### Introduction
 
-JDAO is an innovative persistence layer solution aimed at reducing programming workload, increasing productivity and performance, supporting multiple data sources, and enabling data read-write separation while establishing a standard for persistence layer programming. By leveraging JDAO, developers can reduce more than 50% of the persistence layer programming workload, standardize programming practices, minimize errors, and facilitate maintenance and extension.
-Even if you haven't used Jdao before, you can instantly understand the meaning of its code and related data behavior just by looking at it. Moreover, you can grasp its usage within minutes, thanks to its simplicity.
+JDAO is an innovative persistence layer solution designed to reduce coding efforts, increase productivity and performance, support multi-datasource integration, and enforce persistence layer programming standards. By leveraging JDAO, developers can decrease the amount of code required for the persistence layer by 30% to 50%, establish unified coding standards, minimize errors, and ensure easier maintenance and expansion.
+
+* JDAO’s structure is both simple and rigorous, with interfaces and function names that adhere to JDBC conventions, making the operations intuitive and self-explanatory. 
+* Even if you are new to JDAO, you can quickly understand its code and the associated data behaviors. 
+* The simplicity of JDAO ensures that you can master its usage within minutes.
 
 ### [Official Website](https://tlnet.top/jdao)
 
@@ -65,7 +68,10 @@ Mapping SQL to interfaces, supporting the following functions:
 - Directly invoking JDAO interfaces to execute SQL
 - Mapping SQL through XML files
 
-### Installation
+
+## Quick Start
+
+### 1. Installation
 
 ```xml
 <dependency>
@@ -76,9 +82,9 @@ Mapping SQL to interfaces, supporting the following functions:
 </dependency>
 ```
 
-### Quick Start
 
-#### 1. Configure Data Source
+
+### 2. Configure Data Source
 
 ```java
 Jdao.init(dataSource, Jdao.MYSQL);
@@ -86,11 +92,11 @@ Jdao.init(dataSource, Jdao.MYSQL);
 // Jdao.MYSQL is the database type
 ```
 
-#### 2. Generate Table Entity Classes
+### 3. Generate Table Entity Classes
 
 Use the JDAO code generation tool to generate standardized entity classes for database tables.
 
-#### 3. Entity Class Operations
+### 4. Entity Class Operations
 
 ```java
 // Set data source
@@ -127,7 +133,7 @@ hs.insert();
 // [INSERT SQL] insert into hstest (rowname, value) values ("hello world", "123456789")
 ```
 
-#### 4. Jdao
+### 5. Jdao
 
 ###### CRUD Operations
 
@@ -146,7 +152,7 @@ int i = Jdao.executeUpdate("update hstest set value = ? where id = 1", "hello");
 int i = Jdao.executeUpdate("delete from hstest where id = ?", 1);
 ```
 
-#### 5. JdaoCache 
+### 6. JdaoCache 
 
 ###### Configure Cache
 
@@ -165,7 +171,7 @@ Hstest hs2 = t2.select();
 System.out.println(hs2);
 ```
 
-#### 6. JdaoSlave 
+### 7. JdaoSlave 
 
 ###### Read-Write Separation
 
@@ -178,7 +184,7 @@ Hstest hs = t.select();
 System.out.println(hs);
 ```
 
-#### 7. JdaoMapper 
+### 8. JdaoMapper 
 
 ###### Use XML for SQL Mapping
 
