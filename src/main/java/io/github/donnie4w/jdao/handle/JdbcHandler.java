@@ -18,6 +18,8 @@
 
 package io.github.donnie4w.jdao.handle;
 
+import io.github.donnie4w.jdao.base.Params;
+
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -70,8 +72,6 @@ public class JdbcHandler implements JdbcHandle {
     public DataBean executeQueryBean(String sql, Object... values) throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
             return DBexec.executequeryBean(conn, sql, values);
-        } catch (SQLException ex) {
-            throw ex;
         }
     }
 
@@ -85,8 +85,6 @@ public class JdbcHandler implements JdbcHandle {
     public List<DataBean> executeQueryBeans(String sql, Object... values) throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
             return DBexec.executequeryBeans(conn, sql, values);
-        } catch (SQLException ex) {
-            throw ex;
         }
     }
 
@@ -95,8 +93,8 @@ public class JdbcHandler implements JdbcHandle {
      * @param claz
      * @param sql
      * @param values
-     * @return
      * @param <T>
+     * @return
      * @throws JdaoException
      * @throws JdaoClassException
      * @throws SQLException
@@ -105,8 +103,6 @@ public class JdbcHandler implements JdbcHandle {
     public <T> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         try (Connection conn = dataSource.getConnection()) {
             return DBexec.executeQueryList(claz, conn, sql, values);
-        } catch (SQLException | JdaoClassException ex) {
-            throw ex;
         }
     }
 
@@ -114,8 +110,8 @@ public class JdbcHandler implements JdbcHandle {
      * @param claz
      * @param sql
      * @param values
-     * @return
      * @param <T>
+     * @return
      * @throws JdaoException
      * @throws JdaoClassException
      * @throws SQLException
@@ -124,8 +120,6 @@ public class JdbcHandler implements JdbcHandle {
     public <T> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         try (Connection conn = dataSource.getConnection()) {
             return DBexec.executeQuery(claz, conn, sql, values);
-        } catch (SQLException | JdaoClassException ex) {
-            throw ex;
         }
     }
 
@@ -140,8 +134,6 @@ public class JdbcHandler implements JdbcHandle {
     public int executeUpdate(String sql, Object... values) throws JdaoException, SQLException {
         try (Connection conn = dataSource.getConnection()) {
             return DBexec.executeUpdate(conn, sql, values);
-        } catch (SQLException ex) {
-            throw ex;
         }
     }
 
@@ -155,10 +147,19 @@ public class JdbcHandler implements JdbcHandle {
     public int[] executeBatch(String sql, List<Object[]> values) throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
             return DBexec.executeBatch(conn, sql, values);
-        } catch (SQLException ex) {
-            throw ex;
         }
     }
 
 
+    /**
+     * @param procedureName
+     * @param params
+     * @return
+     * @throws SQLException
+     */
+    public Map<Integer, Object> executeCall(String procedureCallMethod, Params... params) throws SQLException {
+        try (Connection conn = dataSource.getConnection()) {
+            return DBexec.executeCall(conn, procedureCallMethod, params);
+        }
+    }
 }
