@@ -18,10 +18,13 @@
 
 package io.github.donnie4w.jdao.handle;
 
+import io.github.donnie4w.jdao.base.Params;
+
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class DBhandler implements DBhandle {
     private final DBType dbType;
@@ -206,6 +209,32 @@ public class DBhandler implements DBhandle {
     @Override
     public int[] executeBatch(String sql, List<Object[]> values) throws JdaoException, SQLException {
         return jdbcHandle.executeBatch(sql, values);
+    }
+
+
+    /**
+     * @param procedureName
+     * @param params
+     * @return
+     * @throws SQLException
+     */
+    public Map<Integer, Object> executeCall(String procedureCallMethod, Params... params) throws SQLException {
+        return jdbcHandle.executeCall(procedureCallMethod, params);
+    }
+
+    /**
+     * Store Procedure operations
+     *
+     * @param procedureName StoreProcedure Name
+     * @param params
+     * @return
+     * @throws SQLException
+     */
+    public Map<Integer, Object> executeCall(Transaction transaction, String procedureName, Params... params) throws SQLException {
+        if (transaction != null) {
+            return transaction.executeCall(procedureName, params);
+        }
+        return jdbcHandle.executeCall(procedureName, params);
     }
 
 }
