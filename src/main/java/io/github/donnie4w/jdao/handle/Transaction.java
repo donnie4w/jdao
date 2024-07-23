@@ -17,22 +17,27 @@
  */
 package io.github.donnie4w.jdao.handle;
 
+import io.github.donnie4w.jdao.base.Params;
+
+import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 
 /**
- *  author donnie4w <donnie4w@gmail.com>
- *  Database transaction interface for transactional manipulation of data
- *
+ * author donnie4w <donnie4w@gmail.com>
+ * Database transaction interface for transactional manipulation of data
  */
-public interface Transaction extends JdbcHandle {
-
+public interface Transaction extends Basehandle{
     /**
      * @throws SQLException
      */
     void commit() throws SQLException;
-
     /**
      * @throws SQLException
      */
     void rollback() throws SQLException;
+
+    DataSource getDataSource();
+
 }
