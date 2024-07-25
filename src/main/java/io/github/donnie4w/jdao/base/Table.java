@@ -31,7 +31,7 @@ import java.util.*;
  * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
  * @date 2013-1-10
  */
-public abstract class Table<T extends Table<?>> implements Scanner<T>, Serializable ,JdaoSerializa{
+public abstract class Table<T extends Table<?>> implements JStruct<T> {
     private static final long serialVersionUID = 6118092300004961000L;
 
     private static final String AND = " and ";
@@ -71,8 +71,6 @@ public abstract class Table<T extends Table<?>> implements Scanner<T>, Serializa
         this.clazz = claz;
         this.isinit = true;
     }
-
-    public abstract void toJdao();
 
     public T useMaster(boolean useMaster) {
         this.mustMaster = useMaster;
@@ -697,7 +695,6 @@ public abstract class Table<T extends Table<?>> implements Scanner<T>, Serializa
             }
         }
         return getDBhandle(false).executeUpdate(transaction, sb.toString(), values);
-
     }
 
     public void reset() {
@@ -715,10 +712,9 @@ public abstract class Table<T extends Table<?>> implements Scanner<T>, Serializa
     /**
      * This operation enables caching
      *
-     * @param <T>
      * @return
      */
-    public <T> T useCache() {
+    public T useCache() {
         return useCache(true);
     }
 
@@ -727,10 +723,9 @@ public abstract class Table<T extends Table<?>> implements Scanner<T>, Serializa
      * Set whether this table object uses cache
      *
      * @param use
-     * @param <T>
      * @return
      */
-    public <T> T useCache(boolean use) {
+    public T useCache(boolean use) {
         isinit();
         if (use) {
             this.isCache = 1;
@@ -745,9 +740,10 @@ public abstract class Table<T extends Table<?>> implements Scanner<T>, Serializa
      *
      * @param commentLine
      */
-    public void setCommentLine(String commentLine) {
+    public T useCommentLine(String commentLine) {
         isinit();
         this.commentLine = commentLine.matches(".{0,}\\*/.{0,}") ? null : commentLine;
+        return (T) this;
     }
 
     /**
