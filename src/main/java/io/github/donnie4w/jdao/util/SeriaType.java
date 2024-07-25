@@ -35,7 +35,8 @@ public enum SeriaType {
     BYTE_ARRAY(10),
     DATE(11),
     BIGINTEGER(12),
-    BIGDECIMAL(13);
+    BIGDECIMAL(13),
+    TIMESTAMP(14);
 
 
     private final int code;
@@ -72,7 +73,7 @@ public enum SeriaType {
         typeMapping.put(java.util.Date.class, DATE);
         typeMapping.put(java.sql.Date.class, DATE);
         typeMapping.put(java.sql.Time.class, DATE);
-        typeMapping.put(java.sql.Timestamp.class, DATE);
+        typeMapping.put(java.sql.Timestamp.class, TIMESTAMP);
         typeMapping.put(BigInteger.class, BIGINTEGER);
         typeMapping.put(BigDecimal.class, BIGDECIMAL);
 
