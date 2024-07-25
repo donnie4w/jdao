@@ -20,6 +20,7 @@ package io.github.donnie4w.jdao.base;
 
 import io.github.donnie4w.jdao.handle.JdaoException;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
@@ -33,37 +34,50 @@ public class DateUtil {
     public static Date asDate(Object obj) throws JdaoException {
         if (obj instanceof Date) {
             return (Date) obj;
+        } else if (obj instanceof OffsetDateTime) {
+            return java.sql.Timestamp.from(((OffsetDateTime) obj).toInstant());
+        } else if (obj instanceof ZonedDateTime) {
+            return java.sql.Timestamp.from(((ZonedDateTime) obj).toInstant());
+        } else if (obj instanceof Instant) {
+            Instant instant = (Instant) obj;
+            if (instant.getNano() > 0) {
+                return java.sql.Timestamp.from(instant);
+            } else {
+                return Date.from(instant);
+            }
         } else if (obj instanceof LocalDateTime) {
-            return dateFromLocalDateTime((LocalDateTime) obj);
-        } else if (obj instanceof LocalDate) {
-            return dateFromLocalDate((LocalDate) obj);
+            LocalDateTime localDateTime = (LocalDateTime) obj;
+            if (localDateTime.getNano() > 0) {
+                return java.sql.Timestamp.from(localDateTime.atZone(DEFAULT_ZONE_ID).toInstant());
+            } else {
+                return Date.from(localDateTime.atZone(DEFAULT_ZONE_ID).toInstant());
+            }
         } else if (obj instanceof LocalTime) {
-            return dateFromLocalTime((LocalTime) obj);
+            LocalTime localTime = (LocalTime) obj;
+            LocalDate today = LocalDate.now();
+            ZonedDateTime zdt = localTime.atDate(today).atZone(DEFAULT_ZONE_ID);
+            if (localTime.getNano() > 0) {
+                return java.sql.Timestamp.from(zdt.toInstant());
+            }
+            return Date.from(zdt.toInstant());
+        } else if (obj instanceof LocalDate) {
+            LocalDate localDate = (LocalDate) obj;
+            return Date.from(localDate.atStartOfDay(DEFAULT_ZONE_ID).toInstant());
         } else if (obj instanceof String) {
             return parseStringDate((String) obj);
         } else if (obj instanceof byte[]) {
             return parseByteArrayDate((byte[]) obj);
-        } else if (obj instanceof Long || obj instanceof Integer || obj instanceof BigInteger) {
-            return dateFromNumber(obj);
+        } else if (obj instanceof Long) {
+            return timeStampToDate((Long) obj);
+        } else if (obj instanceof Integer) {
+            return timeStampToDate((Integer) obj);
+        } else if (obj instanceof BigInteger) {
+            return timeStampToDate(((BigInteger) obj).longValue());
+        } else if (obj instanceof BigDecimal) {
+            return timeStampToDate(((BigDecimal) obj).longValue());
         } else {
             throw new JdaoException("Unsupported type for conversion to Date: " + obj.getClass().getName());
         }
-    }
-
-    private static Date dateFromLocalDateTime(LocalDateTime ldt) {
-        ZonedDateTime zdt = ldt.atZone(DEFAULT_ZONE_ID);
-        return Date.from(zdt.toInstant());
-    }
-
-    private static Date dateFromLocalDate(LocalDate ld) {
-        ZonedDateTime zdt = ld.atStartOfDay(DEFAULT_ZONE_ID);
-        return Date.from(zdt.toInstant());
-    }
-
-    private static Date dateFromLocalTime(LocalTime lt) {
-        LocalDate today = LocalDate.now();
-        ZonedDateTime zdt = lt.atDate(today).atZone(DEFAULT_ZONE_ID);
-        return Date.from(zdt.toInstant());
     }
 
     private static Date parseStringDate(String str) throws JdaoException {
@@ -71,7 +85,7 @@ public class DateUtil {
             Date t = DateConvert.convertToDate(str);
             if (t == null) {
                 if ((str).matches("\\d+")) {
-                    t = new Date(Long.valueOf(str));
+                    return timeStampToDate(Long.valueOf(str));
                 }
             }
             return t;
@@ -89,15 +103,18 @@ public class DateUtil {
         }
     }
 
-    private static Date dateFromNumber(Object number) {
-        long millis;
-        if (number instanceof Integer) {
-            millis = ((Integer) number).longValue() * 1000; // Assuming seconds
-        } else if (number instanceof Long) {
-            millis = (Long) number;
-        } else { // BigInteger
-            millis = ((BigInteger) number).longValue();
+    private static Date timeStampToDate(long timestamp) {
+        if (timestamp > 3093527923199000L) {
+            return convertNanosecondsToDate(timestamp);
+        } else {
+            return new Date(timestamp);
         }
-        return new Date(millis);
     }
+
+    private static Date convertNanosecondsToDate(long timestamp) {
+        java.sql.Timestamp ts = new java.sql.Timestamp(timestamp / 1_000_000L);
+        ts.setNanos((int) (timestamp % 1_000_000_000L));
+        return ts;
+    }
+
 }
