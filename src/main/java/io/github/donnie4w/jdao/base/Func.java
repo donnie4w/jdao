@@ -23,7 +23,7 @@ package io.github.donnie4w.jdao.base;
  * @date 2013-1-10
  * @verion 1.0
  */
-public class Func<T> implements Field {
+public class Func<T> implements Field<T> {
     private static final long serialVersionUID = 1L;
     public String fieldName;
 
