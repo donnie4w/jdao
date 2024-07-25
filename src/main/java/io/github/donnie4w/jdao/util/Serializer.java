@@ -95,6 +95,9 @@ public class Serializer {
                         dos.writeByte(bigIntBytes.length);
                         dos.write(bigIntBytes);
                         break;
+                    case TIMESTAMP:
+                        java.sql.Timestamp t = (java.sql.Timestamp) value;
+                        dos.writeLong(t.getTime()*1_000_000 +t.getNanos()%1_000_000);
                     default:
                         Logger.warn("Unsupported type: ", type);
                 }
@@ -182,6 +185,12 @@ public class Serializer {
                         BigDecimal decimal = new BigDecimal(unscaledValue, scale);
                         result.put(key, decimal);
                         break;
+                     case 14:
+                         timestamp = dis.readLong();
+                         java.sql.Timestamp t = new java.sql.Timestamp(timestamp/1_000_000L);
+                         int nanoseconds = (int) (timestamp % 1_000_000_000L);
+                         t.setNanos(nanoseconds);
+                         result.put(key, t);
                     default:
                         Logger.warn("[Serialize Decode]Unsupported type: ", valueType);
                 }
