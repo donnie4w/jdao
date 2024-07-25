@@ -27,7 +27,19 @@ import java.util.Date;
 public class DateConvert {
 
     public static Date convertToDate(String dateStr) throws JdaoException {
-        if (dateStr == null || dateStr.length() == 0){
+        Instant instant = convertToInstant(dateStr);
+        if (instant != null) {
+            if (instant.getNano() > 0) {
+                return java.sql.Timestamp.from(instant);
+            } else {
+                return Date.from(instant);
+            }
+        }
+        return null;
+    }
+
+    public static Instant convertToInstant(String dateStr) throws JdaoException {
+        if (dateStr == null || dateStr.length() == 0) {
             return null;
         }
 
@@ -119,35 +131,35 @@ public class DateConvert {
                 if (isZonedDateTime) {
                     ZonedDateTime zdt = ZonedDateTime.parse(dateStr, formatter);
                     zdt = zdt.withZoneSameInstant(zoneId);
-                    return Date.from(Instant.from(zdt));
+                    return Instant.from(zdt);
                 } else if (isOffsetDateTime) {
                     OffsetDateTime offsetDateTime = OffsetDateTime.parse(dateStr, formatter);
-                    return Date.from(offsetDateTime.atZoneSameInstant(zoneId).toInstant());
+                    return offsetDateTime.atZoneSameInstant(zoneId).toInstant();
                 } else if (isLocalDateTime) {
                     LocalDateTime localDateTime = LocalDateTime.parse(dateStr, formatter);
-                    return Date.from(Instant.from(localDateTime.atZone(zoneId)));
+                    return Instant.from(localDateTime.atZone(zoneId));
                 } else if (isLocalDate) {
                     LocalDate localDate = LocalDate.parse(dateStr, formatter);
-                    return Date.from(localDate.atStartOfDay(zoneId).toInstant());
+                    return localDate.atStartOfDay(zoneId).toInstant();
                 }
             }
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern.toString());
             if (isZonedDateTime) {
                 ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateStr, formatter);
-                return Date.from(zonedDateTime.toInstant());
+                return zonedDateTime.toInstant();
             } else if (isOffsetDateTime) {
                 OffsetDateTime offsetDateTime = OffsetDateTime.parse(dateStr, formatter);
-                return Date.from(offsetDateTime.toInstant());
+                return offsetDateTime.toInstant();
             } else if (isLocalDateTime) {
                 LocalDateTime localDateTime = LocalDateTime.parse(dateStr, formatter);
-                return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+                return localDateTime.atZone(ZoneId.systemDefault()).toInstant();
             } else if (isLocalDate) {
                 LocalDate localDate = LocalDate.parse(dateStr, formatter);
-                return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
             }
         } catch (Exception e) {
-           throw new JdaoException(e);
+            throw new JdaoException(e);
         }
         return null;
     }
