@@ -8,9 +8,11 @@ JDAO is an innovative persistence layer solution designed to reduce coding effor
 * Even if you are new to JDAO, you can quickly understand its code and the associated data behaviors. 
 * The simplicity of JDAO ensures that you can master its usage within minutes.
 
-### [Official Website](https://tlnet.top/jdao)
+### [Official Website](https://tlnet.top/jdaoen)
 
-### [User Documentation](https://tlnet.top/jdaodoc)
+### [User Documentation](https://tlnet.top/jdaoendoc)
+
+### [Demo](https://github.com/donnie4w/jdaodemo)
 
 ### Key Features
 
@@ -82,8 +84,6 @@ Mapping SQL to interfaces, supporting the following functions:
 </dependency>
 ```
 
-
-
 ### 2. Configure Data Source
 
 ```java
@@ -133,7 +133,7 @@ hs.insert();
 // [INSERT SQL] insert into hstest (rowname, value) values ("hello world", "123456789")
 ```
 
-### 5. Jdao
+### 5. Jdao api
 
 ###### CRUD Operations
 
