@@ -73,4 +73,6 @@ public interface JStruct<T> extends Scanner<T>, JdaoSerializa, Serializable {
     void toJdao();
 
     void reset();
+
+    String TABLENAME();
 }
