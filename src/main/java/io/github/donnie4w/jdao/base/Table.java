@@ -525,7 +525,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
                 batchMap.get(f).add(fieldMap.get(f));
             }
         }
-        fieldMap.clear();
     }
 
     /**
@@ -536,9 +535,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
      */
     public int[] executeBatch() throws JdaoException, SQLException {
         isinit();
-        if (fieldMap.size() > 0) {
-            addBatch();
-        }
         if (batchMap.size() == 0) {
             return new int[]{};
         }
@@ -764,6 +760,10 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
         if (!this.isinit) {
             throw new JdaoRuntimeException("the object is not a Jdao object and should be converted to a Jdao object by calling the toJdao() function");
         }
+    }
+
+    public String TABLENAME() {
+        return TABLENAME;
     }
 }
 
