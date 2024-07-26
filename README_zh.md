@@ -249,3 +249,9 @@ public void selectMapperFace() throws JdaoException, JdaoClassException, SQLExce
     System.out.println(hstest);
 }
 ```
+
+------------
+
+#### Jdao 使用文档界面
+
+![jdao](https://tlnet.top/statics/tlnet/21691.jpg)
