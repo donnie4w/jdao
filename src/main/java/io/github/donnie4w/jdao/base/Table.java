@@ -144,11 +144,24 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
     }
 
     /**
-     * where operation
-     * The function is the same as where in sql
+     * Adds one or more WHERE conditions to the query builder.
      *
-     * @param wheres
-     * @return
+     * @param wheres One or more Where objects representing conditions to be added to the WHERE clause.
+     *
+     * @return The current query builder object to allow method chaining.
+     *<p>
+     * Description:
+     *   This method allows you to add one or more WHERE conditions to the query builder. Each condition is represented by a Where object,
+     *   which can be combined using logical operators (AND, OR) to form complex conditions. The method returns the current query builder
+     *   object to support method chaining for building more complex queries.
+     *<p>
+     * Example:
+     *<p> Assuming Hstest is a table class and ID is a column in that table
+     *<p> sql in MySql : select * from hstest where id &gt=? and id &lt= ? or id=? group by id having  count(id) &lt? order by id asc LIMIT ?, ? [3, 0, 10, 2, 0, 5]
+     *   <blockquote><pre>
+     *   Hstest hs = new Hstest().where(Hstest.ID.LE(3), Hstest.ID.GE(0).OR(Hstest.ID.EQ(10))).groupBy(Hstest.ID).having(Hstest.ID.count().LT(2)).orderBy(Hstest.ID.asc()).limit(0, 5);
+     *   </pre></blockquote>
+     *
      */
     public T where(Where<T>... wheres) {
         isinit();
