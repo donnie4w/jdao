@@ -28,29 +28,29 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class SlaveHandler {
+public class SlaveHandler implements SlaveHandle {
 
     private final Map<Object, List<DBhandle>> slaveMap = new ConcurrentHashMap<>();
 
     private final String MAPPER_PRE = String.valueOf(System.nanoTime());
 
-    void bindPackage(String packageName, DataSource dataSource, DBType dbtype) {
+    public void bindPackage(String packageName, DataSource dataSource, DBType dbtype) {
         getAndset(packageName).add(Jdao.newDBhandle(dataSource, dbtype));
     }
 
-    void bindPackage(String packageName, DBhandle dbhandle) {
+    public void bindPackage(String packageName, DBhandle dbhandle) {
         getAndset(packageName).add(dbhandle);
     }
 
-    void bindClass(Class<?> clz, DBhandle dbHandle) {
+    public void bindClass(Class<?> clz, DBhandle dbHandle) {
         getAndset(clz).add(dbHandle);
     }
 
-    void bindClass(Class<?> clz, DataSource dataSource, DBType dbtype) {
+    public void bindClass(Class<?> clz, DataSource dataSource, DBType dbtype) {
         getAndset(clz).add(Jdao.newDBhandle(dataSource, dbtype));
     }
 
-    boolean bindMapper(String namespace, String id, DBhandle dbhandle) {
+    public boolean bindMapper(String namespace, String id, DBhandle dbhandle) {
         if (MapperParser.getParamBean(namespace, id) != null) {
             getAndset(MAPPER_PRE.concat(namespace).concat(".".concat(id))).add(dbhandle);
             return true;
@@ -58,7 +58,7 @@ public class SlaveHandler {
         return false;
     }
 
-    boolean bindMapper(String namespace, String id, DataSource dataSource, DBType dbtype) {
+    public boolean bindMapper(String namespace, String id, DataSource dataSource, DBType dbtype) {
         if (MapperParser.getParamBean(namespace, id) != null) {
             getAndset(MAPPER_PRE.concat(namespace).concat(".".concat(id))).add(Jdao.newDBhandle(dataSource, dbtype));
             return true;
@@ -66,7 +66,7 @@ public class SlaveHandler {
         return false;
     }
 
-    boolean bindMapper(Class<?> clz, DataSource dataSource, DBType dbtype) {
+    public boolean bindMapper(Class<?> clz, DataSource dataSource, DBType dbtype) {
         if (clz.isInterface()) {
             Method[] methods = clz.getMethods();
             if (methods == null || methods.length == 0) {
@@ -81,7 +81,7 @@ public class SlaveHandler {
         return false;
     }
 
-    boolean bindMapper(Class<?> clz, DBhandle dbHandle) {
+    public boolean bindMapper(Class<?> clz, DBhandle dbHandle) {
         if (clz.isInterface()) {
             Method[] methods = clz.getMethods();
             if (methods == null || methods.length == 0) {
@@ -96,7 +96,7 @@ public class SlaveHandler {
         return false;
     }
 
-    boolean bindMapper(String namespace, DataSource dataSource, DBType dbtype) {
+    public boolean bindMapper(String namespace, DataSource dataSource, DBType dbtype) {
         List<String> list = MapperParser.getMapperIds(namespace);
         if (list != null) {
             for (String name : list) {
@@ -107,7 +107,7 @@ public class SlaveHandler {
         return false;
     }
 
-    boolean bindMapper(String namespace, DBhandle dbHandle) {
+    public boolean bindMapper(String namespace, DBhandle dbHandle) {
         List<String> list = MapperParser.getMapperIds(namespace);
         if (list != null) {
             for (String name : list) {
@@ -119,19 +119,19 @@ public class SlaveHandler {
     }
 
 
-    void unbindPackage(String packageName) {
+    public void unbindPackage(String packageName) {
         slaveMap.remove(packageName);
     }
 
-    void unbindMapper(String namespace, String id) {
+    public void unbindMapper(String namespace, String id) {
         slaveMap.remove(MAPPER_PRE.concat(namespace).concat(".".concat(id)));
     }
 
-    void unbindClass(Class<?> clz) {
+    public void unbindClass(Class<?> clz) {
         slaveMap.remove(clz);
     }
 
-    void unbindMapper(Class<?> clz) {
+    public void unbindMapper(Class<?> clz) {
         if (clz.isInterface()) {
             Method[] methods = clz.getMethods();
             if (methods == null || methods.length == 0) {
@@ -144,7 +144,7 @@ public class SlaveHandler {
         }
     }
 
-    void unbindMapper(String namespace){
+    public void unbindMapper(String namespace){
         List<String> list = MapperParser.getMapperIds(namespace);
         if (list != null) {
             for (String name : list) {
@@ -165,12 +165,12 @@ public class SlaveHandler {
     }
 
 
-    int size() {
+    public  int size() {
         return slaveMap.size();
     }
 
 
-    DBhandle get(Class<?> clz, String packageName) {
+    public DBhandle get(Class<?> clz, String packageName) {
         DBhandle dbHandle = null;
         if (clz != null) {
             dbHandle = getList(slaveMap.get(clz));
@@ -182,7 +182,7 @@ public class SlaveHandler {
     }
 
 
-    DBhandle getMapper(String namespace, String id) {
+    public DBhandle getMapper(String namespace, String id) {
         if (Utils.stringValid(namespace) && Utils.stringValid(id)) {
             return getList(slaveMap.get(MAPPER_PRE.concat(namespace).concat(".").concat(id)));
         }
