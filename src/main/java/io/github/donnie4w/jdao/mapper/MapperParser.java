@@ -20,6 +20,7 @@ package io.github.donnie4w.jdao.mapper;
 
 import io.github.donnie4w.jdao.handle.JdaoException;
 import io.github.donnie4w.jdao.util.Logger;
+import io.github.donnie4w.jdao.util.Utils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -37,8 +38,15 @@ public class MapperParser {
     final static Map<String, ParamBean> mapper = new ConcurrentHashMap<>();
     final static Map<String, List<String>> namespaceMapper = new ConcurrentHashMap<>();
 
-    static ParamBean getParamBean(String mapperId) {
+    public static ParamBean getParamBean(String mapperId) {
         return mapper.get(mapperId);
+    }
+
+    public static ParamBean getParamBean(String namespace, String id) {
+        if (Utils.stringValid(namespace)&&Utils.stringValid(id)) {
+            return mapper.get(namespace.concat(".").concat(id));
+        }
+        return null;
     }
 
     static boolean containsMapperId(String mapperId) {
@@ -83,11 +91,11 @@ public class MapperParser {
         }
     }
 
-    private static void namespaceMapperAdd(String namespaces, String mapperId) {
-        if (!namespaceMapper.containsKey(namespaces)) {
-            namespaceMapper.put(namespaces, new ArrayList<>());
+    private static void namespaceMapperAdd(String namespace, String id) {
+        if (!namespaceMapper.containsKey(namespace)) {
+            namespaceMapper.put(namespace, new ArrayList<>());
         }
-        if (mapperId != null) namespaceMapper.get(namespaces).add(mapperId);
+        if (id != null) namespaceMapper.get(namespace).add(id);
     }
 
     private static void parseMapper(String xmlpath) throws JdaoException {
