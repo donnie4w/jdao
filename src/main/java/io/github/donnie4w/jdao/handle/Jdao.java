@@ -26,7 +26,6 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * author: donnie4w <donnie4w@gmail.com>
@@ -45,7 +44,7 @@ public class Jdao {
     private Jdao() {
     }
 
-    private static final Map<Object, DBhandle> dbhandleMap = new ConcurrentHashMap<>();
+    private static final DBContainer container = new DBContainer();
 
     private static DBhandle defaultDBhandle;
 
@@ -61,24 +60,64 @@ public class Jdao {
     }
 
     /**
-     * jdao init DataSource and return DBhandle
+     * Initializes the data source and binds it to a specific database type.
      *
-     * @param dataSource
-     * @param dbtype
+     * @param dataSource The DataSource object representing the database connection pool.
+     * @param dbtype     The database type, such as DBType.MYSQL, DBType.POSTGRESQL, etc.
+     *<p>
+     * Description:
+     *   This method sets up the data source to work with the specified database type.
+     *   It is typically called at the beginning of the application to configure the data source for use with a specific database.
+     *<p>
+     * Example:
+     * <blockquote><pre>
+     *   DataSource dataSource = new BasicDataSource();
+     *   dataSource.setUrl("jdbc:mysql://localhost:3306/mydb");
+     *   dataSource.setUsername("user");
+     *   dataSource.setPassword("password");
+     *
+     *   Jdao.init(dataSource, DBType.MYSQL);
+     * </pre></blockquote>
      */
     public static void init(DataSource dataSource, DBType dbtype) {
         defaultDBhandle = newDBhandle(dataSource, dbtype);
     }
 
     /**
-     * Sets the data source of the class that will be used by the class operation
+     * Binds a standard entity class to a specific data source and database type.
+     *
+     * @param clz         The class representing the entity to bind to the data source.
+     * @param dataSource  The DataSource object representing the database connection pool.
+     * @param dbtype      The database type, such as DBType.MYSQL, DBType.POSTGRESQL, etc.
+     *<p>
+     * Description:
+     *   This method sets up the specified entity class to work with the given data source and database type.
+     *   It is typically called at the beginning of the application to configure the entity class for use with a specific database.
+     *<p>
+     * Example:
+     * <p> Assuming Hstest is a class representing the user entity
+     *  <blockquote><pre>
+     *   DataSource dataSource = new BasicDataSource();
+     *   dataSource.setUrl("jdbc:mysql://localhost:3306/mydb");
+     *   dataSource.setUsername("user");
+     *   dataSource.setPassword("password");
+     *
+     *
+     *   Jdao.bindDataSource(Hstest.class, dataSource, DBType.MYSQL);
+     *   </pre></blockquote>
+     */
+    public static void bindDataSource(Class<? extends Table<?>> clz, DataSource dataSource, DBType dbtype) {
+        container.bind(clz, dataSource, dbtype);
+    }
+
+    /**
+     * remove DataSource by class
      *
      * @param clz
-     * @param dataSource
-     * @param dbtype
      */
-    public static void setDataSource(Class<? extends Table<?>> clz, DataSource dataSource, DBType dbtype) {
-        dbhandleMap.put(clz, newDBhandle(dataSource, dbtype));
+    public static void unbindDataSource(Class<?> clz) {
+        container.unbind(clz);
+
     }
 
     /**
@@ -88,7 +127,7 @@ public class Jdao {
      * @return
      */
     public static DBhandle getDBhandle(Class<?> clz) {
-        return dbhandleMap.get(clz);
+        return container.getDBhandle(clz);
     }
 
     /**
@@ -98,39 +137,140 @@ public class Jdao {
      * @return DBhandle
      */
     public static DBhandle getDBhandle(String packageName) {
-        return dbhandleMap.get(packageName);
+        return container.getDBhandle(packageName);
+    }
+
+
+    public static DBhandle getMapperDBhandle(String namespace,String id) {
+        return container.getMapperDBhandle(namespace,id);
     }
 
 
     /**
-     * remove DataSource by class
+     * Binds all standard entity classes within a specified package to a data source and database type.
      *
-     * @param clz
-     */
-    public static void removeDataSource(Class<?> clz) {
-        dbhandleMap.remove(clz);
-    }
-
-    /**
-     * For the package where the dao resides, set the data source,
-     * and use the data source for the operations corresponding to the dao in the package
+     * @param packageName The name of the package containing the entity classes to bind.
+     * @param dataSource  The DataSource object representing the database connection pool.
+     * @param dbtype      The database type, such as DBType.MYSQL, DBType.POSTGRESQL, etc.
+     *<p>
+     * Description:
+     *   This method sets up all entity classes within the specified package to work with the given data source and database type.
+     *<p>
+     * Example:
+     * <p> Assuming "com.example.entities" is the package containing the entity classes
+     *   <blockquote><pre>
+     *   DataSource dataSource = new BasicDataSource();
+     *   dataSource.setUrl("jdbc:mysql://localhost:3306/mydb");
+     *   dataSource.setUsername("user");
+     *   dataSource.setPassword("password");
      *
-     * @param packageName
-     * @param dataSource
-     * @param dbtype
+     *   Jdao.bindDataSource("com.example.entities", dataSource, DBType.MYSQL);
+     *  </pre></blockquote>
      */
-    public static void setDataSource(String packageName, DataSource dataSource, DBType dbtype) {
-        dbhandleMap.put(packageName, newDBhandle(dataSource, dbtype));
+    public static void bindDataSource(String packageName, DataSource dataSource, DBType dbtype) {
+        container.bind(packageName, dataSource, dbtype);
     }
-
 
     /**
      * remove DataSource by packageName
      *
      * @param packageName
      */
-    public static void removeDataSource(String packageName) {
-        dbhandleMap.remove(packageName);
+    public static void unbindDataSource(String packageName) {
+        container.unbind(packageName);
+    }
+
+
+    /**
+     * Binds the specified XML mapping namespace to a data source and database type.
+     *
+     * @param namespace   The namespace in the XML mapping files that corresponds to the tables and queries to bind.
+     * @param dataSource  The DataSource object representing the database connection pool.
+     * @param dbtype      The database type, such as DBType.MySQL, DBType.PostgreSQL, etc.
+     *<p>
+     * Description:
+     *   This method sets up the specified XML mapping namespace to work with the given data source and database type.
+     *<p>
+     * Example:
+     *<p> Assuming "com.example.mappers.users" is the namespace in the XML mapping files
+     *  <blockquote><pre>
+     *   DataSource dataSource = new BasicDataSource();
+     *   dataSource.setUrl("jdbc:mysql://localhost:3306/mydb");
+     *   dataSource.setUsername("user");
+     *   dataSource.setPassword("password");
+     *
+     *   Jdao.bindMapperDataSource("com.example.mappers.users", dataSource, DBType.MYSQL);
+     *  </pre></blockquote>
+     */
+    public static boolean bindMapperDataSource(String namespace, DataSource dataSource, DBType dbtype) {
+        return  container.bindMapper(namespace, dataSource, dbtype);
+    }
+
+
+    public static void unbindMapperDataSource(String namespace){
+        container.unbindMapper(namespace);
+    }
+
+    /**
+     * Binds the specified XML mapping namespace and CRUD tag id to a data source and database type.
+     *
+     * @param namespace The namespace in the XML mapping files that corresponds to the tables and queries to bind.
+     * @param id        The ID of the CRUD tag within the namespace to bind.
+     * @param dataSource The DataSource object representing the database connection pool.
+     * @param dbtype    The database type, such as DBType.MySQL, DBType.PostgreSQL, etc.
+     *<p>
+     * Description:
+     *   This method sets up the specified XML mapping namespace and CRUD tag id to work with the given data source and database type.
+     *<p>
+     * Example:
+     * <p>Assuming "com.example.mappers.users" is the namespace in the XML mapping files
+     * <p>Assuming "userSelect" is the id of the select tag within the namespace
+     *   <blockquote><pre>
+     *   DataSource dataSource = new BasicDataSource();
+     *   dataSource.setUrl("jdbc:mysql://localhost:3306/mydb");
+     *   dataSource.setUsername("user");
+     *   dataSource.setPassword("password");
+     *
+     *   Jdao.bindMapperDataSource("com.example.mappers.users", "userCrud", dataSource, DBType.MYSQL);
+     *   </pre></blockquote>
+     */
+    public static boolean bindMapperDataSource(String namespace, String id, DataSource dataSource, DBType dbtype) {
+        return container.bindMapper(namespace, id, dataSource, dbtype);
+    }
+
+
+    public static void unbindMapperDataSource(String namespace,String id){
+         container.unbindMapper(namespace,id);
+    }
+
+    /**
+     * Binds the specified mapper interface to a data source and database type, associating it with XML mapping files.
+     *
+     * @param mapperface The mapper interface class that defines the methods to bind, which correspond to the XML mappings.
+     * @param dataSource The DataSource object representing the database connection pool.
+     * @param dbtype     The database type, such as DBType.MYSQL, DBType.POSTGRESQL, etc.
+     *<p>
+     * Description:
+     *   This method sets up the specified mapper interface to work with the given data source and database type.
+     *<p>
+     * Example:
+     *<p> Assuming UserMapper is the mapper interface class
+     *  <blockquote><pre>
+     *   DataSource dataSource = new BasicDataSource();
+     *   dataSource.setUrl("jdbc:mysql://localhost:3306/mydb");
+     *   dataSource.setUsername("user");
+     *   dataSource.setPassword("password");
+     *
+     *   Jdao.bindMapperDataSource(UserMapper.class, dataSource, DBType.MYSQL);
+     *   </pre></blockquote>
+     */
+    public static boolean bindMapperDataSource(Class<?> mapperface, DataSource dataSource, DBType dbtype) {
+        return  container.bindMapper(mapperface, dataSource, dbtype);
+    }
+
+
+    public static void unbindMapperDataSource(Class<?> mapperface){
+        container.unbindMapper(mapperface);
     }
 
     /**
@@ -162,6 +302,13 @@ public class Jdao {
      * @param <T>
      * @return List<T>
      * @throws JdaoException
+     * @throws JdaoClassException
+     * @throws SQLException
+     * <P>
+     * Example:
+     *   <blockquote><pre>
+     *   Hstest hstest = Jdao.executeQuery(Hstest.class,"select id,age,rowname,updatetime from hstest where id = ?", 10);
+     *   </pre></blockquote>
      */
     public static <T> T executeQuery(Class<T> clz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         notnull(defaultDBhandle, err_noinit);
@@ -193,6 +340,13 @@ public class Jdao {
      * @param <T>
      * @return List<T>
      * @throws JdaoException
+     * @throws JdaoClassException
+     * @throws SQLException
+     * <P>
+     * Example:
+     *   <blockquote><pre>
+     *   List<Hstest> list = Jdao.executeQueryList(Hstest.class,"select id,age,rowname,updatetime from hstest limit ?", 10);
+     *   </pre></blockquote>
      */
     public static <T> List<T> executeQueryList(Class<T> clz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         notnull(defaultDBhandle, err_noinit);
@@ -209,6 +363,8 @@ public class Jdao {
      * @param <T>
      * @return List<T>
      * @throws JdaoException
+     * @throws JdaoClassException
+     * @throws SQLException
      */
     public static <T> List<T> executeQueryList(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         notnull(defaultDBhandle, err_noinit);
@@ -236,6 +392,12 @@ public class Jdao {
      * @param values
      * @return DataBean
      * @throws JdaoException
+     * @throws SQLException
+     * <P>
+     * Example:
+     *   <blockquote><pre>
+     *   DataBean dataBean = Jdao.executeQueryBean("select id,age,rowname,updatetime from hstest where id = ?", 15);
+     *   </pre></blockquote>
      */
     public static DataBean executeQueryBean(String sql, Object... values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
@@ -250,6 +412,7 @@ public class Jdao {
      * @param values
      * @return List<DataBean>
      * @throws JdaoException
+     * @throws SQLException
      */
     public static List<DataBean> executeQueryBeans(Transaction transaction, String sql, Object... values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
@@ -263,6 +426,12 @@ public class Jdao {
      * @param values
      * @return List<DataBean>
      * @throws JdaoException
+     * @throws SQLException
+     * <P>
+     * Example:
+     *   <blockquote><pre>
+     *   List<DataBean> list = Jdao.executeQueryBeans("select id,age,rowname,updatetime from hstest limit ?", 10);
+     *   </pre></blockquote>
      */
     public static List<DataBean> executeQueryBeans(String sql, Object... values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
@@ -277,6 +446,7 @@ public class Jdao {
      * @param values
      * @return int
      * @throws JdaoException
+     * @throws SQLException
      */
     public static int executeUpdate(Transaction transaction, String sql, Object... values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
@@ -290,6 +460,12 @@ public class Jdao {
      * @param values
      * @return
      * @throws JdaoException
+     * @throws SQLException
+     * <P>
+     * Example:
+     *   <blockquote><pre>
+     *   List<DataBean> list = Jdao.executeUpdate("update hstest set rowname = ? where id = ?", "hello world" , 1);
+     *   </pre></blockquote>
      */
     public static int executeUpdate(String sql, Object... values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
@@ -304,6 +480,7 @@ public class Jdao {
      * @param values
      * @return
      * @throws JdaoException
+     * @throws SQLException
      */
     public static int[] executeBatch(Transaction transaction, String sql, List<Object[]> values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
@@ -317,6 +494,15 @@ public class Jdao {
      * @param values
      * @return
      * @throws JdaoException
+     * @throws SQLException
+     * <P>
+     * Example:
+     *   <blockquote><pre>
+     *   List<Object[]> list = new ArrayList<>();
+     *   list.add(new Object[]{"111", "aaa"});
+     *   list.add(new Object[]{"222", "bbb"});
+     *   Jdao.executeBatch("insert into hstest1(`rowname`,`value`) values(?,?)", list);
+     *   </pre></blockquote>
      */
     public static int[] executeBatch(String sql, List<Object[]> values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
