@@ -31,33 +31,35 @@ public abstract class Cache {
 
     abstract void bindPackage(String packageName, CacheHandle cacheHandle);
 
+    abstract void unbindPackage(String packageName);
+
     abstract void bindClass(Class<? extends Table> clazz);
 
     abstract void bindClass(Class<? extends Table> clazz, CacheHandle cacheHandle);
 
-    abstract void removePackage(String packageName);
-
-    abstract void removeClass(Class<?> clazz);
+    abstract void unbindClass(Class<? extends Table> clazz);
 
     abstract boolean bindMapper(Class<?> mapperface);
 
     abstract boolean bindMapper(Class<?> mapperface, CacheHandle cacheHandle);
 
+    abstract void unbindMapper(Class<?> mapperface);
+
     abstract boolean bindMapper(String namespace);
 
     abstract boolean bindMapper(String namespace, CacheHandle cacheHandle);
+
+    abstract void unbindMapper(String namespace);
 
     abstract boolean bindMapper(String namespace, String id);
 
     abstract boolean bindMapper(String namespace, String id, CacheHandle cacheHandle);
 
-    abstract void removeMapper(Class<?> mapperface);
-
-    abstract void removeMapper(String namespace);
-
-    abstract void removeMapper(String namespace, String id);
+    abstract void unbindMapper(String namespace, String id);
 
     abstract String getDomain(String packageName, Class<?> clazz);
+
+    abstract String getDomain(String namespace, String id);
 
     abstract Object getCache(String domain, Class<?> clazz, Condition condition);
 
