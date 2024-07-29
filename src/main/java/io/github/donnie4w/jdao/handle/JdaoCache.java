@@ -24,39 +24,76 @@ public class JdaoCache {
     private static final Cache cache = Cache.newInstance();
 
     /**
-     * register cache by dao package
+     * Binds the specified package to enable caching mechanisms for all standard entity classes within the package.
      *
-     * @param packageName
+     * @param packageName The name of the package containing the entity classes to bind.
+     *<p>
+     * Description:
+     *   This method sets up all entity classes within the specified package to utilize the caching mechanism.
+     *<p>
+     * Example:
+     * <p> Assuming "com.example.entities" is the package containing the entity classes
+     *   <blockquote><pre>
+     *   JdaoCache.bindPackage("com.example.entities");
+     *   </pre></blockquote>
      */
     public static void bindPackage(String packageName) {
         cache.bindPackage(packageName);
     }
 
     /**
-     * register cache by dao package and use new CacheHandle
+     * Binds the specified package to enable caching mechanisms for all standard entity classes within the package, using the provided cache handle.
      *
-     * @param packageName
-     * @param cacheHandle
+     * @param packageName The name of the package containing the entity classes to bind.
+     * @param cacheHandle The cache handle that specifies caching behaviors such as data expiration and eviction policies.
+     *<p>
+     * Description:
+     *   This method sets up all entity classes within the specified package to utilize the caching mechanism defined by the provided cache handle.
+     *<p>
+     * Example:
+     * <p> Assuming "com.example.entities" is the package containing the entity classes
+     * <blockquote><pre>
+     *   JdaoCache.bindPackage("com.example.entities", new CacheHandle(10000));
+     * </pre></blockquote>
      */
     public static void bindPackage(String packageName, CacheHandle cacheHandle) {
         cache.bindPackage(packageName, cacheHandle);
     }
 
     /**
-     * register cache by table dao
+     * Binds the specified standard entity class to enable caching mechanisms.
      *
-     * @param clazz
+     * @param clazz The class representing the entity to bind.
+     *<p>
+     * Description:
+     *   This method sets up the specified entity class to utilize the caching mechanism.
+     *<p>
+     * Example:
+     * <p> Assuming Hstest is a class representing the user entity
+     *  <blockquote><pre>
+     *   JdaoCache.bindClass(Hstest.class);
+     *  </pre></blockquote>
      */
-    public static void bindClass(Class<? extends Table> clazz) {
+    public static void bindClass(Class<? extends Table<?>> clazz) {
         cache.bindClass(clazz);
     }
 
     /**
-     * register cache by table dao and use new CacheHandle
+     * Binds the specified standard entity class to enable caching mechanisms,using the provided cache handle.
      *
-     * @param clazz
+     * @param clazz The class representing the entity to bind.
+     * @param cacheHandle The cache handle that specifies caching behaviors such as data expiration and eviction policies.
+     *<p>
+     * Description:
+     *   This method sets up the specified entity class to utilize the caching mechanism.
+     *<p>
+     * Example:
+     *<p> Assuming Hstest is a class representing the user entity
+     *  <blockquote><pre>
+     *   JdaoCache.bindClass(Hstest.class,new CacheHandle(10000));
+     *  </pre></blockquote>
      */
-    public static void bindClass(Class<? extends Table> clazz, CacheHandle cacheHandle) {
+    public static void bindClass(Class<? extends Table<?>> clazz, CacheHandle cacheHandle) {
         cache.bindClass(clazz, cacheHandle);
     }
 
@@ -65,8 +102,8 @@ public class JdaoCache {
      *
      * @param packageName
      */
-    public static void removePackage(String packageName) {
-        cache.removePackage(packageName);
+    public static void unbindPackage(String packageName) {
+        cache.unbindPackage(packageName);
     }
 
     /**
@@ -74,66 +111,136 @@ public class JdaoCache {
      *
      * @param clazz
      */
-    public static void removeClass(Class<? extends Table> clazz) {
-        cache.removeClass(clazz);
+    public static void unbindClass(Class<? extends Table<?>> clazz) {
+        cache.unbindClass(clazz);
     }
 
     /**
-     * register cache for jdao Mapper by mapper interface
+     * Binds the specified mapper interface to enable caching mechanisms for all methods within the interface.
      *
-     * @param mapperface
+     * @param mapperface The mapper interface class that defines the methods to bind.
+     *
+     * @return true if the binding was successful, false otherwise.
+     *<p>
+     * Description:
+     *   This method sets up the specified mapper interface to utilize the caching mechanism for all methods within the interface.
+     *<p>
+     * Example:
+     * <p> Assuming UserMapper is the mapper interface class
+     * <blockquote><pre>
+     *   boolean bound = JdaoCache.bindMapper(UserMapper.class);
+     * </pre></blockquote>
      */
-    public static void bindMapper(Class<?> mapperface) {
-        cache.bindMapper(mapperface);
+    public static boolean bindMapper(Class<?> mapperface) {
+        return cache.bindMapper(mapperface);
     }
 
     /**
-     * register cache for jdao Mapper by mapper interface and use new CacheHandle
+     * Binds the specified mapper interface to enable caching mechanisms for all methods within the interface, using the provided cache handle.
      *
-     * @param mapperface
-     * @param cacheHandle
+     * @param mapperface The mapper interface class that defines the methods to bind.
+     * @param cacheHandle The cache handle that specifies caching behaviors such as data expiration and eviction policies.
+     *
+     * @return true if the binding was successful, false otherwise.
+     *<p>
+     * Description:
+     *   This method sets up the specified mapper interface to utilize the caching mechanism defined by the provided cache handle for all methods within the interface.
+     *<p>
+     * Example:
+     *<p> Assuming UserMapper is the mapper interface class
+     *<p> And "cacheHandle" is an instance of CacheHandle configured with specific caching policies
+     * <blockquote><pre>
+     *   boolean bound = JdaoCache.bindMapper(UserMapper.class, new CacheHandle(10000));
+     * </pre></blockquote>
      */
-    public static void bindMapper(Class<?> mapperface, CacheHandle cacheHandle) {
-        cache.bindMapper(mapperface, cacheHandle);
+    public static boolean bindMapper(Class<?> mapperface, CacheHandle cacheHandle) {
+        return cache.bindMapper(mapperface, cacheHandle);
     }
 
     /**
-     * register cache for jdao Mapper by namespace
+     * Binds the specified XML mapping namespace to enable caching mechanisms for all CRUD tags within the namespace.
      *
-     * @param namespace
+     * @param namespace The namespace in the XML mapping files that corresponds to the CRUD operations to bind.
+     *
+     * @return true if the binding was successful, false otherwise.
+     *<p>
+     * Description:
+     *   This method sets up the specified XML mapping namespace to utilize the caching mechanism for all CRUD operations within the namespace.
+     *<p>
+     * Example:
+     *<p> Assuming "com.example.mappers.users" is the namespace in the XML mapping files
+     *   <blockquote><pre>
+     *   boolean bound = JdaoCache.bindMapper("com.example.mappers.users");
+     *   </pre></blockquote>
      */
-    public static void bindMapper(String namespace) {
-        cache.bindMapper(namespace);
+    public static boolean bindMapper(String namespace) {
+        return cache.bindMapper(namespace);
     }
 
     /**
-     * register cache for jdao Mapper by namespace and use new CacheHandle
+     * Binds the specified XML mapping namespace to enable caching mechanisms for all CRUD tags within the namespace, using the provided cache handle.
      *
-     * @param namespace
-     * @param cacheHandle
+     * @param namespace The namespace in the XML mapping files that corresponds to the CRUD operations to bind.
+     * @param cacheHandle The cache handle that specifies caching behaviors such as data expiration and eviction policies.
+     *
+     * @return true if the binding was successful, false otherwise.
+     *<p>
+     * Description:
+     *   This method sets up the specified XML mapping namespace to utilize the caching mechanism defined by the provided cache handle for all CRUD operations within the namespace.
+     *<p>
+     * Example:
+     * <p> Assuming "com.example.mappers.users" is the namespace in the XML mapping files
+     * <blockquote><pre>
+     *   boolean bound = JdaoCache.bindMapper("com.example.mappers.users", new CacheHandle(10000));
+     * </pre></blockquote>
      */
-    public static void bindMapper(String namespace, CacheHandle cacheHandle) {
-        cache.bindMapper(namespace, cacheHandle);
+    public static boolean bindMapper(String namespace, CacheHandle cacheHandle) {
+        return cache.bindMapper(namespace, cacheHandle);
     }
 
     /**
-     * register cache for jdao Mapper by namespace and mapper id
+     * Binds the specified XML mapping namespace and CRUD tag ID to enable caching mechanisms for the specified CRUD operation.
      *
-     * @param namespace
+     * @param namespace The namespace in the XML mapping files that corresponds to the CRUD operations to bind.
+     * @param id The ID of the CRUD tag within the namespace to bind.
+     *
+     * @return true if the binding was successful, false otherwise.
+     *<p>
+     * Description:
+     *   This method sets up the specified XML mapping namespace and CRUD tag ID to utilize the caching mechanism for the specified CRUD operation.
+     *<p>
+     * Example:
+     *<p> Assuming "com.example.mappers.users" is the namespace in the XML mapping files
+     *<p> And "getUserById" is the ID of the select tag within the namespace
+     * <blockquote><pre>
+     *   boolean bound = JdaoCache.bindMapper("com.example.mappers.users", "getUserById");
+     * </pre></blockquote>
      */
-    public static void bindMapper(String namespace, String id) {
-        cache.bindMapper(namespace, id);
+    public static boolean bindMapper(String namespace, String id) {
+        return cache.bindMapper(namespace, id);
     }
 
     /**
-     * register cache for jdao Mapper by namespace and mapper id and use new CacheHandle
+     * Binds the specified XML mapping namespace and CRUD tag ID to enable caching mechanisms for the specified CRUD operation, using the provided cache handle.
      *
-     * @param namespace
-     * @param id
-     * @param cacheHandle
+     * @param namespace The namespace in the XML mapping files that corresponds to the CRUD operations to bind.
+     * @param id The ID of the CRUD tag within the namespace to bind.
+     * @param cacheHandle The cache handle that specifies caching behaviors such as data expiration and eviction policies.
+     *
+     * @return true if the binding was successful, false otherwise.
+     *<p>
+     * Description:
+     *   This method sets up the specified XML mapping namespace and CRUD tag ID to utilize the caching mechanism defined by the provided cache handle for the specified CRUD operation.
+     *<p>
+     * Example:
+     *<p> Assuming "com.example.mappers.users" is the namespace in the XML mapping files
+     *<p> And "getUserById" is the ID of the select tag within the namespace
+     * <blockquote><pre>
+     *   boolean bound = JdaoCache.bindMapper("com.example.mappers.users", "getUserById", new CacheHandle(10000));
+     * </pre></blockquote>
      */
-    public static void bindMapper(String namespace, String id, CacheHandle cacheHandle) {
-        cache.bindMapper(namespace, id, cacheHandle);
+    public static boolean bindMapper(String namespace, String id, CacheHandle cacheHandle) {
+        return cache.bindMapper(namespace, id, cacheHandle);
     }
 
     /**
@@ -141,8 +248,8 @@ public class JdaoCache {
      *
      * @param mapperface
      */
-    public static void removeMapper(Class<?> mapperface) {
-        cache.removeMapper(mapperface);
+    public static void unbindMapper(Class<?> mapperface) {
+        cache.unbindMapper(mapperface);
     }
 
     /**
@@ -150,8 +257,8 @@ public class JdaoCache {
      *
      * @param namespace
      */
-    public static void removeMapper(String namespace) {
-        cache.removeMapper(namespace);
+    public static void unbindMapper(String namespace) {
+        cache.unbindMapper(namespace);
     }
 
     /**
@@ -160,8 +267,8 @@ public class JdaoCache {
      * @param namespace
      * @param id
      */
-    public static void removeMapper(String namespace, String id) {
-        cache.removeMapper(namespace, id);
+    public static void unbindMapper(String namespace, String id) {
+        cache.unbindMapper(namespace, id);
     }
 
 
@@ -174,6 +281,11 @@ public class JdaoCache {
      */
     public static String getDomain(String packageName, Class<?> clazz) {
         return cache.getDomain(packageName, clazz);
+    }
+
+
+    public static String getDomain(String namespace, String id) {
+        return cache.getDomain(namespace, id);
     }
 
     /**
