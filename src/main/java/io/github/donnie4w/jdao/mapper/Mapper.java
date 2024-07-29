@@ -25,16 +25,17 @@ import io.github.donnie4w.jdao.handle.Transaction;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * @author donnie4w <donnie4w@gmail.com>
+ */
 public interface Mapper {
 
     boolean isAutocommit();
-
     /**
      * @param on
      * @throws JdaoException
      */
     void setAutocommit(boolean on) throws SQLException;
-
     /**
      *
      * @param transaction
