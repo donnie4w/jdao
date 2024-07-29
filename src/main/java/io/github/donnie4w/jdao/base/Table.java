@@ -119,11 +119,11 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
         return dbhandle;
     }
 
-    static DBhandle getDBhandle(Class<?> clz, String packageName, boolean queryType) {
+    static DBhandle getDBhandle(Class<? extends Table<?>> clz, String packageName, boolean queryType) {
         DBhandle dbhandle = null;
 
         if (JdaoSlave.size() > 0 && queryType) {
-            dbhandle = JdaoSlave.get(clz, packageName, null);
+            dbhandle = JdaoSlave.get(clz, packageName);
             if (dbhandle != null) {
                 return dbhandle;
             }
