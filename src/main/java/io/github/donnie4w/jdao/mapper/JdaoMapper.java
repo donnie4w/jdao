@@ -46,13 +46,13 @@ public abstract class JdaoMapper implements Mapper{
     /**
      * @param dBhandle
      */
-    public abstract void setDBhandle(DBhandle dBhandle);
+    public abstract JdaoMapper useDBhandle(DBhandle dBhandle);
 
     /**
      * @param dataSource
      * @param dbType
      */
-    public abstract void setDBhandle(DataSource dataSource, DBType dbType);
+    public abstract JdaoMapper useDBhandle(DataSource dataSource, DBType dbType);
 
     /**
      * the sql configure the mapping to the specified interface
