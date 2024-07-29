@@ -24,6 +24,7 @@ import io.github.donnie4w.jdao.base.SqlKV;
 import io.github.donnie4w.jdao.base.Table;
 import io.github.donnie4w.jdao.handle.*;
 import io.github.donnie4w.jdao.util.Logger;
+import io.github.donnie4w.jdao.util.Utils;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Method;
@@ -47,10 +48,10 @@ public class MapperHandler extends JdaoMapper {
     public void setAutocommit(boolean on) throws SQLException {
         if (on) {
             if (this.transaction == null) {
-                DBhandle dBhandle = getDBhandle(null, false);
+                DBhandle dBhandle = getDBhandle("", "", false);
                 if (dBhandle != null) {
                     this.transaction = dBhandle.getTransaction();
-                }else{
+                } else {
                     throw new SQLException("No data source was found");
                 }
             }
@@ -77,19 +78,19 @@ public class MapperHandler extends JdaoMapper {
         }
     }
 
-    private DBhandle getDBhandle(String mapperId, boolean queryType) {
+    private DBhandle getDBhandle(String namespce, String id, boolean queryType) {
         if (this.dBhandle != null) {
             return this.dBhandle;
         }
         DBhandle dbhandle = null;
-        if (mapperId != null && JdaoSlave.size() > 0 && queryType) {
-            dbhandle = JdaoSlave.get(null, null,mapperId);
+        if (Utils.stringValid(namespce) && Utils.stringValid(id) && JdaoSlave.size() > 0 && queryType) {
+            dbhandle = JdaoSlave.getMapper(namespce, id);
             if (dbhandle != null) {
                 return dbhandle;
             }
         }
-        if (mapperId != null) {
-            dbhandle = Jdao.getDBhandle(mapperId);
+        if (Utils.stringValid(namespce) && Utils.stringValid(id)) {
+            dbhandle = Jdao.getMapperDBhandle(namespce, id);
         }
         if (dbhandle == null) {
             dbhandle = Jdao.getDefaultDBhandle();
@@ -106,12 +107,14 @@ public class MapperHandler extends JdaoMapper {
         }
     }
 
-    public void setDBhandle(DBhandle dBhandle) {
+    public JdaoMapper useDBhandle(DBhandle dBhandle) {
         this.dBhandle = dBhandle;
+        return this;
     }
 
-    public void setDBhandle(DataSource dataSource, DBType dbType) {
+    public JdaoMapper useDBhandle(DataSource dataSource, DBType dbType) {
         this.dBhandle = Jdao.newDBhandle(dataSource, dbType);
+        return this;
     }
 
     public <T> T selectOne(String mapperId, Object... args) throws JdaoException, JdaoClassException, SQLException {
@@ -122,7 +125,7 @@ public class MapperHandler extends JdaoMapper {
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nSELECTONE SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
-        return _selectOne(mapperId, pb.getResultClass(), pb.getOutputType(), pb.getSql(), args);
+        return _selectOne(mapperId, pb, args);
     }
 
     public <T> T selectOne(String mapperId, Object param) throws JdaoException, JdaoClassException, SQLException {
@@ -135,14 +138,17 @@ public class MapperHandler extends JdaoMapper {
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nSELECTONE SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
-        return _selectOne(mapperId, pb.getResultClass(), pb.getOutputType(), pb.getSql(), args);
+        return _selectOne(mapperId, pb, args);
     }
 
 
-    private <T> T _selectOne(String mapperId, Class resultclass, String outputType, String sql, Object... args) throws JdaoException, JdaoClassException, SQLException {
-        String domain = JdaoCache.getDomain(mapperId, this.getClass());
+    private <T> T _selectOne(String mapperId, ParamBean pb, Object... args) throws JdaoException, JdaoClassException, SQLException {
+        String domain = JdaoCache.getDomain(pb.getNamespace(),pb.getId());
         SqlKV skv = null;
         Object result = null;
+        Class resultclass = pb.getResultClass();
+        String outputType = pb.getOutputType();
+        String sql = pb.getSql();
 
         if (domain != null) {
             skv = new SqlKV(sql, args);
@@ -155,9 +161,9 @@ public class MapperHandler extends JdaoMapper {
         }
 
         if (resultclass != null) {
-            result = getDBhandle(mapperId, true).executeQuery(transaction, (Class<T>) resultclass, sql, args);
+            result = getDBhandle(pb.getNamespace(), pb.getId(), true).executeQuery(transaction, (Class<T>) resultclass, sql, args);
         } else {
-            result = toT(getDBhandle(mapperId, true).executeQueryBean(transaction, sql, args), outputType);
+            result = toT(getDBhandle(pb.getNamespace(), pb.getId(), true).executeQueryBean(transaction, sql, args), outputType);
         }
 
         if (domain != null) {
@@ -200,7 +206,7 @@ public class MapperHandler extends JdaoMapper {
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nSELECTLIST SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
-        return _selectList(mapperId, pb.getResultClass(), pb.getOutputType(), pb.getSql(), args);
+        return _selectList(mapperId, pb, args);
     }
 
     public <T> List<T> selectList(String mapperId, Object param) throws JdaoException, JdaoClassException, SQLException {
@@ -212,16 +218,15 @@ public class MapperHandler extends JdaoMapper {
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nSELECTLIST SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
-        return _selectList(mapperId, pb.getResultClass(), pb.getOutputType(), pb.getSql(), args);
+        return _selectList(mapperId, pb, args);
     }
 
-    private <T> List<T> _selectList(String mapperId, Class resultclass, String outputType, String sql, Object... args) throws JdaoException, JdaoClassException, SQLException {
-
-        String domain = JdaoCache.getDomain(mapperId, this.getClass());
+    private <T> List<T> _selectList(String mapperId, ParamBean pb, Object... args) throws JdaoException, JdaoClassException, SQLException {
+        String domain = JdaoCache.getDomain(pb.getNamespace(),pb.getId());
         Object result = null;
         SqlKV skv = null;
         if (domain != null) {
-            skv = new SqlKV(sql, args);
+            skv = new SqlKV(pb.getSql(), args);
             result = JdaoCache.getCache(domain, mapperTable.getClass(), Condition.newInstance(skv, mapperId));
             if (result != null) {
                 if (Logger.isVaild())
@@ -231,14 +236,14 @@ public class MapperHandler extends JdaoMapper {
             }
         }
 
-        if (resultclass != null) {
-            result = getDBhandle(mapperId, true).executeQueryList(transaction, (Class<T>) resultclass, sql, args);
+        if (pb.getResultClass() != null) {
+            result = getDBhandle(pb.getNamespace(), pb.getId(), true).executeQueryList(transaction, (Class<T>) pb.getResultClass(), pb.getSql(), args);
         } else {
-            List<DataBean> list = getDBhandle(mapperId, true).executeQueryBeans(transaction, sql, args);
+            List<DataBean> list = getDBhandle(pb.getNamespace(), pb.getId(), true).executeQueryBeans(transaction, pb.getSql(), args);
             if (list != null && list.size() > 0) {
                 List<T> rlist = new ArrayList<>();
                 for (DataBean db : list) {
-                    rlist.add(toT(db, outputType));
+                    rlist.add(toT(db, pb.getOutputType()));
                 }
                 result = rlist;
             }
@@ -246,7 +251,7 @@ public class MapperHandler extends JdaoMapper {
 
         if (domain != null) {
             if (skv == null) {
-                skv = new SqlKV(sql, args);
+                skv = new SqlKV(pb.getSql(), args);
             }
             if (Logger.isVaild())
                 Logger.info("[SET CACHE]:" + skv);
@@ -266,7 +271,7 @@ public class MapperHandler extends JdaoMapper {
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nINSERT SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
-        return getDBhandle(mapperId, false).executeUpdate(transaction, pb.getSql(), args);
+        return getDBhandle(pb.getNamespace(), pb.getId(), false).executeUpdate(transaction, pb.getSql(), args);
     }
 
     public int insert(String mapperId, Object param) throws JdaoException, SQLException {
@@ -278,7 +283,7 @@ public class MapperHandler extends JdaoMapper {
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nINSERT SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
-        return getDBhandle(mapperId, false).executeUpdate(transaction, pb.getSql(), args);
+        return getDBhandle(pb.getNamespace(), pb.getId(), false).executeUpdate(transaction, pb.getSql(), args);
     }
 
     public int update(String mapperId, Object... args) throws JdaoException, SQLException {
@@ -289,7 +294,7 @@ public class MapperHandler extends JdaoMapper {
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nUPDATE SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
-        return getDBhandle(mapperId, false).executeUpdate(transaction, pb.getSql(), args);
+        return getDBhandle(pb.getNamespace(), pb.getId(), false).executeUpdate(transaction, pb.getSql(), args);
     }
 
     public int update(String mapperId, Object param) throws JdaoException, SQLException {
@@ -301,7 +306,7 @@ public class MapperHandler extends JdaoMapper {
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nUPDATE SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
-        return getDBhandle(mapperId, false).executeUpdate(transaction, pb.getSql(), args);
+        return getDBhandle(pb.getNamespace(), pb.getId(), false).executeUpdate(transaction, pb.getSql(), args);
     }
 
     public int delete(String mapperId, Object... args) throws JdaoException, SQLException {
@@ -312,7 +317,7 @@ public class MapperHandler extends JdaoMapper {
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nDELETE SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
-        return getDBhandle(mapperId, false).executeUpdate(transaction, pb.getSql(), args);
+        return getDBhandle(pb.getNamespace(), pb.getId(), false).executeUpdate(transaction, pb.getSql(), args);
     }
 
     public int delete(String mapperId, Object param) throws JdaoException, SQLException {
@@ -324,7 +329,7 @@ public class MapperHandler extends JdaoMapper {
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nDELETE SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
-        return getDBhandle(mapperId, false).executeUpdate(transaction, pb.getSql(), args);
+        return getDBhandle(pb.getNamespace(), pb.getId(), false).executeUpdate(transaction, pb.getSql(), args);
     }
 
     public <T> T toT(DataBean db, String rsType) throws JdaoException {
