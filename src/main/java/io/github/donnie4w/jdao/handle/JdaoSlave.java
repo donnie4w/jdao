@@ -18,6 +18,8 @@
 
 package io.github.donnie4w.jdao.handle;
 
+import io.github.donnie4w.jdao.base.Table;
+
 import javax.sql.DataSource;
 
 public class JdaoSlave {
@@ -46,37 +48,65 @@ public class JdaoSlave {
         defaultSlaveHandler.bindPackage(packageName, dBhandle);
     }
 
-    public static void bindClass(Class<?> clz, DataSource dataSource, DBType dbtype) {
+    public static void bindClass(Class<? extends Table<?>> clz, DataSource dataSource, DBType dbtype) {
         defaultSlaveHandler.bindClass(clz, dataSource, dbtype);
     }
 
-    public static void bindClass(Class<?> clz, DBhandle dBhandle) {
+    public static void bindClass(Class<? extends Table<?>> clz, DBhandle dBhandle) {
         defaultSlaveHandler.bindClass(clz, dBhandle);
     }
 
-    public static void bindMapper(String mapperId, DataSource dataSource, DBType dbtype) {
-        defaultSlaveHandler.bindMapper(mapperId, dataSource, dbtype);
+    public static boolean bindMapper(String namespace, String id, DataSource dataSource, DBType dbtype) {
+        return defaultSlaveHandler.bindMapper(namespace, id, dataSource, dbtype);
     }
 
-    public static void bindMapper(String mapperId, DBhandle dBhandle) {
-        defaultSlaveHandler.bindMapper(mapperId, dBhandle);
+    public static boolean bindMapper(String namespace, String id, DBhandle dBhandle) {
+        return defaultSlaveHandler.bindMapper(namespace, id, dBhandle);
+    }
+
+    public static void unbindMapper(String namespace, String id) {
+        defaultSlaveHandler.unbindMapper(namespace, id);
     }
 
 
-    public static void removeClass(Class<?> clz) {
-        defaultSlaveHandler.removeClass(clz);
+    public static boolean bindMapper(Class<?> clz, DBhandle dBhandle) {
+        return defaultSlaveHandler.bindMapper(clz, dBhandle);
     }
 
-    public static void removePackage(String packageName) {
-        defaultSlaveHandler.removePackage(packageName);
+    public static boolean bindMapper(Class<?> clz, DataSource dataSource, DBType dbtype) {
+        return defaultSlaveHandler.bindMapper(clz, dataSource, dbtype);
     }
 
-    public static void removeMapperId(String mapperId) {
-        defaultSlaveHandler.removeMapperId(mapperId);
+    public static void unbindMapper(Class<?> clz) {
+        defaultSlaveHandler.unbindMapper(clz);
     }
 
-    public static DBhandle get(Class<?> clz, String packageName, String mapperId) {
-        return defaultSlaveHandler.get(clz, packageName, mapperId);
+    public static boolean bindMapper(String namespace, DataSource dataSource, DBType dbtype) {
+        return defaultSlaveHandler.bindMapper(namespace, dataSource, dbtype);
+    }
+
+    public static boolean bindMapper(String namespace, DBhandle dBhandle) {
+        return defaultSlaveHandler.bindMapper(namespace, dBhandle);
+    }
+
+    public static void unbindMapper(String namespace) {
+        defaultSlaveHandler.unbindMapper(namespace);
+    }
+
+    public static void unbindClass(Class<? extends Table<?>> clz) {
+        defaultSlaveHandler.unbindClass(clz);
+    }
+
+    public static void unbindPackage(String packageName) {
+        defaultSlaveHandler.unbindPackage(packageName);
+    }
+
+    public static DBhandle get(Class<? extends Table<?>> clz, String packageName) {
+        return defaultSlaveHandler.get(clz, packageName);
+    }
+
+    public static DBhandle getMapper(String namespace, String id) {
+        return defaultSlaveHandler.getMapper(namespace, id);
     }
 
 }
