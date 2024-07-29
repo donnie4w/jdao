@@ -20,280 +20,100 @@ package io.github.donnie4w.jdao.handle;
 
 import io.github.donnie4w.jdao.base.Condition;
 import io.github.donnie4w.jdao.base.Table;
-import io.github.donnie4w.jdao.mapper.MapperParser;
-import io.github.donnie4w.jdao.util.Logger;
-
-import java.lang.ref.SoftReference;
-import java.lang.ref.WeakReference;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Cacher extends Cache {
 
-    private final Map<String, CacheHandle> cacheMap = new ConcurrentHashMap();
-    private final Map<Object, String> rmap = new ConcurrentHashMap();
     private final CacheHandle defaultCacheHandle = new CacheHandle();
-
+    private final CacheContainer container = new CacheContainer(defaultCacheHandle);
 
     public Cacher() {
-        new ClearThread().start();
     }
 
     public void bindPackage(String packageName) {
-        rmap.put(packageName, defaultCacheHandle.getDomain());
+        container.bindPackage(packageName);
     }
 
+
     public void bindPackage(String packageName, CacheHandle cacheHandle) {
-        rmap.put(packageName, cacheHandle.getDomain());
-        cacheMap.put(cacheHandle.getDomain(), cacheHandle);
+        container.bindPackage(packageName, cacheHandle);
     }
 
     public void bindClass(Class<? extends Table> clazz) {
-        rmap.put(clazz, defaultCacheHandle.getDomain());
+        container.bindClass(clazz);
     }
 
     public void bindClass(Class<? extends Table> clazz, CacheHandle cacheHandle) {
-        rmap.put(clazz, cacheHandle.getDomain());
-        cacheMap.put(cacheHandle.getDomain(), cacheHandle);
+        container.bindClass(clazz, cacheHandle);
     }
 
-    public void removePackage(String packageName) {
-        rmap.remove(packageName);
+    public void unbindPackage(String packageName) {
+        container.unbindPackage(packageName);
     }
 
-    public void removeClass(Class<?> clazz) {
-        rmap.remove(clazz);
+    public void unbindClass(Class<? extends Table> clazz) {
+        container.unbindClass(clazz);
     }
 
     public boolean bindMapper(Class<?> mapperface) {
-        if (mapperface.isInterface()) {
-            for (Method m : mapperface.getMethods()) {
-                bindMapper(mapperface.getName(), m.getName());
-            }
-            return true;
-        }
-        return false;
+        return container.bindMapper(mapperface);
     }
 
     public boolean bindMapper(Class<?> mapperface, CacheHandle cacheHandle) {
-        if (mapperface.isInterface()) {
-            for (Method m : mapperface.getMethods()) {
-                bindMapper(mapperface.getName(), m.getName(), cacheHandle);
-            }
-            return true;
-        }
-        return false;
+        return container.bindMapper(mapperface, cacheHandle);
     }
 
     public boolean bindMapper(String namespace) {
-        List<String> list = MapperParser.getMapperIds(namespace);
-        if (list != null) {
-            for (String name : list) {
-                bindPackage(namespace.concat(".").concat(name));
-            }
-            return true;
-        }
-        return false;
+        return container.bindMapper(namespace);
     }
 
     public boolean bindMapper(String namespace, CacheHandle cacheHandle) {
-        List<String> list = MapperParser.getMapperIds(namespace);
-        if (list != null) {
-            for (String name : list) {
-                bindPackage(namespace.concat(".").concat(name), cacheHandle);
-            }
-            return true;
-        }
-        return false;
+        return container.bindMapper(namespace, cacheHandle);
     }
 
     public boolean bindMapper(String namespace, String id) {
-        List<String> list = MapperParser.getMapperIds(namespace);
-        if (list != null) {
-            for (String name : list) {
-                if (id.equals(name)) {
-                    bindPackage(namespace.concat(".").concat(name));
-                    return true;
-                }
-            }
-        }
-        return false;
+        return container.bindMapper(namespace, id);
     }
 
     public boolean bindMapper(String namespace, String id, CacheHandle cacheHandle) {
-        List<String> list = MapperParser.getMapperIds(namespace);
-        if (list != null) {
-            for (String name : list) {
-                if (id.equals(name)) {
-                    bindPackage(namespace.concat(".").concat(name), cacheHandle);
-                    return true;
-                }
-            }
-        }
-        return false;
+        return container.bindMapper(namespace, id, cacheHandle);
     }
 
-    public void removeMapper(Class<?> mapperface) {
-        if (mapperface.isInterface()) {
-            removeMapper(mapperface.getName());
-        }
+    public void unbindMapper(Class<?> mapperface) {
+        container.unbindMapper(mapperface);
     }
 
-    public void removeMapper(String namespace) {
-        List<String> list = MapperParser.getMapperIds(namespace);
-        if (list != null) {
-            for (String name : list) {
-                removePackage(namespace.concat(".").concat(name));
-            }
-        }
+    public void unbindMapper(String namespace) {
+        container.unbindMapper(namespace);
     }
 
-    public void removeMapper(String namespace, String id) {
-        removePackage(namespace.concat(".").concat(id));
+    public void unbindMapper(String namespace, String id) {
+        container.unbindMapper(namespace, id);
     }
 
 
     public String getDomain(String packageName, Class<?> clazz) {
-        String domain = null;
-        if (clazz != null) {
-            domain = rmap.get(clazz);
-        }
-        if (domain == null) {
-            return rmap.get(packageName);
-        }
-        return domain;
+        return container.getDomain(packageName,clazz);
+    }
+
+    public String getDomain(String namespace, String id) {
+        return container.getDomain(namespace,id);
     }
 
 
     public Object getCache(String domain, Class<?> clazz, Condition condition) {
-        if (domain == null || domain.length() == 0) {
-            domain = defaultCacheHandle.getDomain();
-        }
-        CacheHandle ch = cacheMap.get(domain);
-        if (ch == null || condition == null) {
-            return null;
-        }
-        Map<Condition, CacheBean> map = ch.map.get(clazz);
-        if (map != null) {
-            CacheBean cb = map.get(condition);
-            if (cb == null) {
-                return null;
-            }
-            if (ch.getExpire() == 0 || Long.compare(System.currentTimeMillis(), (cb.getTimestamp() + ch.getExpire())) == -1) {
-                switch (ch.getStoreModel()) {
-                    case SOFT:
-                        if (cb.getValue() instanceof SoftReference) {
-                            return ((SoftReference) cb.getValue()).get();
-                        } else {
-                            return null;
-                        }
-                    case WEAK:
-                        if (cb.getValue() instanceof WeakReference) {
-                            return ((WeakReference) cb.getValue()).get();
-                        } else {
-                            return null;
-                        }
-                    default:
-                        return cb.getValue();
-                }
-            } else {
-                map.remove(condition);
-            }
-        }
-        return null;
+        return container.getCache(domain,clazz,condition);
     }
 
     public void setCache(String domain, Class<Table<?>> clazz, Condition condition, Object result) {
-        CacheHandle ch = null;
-        if (domain == null || domain.length() == 0) {
-            ch = defaultCacheHandle;
-            if (!cacheMap.containsKey(ch.getDomain())) {
-                cacheMap.put(ch.getDomain(), ch);
-            }
-        } else {
-            ch = cacheMap.get(domain);
-            if (ch == null) {
-                ch = new CacheHandle();
-                cacheMap.put(domain, ch);
-            }
-        }
-        final long t = System.currentTimeMillis();
-        Object o = result;
-        switch (ch.getStoreModel()) {
-            case SOFT:
-                o = new SoftReference(result);
-                break;
-            case WEAK:
-                o = new WeakReference(result);
-                break;
-            default:
-                break;
-        }
-        if (ch.map.containsKey(clazz)) {
-            ch.map.get(clazz).put(condition, new CacheBean(t, o));
-        } else {
-            Map<Condition, CacheBean> map = new ConcurrentHashMap();
-            map.put(condition, new CacheBean(t, o));
-            ch.map.put(clazz, map);
-        }
+        container.setCache(domain,clazz,condition,result);
     }
 
     public void clearCache(String domain) {
-        CacheHandle cb = cacheMap.get(domain);
-        if (cb != null)
-            cb.map.clear();
+        container.clearCache(domain);
     }
 
     public void clearCache(String domain, Class<?> clazz, String node) {
-        if (domain == null || domain.length() == 0) domain = defaultCacheHandle.getDomain();
-        CacheHandle cb = cacheMap.get(domain);
-        if (cb != null && cb.map.containsKey(clazz)) {
-            Map<Condition, CacheBean> cbm = cb.map.get(clazz);
-            if (node == null) {
-                cbm.clear();
-            } else {
-                for (Condition o : cbm.keySet()) {
-                    if (node.equals(o.getNode())) {
-                        cbm.remove(o);
-                    }
-                }
-            }
-        }
+        container.clearCache(domain,clazz,node);
     }
 
-    class ClearThread extends Thread {
-        private static final long SLEEP_INTERVAL_MS = 30_000;
-
-        {
-            this.setDaemon(true);
-            this.setName("ClearThread");
-        }
-
-        @Override
-        public void run() {
-            try {
-                while (!Thread.currentThread().isInterrupted()) {
-                    cacheMap.values().forEach(cacheHandle -> {
-                        long expire = cacheHandle.getExpire();
-                        if (expire != 0) {
-                            cacheHandle.map.forEach((key, entries) -> {
-                                entries.entrySet().removeIf(entry -> {
-                                    long createTime = entry.getValue().getTimestamp();
-                                    return System.currentTimeMillis() > (expire + createTime);
-                                });
-                            });
-                        }
-                    });
-                    Thread.sleep(SLEEP_INTERVAL_MS);
-                }
-            } catch (InterruptedException e) {
-                Logger.severe("Cache cleanup thread interrupted.");
-                Thread.currentThread().interrupt();
-            } catch (Exception e) {
-                Logger.severe("Error occurred during cache cleanup.", e.toString());
-            }
-        }
-    }
 }
