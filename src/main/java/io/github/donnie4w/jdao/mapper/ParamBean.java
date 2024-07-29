@@ -58,6 +58,14 @@ public class ParamBean {
         return resultClass;
     }
 
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public String getId() {
+        return id;
+    }
+
     public ParamBean(String namespace, String id, String sqlType, String sql, String inputType, String outputType) {
         this.namespace = namespace;
         this.id = id;
