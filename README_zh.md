@@ -211,7 +211,7 @@ Jdao.init(DataSourceFactory.getDataSourceBySqlite(), DBType.SQLITE);
 //读取解析xml配置
 JdaoMapper.build("mapper.xml");
 
-JdaoMapper jdaoMapper = JdaoMapper.newInstance()
+JdaoMapper jdaoMapper = JdaoMapper.newInstance();
 Hstest hs = jdaoMapper.selectOne("io.github.donnie4w.jdao.action.Mapperface.selectHstestById", 2, 26);
 
 System.out.println(hs);
