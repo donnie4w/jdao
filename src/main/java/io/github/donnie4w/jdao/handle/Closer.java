@@ -18,10 +18,15 @@
 
 package io.github.donnie4w.jdao.handle;
 
+/**
+ * Utility class for closing resources.
+ */
 public class Closer {
 
     /**
-     * @param cs
+     * Closes multiple AutoCloseable resources.
+     *
+     * @param cs the AutoCloseable resources to close.
      */
     public static void closeAll(AutoCloseable... cs) {
         if (cs != null) {

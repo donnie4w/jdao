@@ -24,86 +24,25 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-1-10
- * @verion 1.0
- */
 public interface JdbcHandle {
 
     DataSource getDataSource();
 
     Transaction newTransaction() throws SQLException;
 
-    /**
-     * @param sql
-     * @param values
-     * @return
-     * @throws SQLException
-     */
     DataBean executeQueryBean(String sql, Object... values) throws SQLException;
 
-    /**
-     *
-     * @param sql
-     * @param values
-     * @return
-     * @throws JdaoException
-     * @throws SQLException
-     */
     List<DataBean> executeQueryBeans(String sql, Object... values) throws JdaoException, SQLException;
 
 
-    /**
-     * @param claz
-     * @param sql
-     * @param values
-     * @return
-     * @param <T>
-     * @throws JdaoException
-     * @throws JdaoClassException
-     * @throws SQLException
-     */
     <T> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException;
 
-    /**
-     * @param claz
-     * @param sql
-     * @param values
-     * @return
-     * @param <T>
-     * @throws JdaoException
-     * @throws JdaoClassException
-     * @throws SQLException
-     */
     <T> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException;
 
-    /**
-     * @param sql
-     * @param values
-     * @return
-     * @throws JdaoException
-     * @throws SQLException
-     */
     int executeUpdate(String sql, Object... values) throws JdaoException, SQLException;
 
-
-    /**
-     * @param sql
-     * @param values
-     * @return
-     * @throws JdaoException
-     * @throws SQLException
-     */
     int[] executeBatch(String sql, List<Object[]> values) throws JdaoException, SQLException;
 
-
-    /**
-     * @param procedureName
-     * @param params
-     * @return
-     * @throws SQLException
-     */
     Map<Integer, Object> executeCall(String procedureCallMethod, Params... params) throws SQLException;
 
 }

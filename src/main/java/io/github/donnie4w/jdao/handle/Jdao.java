@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * author: donnie4w <donnie4w@gmail.com>
- * <p>
  * This is the core class of Jdao, providing jdao data CRUD operation functions,
  * transaction, batch processing and other operation functions,
  * data source object DBhandle creation and acquisition,
@@ -51,9 +49,9 @@ public class Jdao {
     /**
      * new DBhandle  by data source
      *
-     * @param dataSource
-     * @param dbtype
-     * @return
+     * @param dataSource The DataSource object representing the database connection pool.
+     * @param dbtype The database type, such as DBType.MYSQL, DBType.POSTGRESQL, etc.
+     * @return DBhandle of dataSource
      */
     public static DBhandle newDBhandle(DataSource dataSource, DBType dbtype) {
         return new DBhandler(dataSource, dbtype);
@@ -113,7 +111,7 @@ public class Jdao {
     /**
      * remove DataSource by class
      *
-     * @param clz
+     * @param clz The class representing the entity to unbind to the data source.
      */
     public static void unbindDataSource(Class<?> clz) {
         container.unbind(clz);
@@ -123,8 +121,8 @@ public class Jdao {
     /**
      * Check whether the class has a set data source and return the data source
      *
-     * @param clz
-     * @return
+     * @param clz The class representing the entity
+     * @return DBhandle of the class binding
      */
     public static DBhandle getDBhandle(Class<?> clz) {
         return container.getDBhandle(clz);
@@ -133,7 +131,7 @@ public class Jdao {
     /**
      * Check whether the package has a set data source and return the data source
      *
-     * @param packageName
+     * @param packageName The package of the class representing the entity
      * @return DBhandle
      */
     public static DBhandle getDBhandle(String packageName) {
@@ -141,6 +139,13 @@ public class Jdao {
     }
 
 
+    /**
+     * Gets the database handle for the specified mapper.
+     *
+     * @param namespace the namespace of the mapper
+     * @param id        the id of the mapper
+     * @return the database handle
+     */
     public static DBhandle getMapperDBhandle(String namespace,String id) {
         return container.getMapperDBhandle(namespace,id);
     }
@@ -174,7 +179,7 @@ public class Jdao {
     /**
      * remove DataSource by packageName
      *
-     * @param packageName
+     * @param packageName  The package of the class representing the entity
      */
     public static void unbindDataSource(String packageName) {
         container.unbind(packageName);
@@ -187,6 +192,7 @@ public class Jdao {
      * @param namespace   The namespace in the XML mapping files that corresponds to the tables and queries to bind.
      * @param dataSource  The DataSource object representing the database connection pool.
      * @param dbtype      The database type, such as DBType.MySQL, DBType.PostgreSQL, etc.
+     * @return true if binding was successful, false otherwise
      *<p>
      * Description:
      *   This method sets up the specified XML mapping namespace to work with the given data source and database type.
@@ -207,6 +213,11 @@ public class Jdao {
     }
 
 
+    /**
+     * Unbinds the data source for the specified namespace.
+     *
+     * @param namespace the namespace
+     */
     public static void unbindMapperDataSource(String namespace){
         container.unbindMapper(namespace);
     }
@@ -218,6 +229,7 @@ public class Jdao {
      * @param id        The ID of the CRUD tag within the namespace to bind.
      * @param dataSource The DataSource object representing the database connection pool.
      * @param dbtype    The database type, such as DBType.MySQL, DBType.PostgreSQL, etc.
+     * @return true if binding was successful, false otherwise
      *<p>
      * Description:
      *   This method sets up the specified XML mapping namespace and CRUD tag id to work with the given data source and database type.
@@ -238,7 +250,12 @@ public class Jdao {
         return container.bindMapper(namespace, id, dataSource, dbtype);
     }
 
-
+    /**
+     * Unbinds the data source for the specified namespace and id.
+     *
+     * @param namespace the namespace
+     * @param id        the id
+     */
     public static void unbindMapperDataSource(String namespace,String id){
          container.unbindMapper(namespace,id);
     }
@@ -249,6 +266,7 @@ public class Jdao {
      * @param mapperface The mapper interface class that defines the methods to bind, which correspond to the XML mappings.
      * @param dataSource The DataSource object representing the database connection pool.
      * @param dbtype     The database type, such as DBType.MYSQL, DBType.POSTGRESQL, etc.
+     * @return true if binding was successful, false otherwise
      *<p>
      * Description:
      *   This method sets up the specified mapper interface to work with the given data source and database type.
@@ -268,16 +286,20 @@ public class Jdao {
         return  container.bindMapper(mapperface, dataSource, dbtype);
     }
 
-
+    /**
+     * Unbinds the data source for the specified mapper interface.
+     *
+     * @param mapperface the mapper interface class
+     */
     public static void unbindMapperDataSource(Class<?> mapperface){
         container.unbindMapper(mapperface);
     }
 
     /**
-     * Gets the new transaction operation object
+     * Creates a new transaction.
      *
-     * @return
-     * @throws JdaoException
+     * @return a new transaction object
+     * @throws SQLException if there is a database access error
      */
     public static Transaction newTransaction() throws SQLException {
         return defaultDBhandle.getJdbcHandle().newTransaction();
@@ -286,7 +308,7 @@ public class Jdao {
     /**
      * reture the default DBhandle , which set with function initDataSource
      *
-     * @return
+     * @return  the default DBhandle object
      */
     public static DBhandle getDefaultDBhandle() {
         return defaultDBhandle;
@@ -294,16 +316,17 @@ public class Jdao {
 
 
     /**
-     * select * from table
+     * Executes a query and returns the result.
      *
-     * @param clz
-     * @param sql
-     * @param values
-     * @param <T>
-     * @return List<T>
-     * @throws JdaoException
-     * @throws JdaoClassException
-     * @throws SQLException
+     * @param <T>        the type of the result
+     * @param clz        the class of the result
+     * @param sql        the SQL query
+     * @param values     the values to be used in the query
+     * @return the result of the query
+     * @throws JdaoException         if a Jdao exception occurs
+     * @throws JdaoClassException    if a class exception occurs
+     * @throws SQLException          if a SQL exception occurs
+     *
      * <P>
      * Example:
      *   <blockquote><pre>
@@ -316,15 +339,18 @@ public class Jdao {
     }
 
     /**
-     * select * from table
+     * Executes a query and returns the result.
      *
-     * @param transaction
-     * @param clz
-     * @param sql
-     * @param values
-     * @param <T>
-     * @return List<T>
-     * @throws JdaoException
+     * @param <T>          the type of the result
+     * @param transaction  the transaction within which to execute the query
+     * @param clz          the class of the result
+     * @param sql          the SQL query
+     * @param values       the values to be used in the query
+     * @return the result of the query
+     * @throws JdaoException         if a Jdao exception occurs
+     * @throws JdaoClassException    if a class exception occurs
+     * @throws SQLException          if a SQL exception occurs
+     *
      */
     public static <T> T executeQuery(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         notnull(defaultDBhandle, err_noinit);
@@ -332,20 +358,21 @@ public class Jdao {
     }
 
     /**
-     * select * from table
+     * Executes a SQL query and maps the result to a list of objects.
      *
-     * @param clz
-     * @param sql
-     * @param values
-     * @param <T>
-     * @return List<T>
-     * @throws JdaoException
-     * @throws JdaoClassException
-     * @throws SQLException
+     * @param <T>        the type of the result
+     * @param clz        the class of the result
+     * @param sql        the SQL query
+     * @param values     the values to be used in the query
+     * @return a list of results
+     * @throws JdaoException         if a Jdao exception occurs
+     * @throws JdaoClassException    if a class exception occurs
+     * @throws SQLException          if a SQL exception occurs
+     *
      * <P>
      * Example:
      *   <blockquote><pre>
-     *   List<Hstest> list = Jdao.executeQueryList(Hstest.class,"select id,age,rowname,updatetime from hstest limit ?", 10);
+     *   Jdao.executeQueryList(Hstest.class,"select id,age,rowname,updatetime from hstest limit ?", 10);
      *   </pre></blockquote>
      */
     public static <T> List<T> executeQueryList(Class<T> clz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
@@ -354,17 +381,17 @@ public class Jdao {
     }
 
     /**
-     * select * from table
+     * Executes a query within a transaction and returns a list of results.
      *
-     * @param transaction
-     * @param clz
-     * @param sql
-     * @param values
-     * @param <T>
-     * @return List<T>
-     * @throws JdaoException
-     * @throws JdaoClassException
-     * @throws SQLException
+     * @param <T>          the type of the result
+     * @param transaction  the transaction within which to execute the query
+     * @param clz          the class of the result
+     * @param sql          the SQL query
+     * @param values       the values to be used in the query
+     * @return a list of results
+     * @throws JdaoException         if a Jdao exception occurs
+     * @throws JdaoClassException    if a class exception occurs
+     * @throws SQLException          if a SQL exception occurs
      */
     public static <T> List<T> executeQueryList(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         notnull(defaultDBhandle, err_noinit);
@@ -372,13 +399,13 @@ public class Jdao {
     }
 
     /**
-     * select * from table
-     *
-     * @param transaction
-     * @param sql
-     * @param values
-     * @return DataBean
-     * @throws JdaoException
+     * Executes a query sql
+     * @param transaction the transaction object
+     * @param sql the SQL query
+     * @param values the values to be used in the query
+     * @return the result of the query
+     * @throws JdaoException if a Jdao exception occurs
+     * @throws SQLException if a SQL exception occurs
      */
     public static DataBean executeQueryBean(Transaction transaction, String sql, Object... values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
@@ -386,13 +413,12 @@ public class Jdao {
     }
 
     /**
-     * select * from table
-     *
-     * @param sql
-     * @param values
-     * @return DataBean
-     * @throws JdaoException
-     * @throws SQLException
+     * Executes a query sql
+     * @param sql the SQL query
+     * @param values the values to be used in the query
+     * @return the result of the query
+     * @throws JdaoException if a Jdao exception occurs
+     * @throws SQLException if a SQL exception occurs
      * <P>
      * Example:
      *   <blockquote><pre>
@@ -405,14 +431,13 @@ public class Jdao {
     }
 
     /**
-     * select * from table
-     *
-     * @param transaction
-     * @param sql
-     * @param values
-     * @return List<DataBean>
-     * @throws JdaoException
-     * @throws SQLException
+     * Executes a query sql
+     * @param transaction the transaction object
+     * @param sql the SQL query
+     * @param values the values to be used in the query
+     * @return the result of the query
+     * @throws JdaoException if a Jdao exception occurs
+     * @throws SQLException if a SQL exception occurs
      */
     public static List<DataBean> executeQueryBeans(Transaction transaction, String sql, Object... values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
@@ -420,17 +445,17 @@ public class Jdao {
     }
 
     /**
-     * select * from table
+     * Executes a query sql
+     * @param sql the SQL query
+     * @param values the values to be used in the query
+     * @return the result of the query
+     * @throws JdaoException if a Jdao exception occurs
+     * @throws SQLException if a SQL exception occurs
      *
-     * @param sql
-     * @param values
-     * @return List<DataBean>
-     * @throws JdaoException
-     * @throws SQLException
      * <P>
      * Example:
      *   <blockquote><pre>
-     *   List<DataBean> list = Jdao.executeQueryBeans("select id,age,rowname,updatetime from hstest limit ?", 10);
+     *   Jdao.executeQueryBeans("select id,age,rowname,updatetime from hstest limit ?", 10);
      *   </pre></blockquote>
      */
     public static List<DataBean> executeQueryBeans(String sql, Object... values) throws JdaoException, SQLException {
@@ -439,14 +464,13 @@ public class Jdao {
     }
 
     /**
-     * update  insert into  delete
-     *
-     * @param transaction
-     * @param sql
-     * @param values
-     * @return int
-     * @throws JdaoException
-     * @throws SQLException
+     * update  insert   delete
+     * @param transaction the transaction object
+     * @param sql the SQL update,insert,delete
+     * @param values the values to be used
+     * @return the result of the query
+     * @throws JdaoException if a Jdao exception occurs
+     * @throws SQLException if a SQL exception occurs
      */
     public static int executeUpdate(Transaction transaction, String sql, Object... values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
@@ -456,15 +480,15 @@ public class Jdao {
     /**
      * update  insert into  delete
      *
-     * @param sql
-     * @param values
-     * @return
-     * @throws JdaoException
-     * @throws SQLException
+     * @param sql the SQL update,insert,delete
+     * @param values the values to be used
+     * @return the result of the query
+     * @throws JdaoException if a Jdao exception occurs
+     * @throws SQLException if a SQL exception occurs
      * <P>
      * Example:
      *   <blockquote><pre>
-     *   List<DataBean> list = Jdao.executeUpdate("update hstest set rowname = ? where id = ?", "hello world" , 1);
+     *   Jdao.executeUpdate("update hstest set rowname = ? where id = ?", "hello world" , 1);
      *   </pre></blockquote>
      */
     public static int executeUpdate(String sql, Object... values) throws JdaoException, SQLException {
@@ -473,14 +497,13 @@ public class Jdao {
     }
 
     /**
-     * insert into
-     *
-     * @param transaction
-     * @param sql
-     * @param values
-     * @return
-     * @throws JdaoException
-     * @throws SQLException
+     * batch operation
+     * @param transaction the transaction object
+     * @param sql the SQL update,insert,delete
+     * @param values the values to be used
+     * @return the result of the query
+     * @throws JdaoException if a Jdao exception occurs
+     * @throws SQLException if a SQL exception occurs
      */
     public static int[] executeBatch(Transaction transaction, String sql, List<Object[]> values) throws JdaoException, SQLException {
         notnull(defaultDBhandle, err_noinit);
@@ -488,17 +511,16 @@ public class Jdao {
     }
 
     /**
-     * insert into
-     *
-     * @param sql
-     * @param values
-     * @return
-     * @throws JdaoException
-     * @throws SQLException
+     * batch operation
+     * @param sql the SQL update,insert,delete
+     * @param values the values to be used
+     * @return the result of the query
+     * @throws JdaoException if a Jdao exception occurs
+     * @throws SQLException if a SQL exception occurs
      * <P>
      * Example:
      *   <blockquote><pre>
-     *   List<Object[]> list = new ArrayList<>();
+     *   List list = new ArrayList();
      *   list.add(new Object[]{"111", "aaa"});
      *   list.add(new Object[]{"222", "bbb"});
      *   Jdao.executeBatch("insert into hstest1(`rowname`,`value`) values(?,?)", list);
@@ -512,10 +534,10 @@ public class Jdao {
 
     /**
      * Store Procedure operations
-     * @param procedureName  StoreProcedure Name
-     * @param params
-     * @return
-     * @throws SQLException
+     * @param procedureName the name of Store Procedure
+     * @param params the Parameter of  Store Procedure
+     * @return the result of the query
+     * @throws SQLException if a SQL exception occurs
      */
     public static Map<Integer, Object> executeCall(String procedureName, Params... params) throws SQLException {
         notnull(defaultDBhandle, err_noinit);
@@ -528,6 +550,11 @@ public class Jdao {
         }
     }
 
+    /**
+     * Enables or disables log printing.
+     *
+     * @param on whether to enable log printing
+     */
     public static void setLogger(boolean on) {
         Logger.setLogger(on);
     }

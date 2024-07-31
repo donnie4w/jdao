@@ -27,11 +27,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.util.Date;
 
-/**
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-1-13
- * @verion 1.0
- */
 public class Util {
 
     private static int len(String s) {

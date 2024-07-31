@@ -13,62 +13,69 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 /**
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-1-10
- * @verion 1.0
+ * Builds DAO (Data Access Object) instances.
  */
 @Deprecated
 public class DaoBuilder {
 
+
     /**
-     * @param tablename
-     * @param destPath
-     * @param conn
-     * @param charset
-     * @throws UnsupportedEncodingException
-     * @throws IOException
-     * @throws SQLException
+     * Creates a DAO file with the specified table name, destination path, connection, and character set.
+     *
+     * @param tablename the name of the table for which to generate the DAO.
+     * @param destPath the destination path where the DAO file will be created.
+     * @param conn the database connection.
+     * @param charset the character set to use for the file.
+     * @throws UnsupportedEncodingException if the character set is not supported.
+     * @throws IOException if an I/O error occurs.
+     * @throws SQLException if a SQL related exception occurs.
      */
     public static void createFile(String tablename, String destPath, Connection conn, String charset) throws UnsupportedEncodingException, IOException, SQLException {
         createFile_(null, tablename, destPath, conn, charset, false);
     }
 
     /**
-     * @param tablename
-     * @param destPath
-     * @param conn
-     * @param charset
-     * @throws UnsupportedEncodingException
-     * @throws IOException
-     * @throws SQLException
+     * Creates a DAO file with the specified table name, destination path, connection, and character set, overwriting existing files.
+     *
+     * @param tablename the name of the table for which to generate the DAO.
+     * @param destPath the destination path where the DAO file will be created.
+     * @param conn the database connection.
+     * @param charset the character set to use for the file.
+     * @throws UnsupportedEncodingException if the character set is not supported.
+     * @throws IOException if an I/O error occurs.
+     * @throws SQLException if a SQL related exception occurs.
      */
     public static void createFileForce(String tablename, String destPath, Connection conn, String charset) throws UnsupportedEncodingException, IOException, SQLException {
         createFile_(null, tablename, destPath, conn, charset, true);
     }
 
     /**
-     * @param packageName
-     * @param tablename
-     * @param destPath
-     * @param conn
-     * @param charset
-     * @throws UnsupportedEncodingException
-     * @throws IOException
-     * @throws SQLException
+     * Creates a DAO file with the specified package name, table name, destination path, connection, and character set.
+     *
+     * @param packageName the package name for the generated DAO.
+     * @param tablename the name of the table for which to generate the DAO.
+     * @param destPath the destination path where the DAO file will be created.
+     * @param conn the database connection.
+     * @param charset the character set to use for the file.
+     * @throws UnsupportedEncodingException if the character set is not supported.
+     * @throws IOException if an I/O error occurs.
+     * @throws SQLException if a SQL related exception occurs.
      */
     public static void createFile(String packageName, String tablename, String destPath, Connection conn, String charset) throws UnsupportedEncodingException, IOException, SQLException {
         createFile_(packageName, tablename, destPath, conn, charset, false);
     }
 
     /**
-     * @param packageName
-     * @param tablename
-     * @param destPath
-     * @param conn
-     * @param charset
-     * @throws UnsupportedEncodingException
-     * @throws IOException
-     * @throws SQLException
+     * Creates a DAO file with the specified package name, table name, destination path, connection, and character set, overwriting existing files.
+     *
+     * @param packageName the package name for the generated DAO.
+     * @param tablename the name of the table for which to generate the DAO.
+     * @param destPath the destination path where the DAO file will be created.
+     * @param conn the database connection.
+     * @param charset the character set to use for the file.
+     * @throws UnsupportedEncodingException if the character set is not supported.
+     * @throws IOException if an I/O error occurs.
+     * @throws SQLException if a SQL related exception occurs.
      */
     public static void createFileForce(String packageName, String tablename, String destPath, Connection conn, String charset) throws UnsupportedEncodingException, IOException, SQLException {
         createFile_(packageName, tablename, destPath, conn, charset, true);

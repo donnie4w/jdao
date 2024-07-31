@@ -19,15 +19,17 @@ package io.github.donnie4w.jdao.base;
 
 /**
  * Input and Outpput parameters to the stored procedure
- *
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-2-2
- * @verion 1.0.1
  */
 public class InOut extends Params {
-    private Object o;
-    private Type t;
+    private final Object o;
+    private final Type t;
 
+    /**
+     * Constructs a new InOut instance.
+     *
+     * @param o Output parameter
+     * @param t the type of the value
+     */
     public InOut(Object o, Type t) {
         this.o = o;
         this.t = t;

@@ -19,27 +19,54 @@ package io.github.donnie4w.jdao.base;
 
 import java.util.Objects;
 
+/**
+ * Represents a condition for SQL queries.
+ */
 public class Condition {
     private SqlKV sqlKV = null;
     private String node = "";
+
 
     private Condition(SqlKV sqlKV, String node) {
         this.sqlKV = sqlKV;
         this.node = node == null ? "" : node;
     }
 
+    /**
+     * Creates a new Condition instance with the specified SQL key-value pair.
+     *
+     * @param sqlKV the SQL key-value pair.
+     * @return a new Condition instance.
+     */
     public static Condition newInstance(SqlKV sqlKV) {
         return new Condition(sqlKV, null);
     }
 
+    /**
+     * Creates a new Condition instance with the specified SQL key-value pair and node.
+     *
+     * @param sqlKV the SQL key-value pair.
+     * @param node the node.
+     * @return a new Condition instance.
+     */
     public static Condition newInstance(SqlKV sqlKV, String node) {
         return new Condition(sqlKV, node);
     }
 
+    /**
+     * Gets the SQL key-value pair associated with this condition.
+     *
+     * @return the SQL key-value pair.
+     */
     public SqlKV getSqlKV() {
         return sqlKV;
     }
 
+    /**
+     * Gets the node associated with this condition.
+     *
+     * @return the node.
+     */
     public String getNode() {
         return node;
     }

@@ -21,27 +21,18 @@ import java.sql.Types;
 
 /**
  * Output parameters to the stored procedure
- *
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-2-2
- * @verion 1.0.1
  */
 public class Out extends Params {
 
-    private int type;
+    private final int type;
 
-    public Out(Type type) {
-        this.type = types2java(type);
-    }
-
-    @Override
-    public int getTypes() {
-        return this.type;
-    }
-
-    @Override
-    public Object getValue() {
-        return null;
+    /**
+     * Constructs a new Out instance.
+     *
+     * @param t the type of the value
+     */
+    public Out(Type t) {
+        this.type = types2java(t);
     }
 
     public static int types2java(Type type) {
@@ -81,6 +72,16 @@ public class Out extends Params {
             default:
                 return Types.VARCHAR;
         }
+    }
+
+    @Override
+    public int getTypes() {
+        return this.type;
+    }
+
+    @Override
+    public Object getValue() {
+        return null;
     }
 
 }

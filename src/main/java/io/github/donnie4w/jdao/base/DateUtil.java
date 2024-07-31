@@ -27,10 +27,20 @@ import java.time.*;
 import java.util.Arrays;
 import java.util.Date;
 
+/**
+ * Utility class for date manipulation.
+ */
 public class DateUtil {
 
     private static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
 
+    /**
+     * Converts an object to a Date.
+     *
+     * @param obj the object to be converted
+     * @return the converted Date
+     * @throws JdaoException if the conversion fails
+     */
     public static Date asDate(Object obj) throws JdaoException {
         if (obj instanceof Date) {
             return (Date) obj;

@@ -21,11 +21,17 @@ package io.github.donnie4w.jdao.handle;
 import io.github.donnie4w.jdao.base.Condition;
 import io.github.donnie4w.jdao.base.Table;
 
+/**
+ * A subclass of Cache that provides additional caching functionality.
+ */
 public class Cacher extends Cache {
 
     private final CacheHandle defaultCacheHandle = new CacheHandle();
     private final CacheContainer container = new CacheContainer(defaultCacheHandle);
 
+    /**
+     * Constructs a new Cacher instance.
+     */
     public Cacher() {
     }
 

@@ -26,12 +26,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @File:jdao: com.jdao.base :Transaction.java
- * @Date:2017年11月4日
- * @Copyright (c) 2017, donnie4w@gmail.com All Rights Reserved.
- * @Author: donnie4w
- */
 public class Tx implements Transaction {
 
     Connection connection;
@@ -50,8 +44,6 @@ public class Tx implements Transaction {
 
     /**
      * The transaction commits and closes the transaction connection
-     *
-     * @throws SQLException
      */
     public void commit() throws SQLException {
         this.connection.commit();
@@ -63,8 +55,6 @@ public class Tx implements Transaction {
 
     /**
      * The transaction rollbacks and closes the transaction connection
-     *
-     * @throws SQLException
      */
     public void rollback() throws SQLException {
         this.connection.rollback();
@@ -78,98 +68,43 @@ public class Tx implements Transaction {
         this.connection.close();
     }
 
-
-    /**
-     * @return
-     */
     @Override
     public DataSource getDataSource() {
         return this.dataSource;
     }
 
-    /**
-     * @param sql
-     * @param values
-     * @return
-     * @throws SQLException
-     */
     @Override
     public DataBean executeQueryBean(String sql, Object... values) throws SQLException {
         return DBexec.executequeryBean(connection, sql, values);
     }
 
-    /**
-     * @param sql
-     * @param values
-     * @return
-     * @throws SQLException
-     */
     @Override
     public List<DataBean> executeQueryBeans(String sql, Object... values) throws SQLException {
         return DBexec.executequeryBeans(connection, sql, values);
     }
 
-    /**
-     * @param claz
-     * @param sql
-     * @param values
-     * @param <T>
-     * @return
-     * @throws JdaoException
-     * @throws JdaoClassException
-     * @throws SQLException
-     */
     @Override
     public <T> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         return DBexec.executeQueryList(claz, connection, sql, values);
     }
 
-    /**
-     * @param claz
-     * @param sql
-     * @param values
-     * @param <T>
-     * @return
-     * @throws JdaoException
-     * @throws JdaoClassException
-     * @throws SQLException
-     */
     @Override
     public <T> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         return DBexec.executeQuery(claz, connection, sql, values);
     }
 
-    /**
-     * @param sql
-     * @param values
-     * @return
-     * @throws SQLException
-     */
     @Override
     public int executeUpdate(String sql, Object... values) throws SQLException {
         return DBexec.executeUpdate(connection, sql, values);
     }
 
-    /**
-     * @param sql
-     * @param values
-     * @return
-     * @throws SQLException
-     */
     @Override
     public int[] executeBatch(String sql, List<Object[]> values) throws SQLException {
         return DBexec.executeBatch(connection, sql, values);
     }
 
-    /**
-     * @param procedureCallMethod
-     * @param params
-     * @return
-     * @throws SQLException
-     */
     @Override
     public Map<Integer, Object> executeCall(String procedureCallMethod, Params... params) throws SQLException {
         return DBexec.executeCall(connection, procedureCallMethod, params);
     }
-
 }

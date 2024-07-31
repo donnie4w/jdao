@@ -20,8 +20,14 @@ package io.github.donnie4w.jdao.handle;
 import io.github.donnie4w.jdao.base.Condition;
 import io.github.donnie4w.jdao.base.Table;
 
+/**
+ * This class provides caching functionalities for JDAO.
+ */
 public class JdaoCache {
     private static final Cache cache = Cache.newInstance();
+
+    private JdaoCache() {
+    }
 
     /**
      * Binds the specified package to enable caching mechanisms for all standard entity classes within the package.
@@ -100,7 +106,7 @@ public class JdaoCache {
     /**
      * remove cache by dao package
      *
-     * @param packageName
+     * @param packageName  The package of the class representing the entity
      */
     public static void unbindPackage(String packageName) {
         cache.unbindPackage(packageName);
@@ -109,7 +115,7 @@ public class JdaoCache {
     /**
      * remove cache by dao package
      *
-     * @param clazz
+     * @param clazz the class representing the entity
      */
     public static void unbindClass(Class<? extends Table<?>> clazz) {
         cache.unbindClass(clazz);
@@ -245,8 +251,7 @@ public class JdaoCache {
 
     /**
      * remove mapper cache by mapper interface
-     *
-     * @param mapperface
+     * @param mapperface the mapper interface class
      */
     public static void unbindMapper(Class<?> mapperface) {
         cache.unbindMapper(mapperface);
@@ -254,8 +259,7 @@ public class JdaoCache {
 
     /**
      * remove mapper cache by namespace
-     *
-     * @param namespace
+     * @param namespace the namespace of xml mapper file
      */
     public static void unbindMapper(String namespace) {
         cache.unbindMapper(namespace);
@@ -263,9 +267,8 @@ public class JdaoCache {
 
     /**
      * remove mapper cache by namespace and mapper id
-     *
-     * @param namespace
-     * @param id
+     * @param namespace the namespace
+     * @param id        the id
      */
     public static void unbindMapper(String namespace, String id) {
         cache.unbindMapper(namespace, id);
@@ -273,28 +276,33 @@ public class JdaoCache {
 
 
     /**
-     * get cache domain by package and table dao
-     *
-     * @param packageName
-     * @param clazz
-     * @return
+     *  get cache domain by package and table dao
+     * @param packageName  The package of the class representing the entity
+     * @param clazz the class representing the entity
+     * @return domain
      */
     public static String getDomain(String packageName, Class<?> clazz) {
         return cache.getDomain(packageName, clazz);
     }
 
 
+    /**
+     * Gets the domain for the specified namespace and id.
+     *
+     * @param namespace the namespace
+     * @param id        the id
+     * @return the domain corresponding to the namespace and id
+     */
     public static String getDomain(String namespace, String id) {
         return cache.getDomain(namespace, id);
     }
 
     /**
-     * get cache value by domain,class and condition
-     *
-     * @param domain
-     * @param clazz
-     * @param condition
-     * @return
+     *  get cache value by domain,class and condition
+     * @param domain the domain of cache
+     * @param clazz the class representing the entity
+     * @param condition  the condition of cache
+     * @return value of cache
      */
     public static Object getCache(String domain, Class<?> clazz, Condition condition) {
         return cache.getCache(domain, clazz, condition);
@@ -302,31 +310,30 @@ public class JdaoCache {
 
     /**
      * set cache
-     *
-     * @param domain
-     * @param clazz
-     * @param condition
-     * @param result
+     * @param domain the domain of cache
+     * @param clazz the class representing the entity
+     * @param condition the condition of cache
+     * @param result value of qurey
      */
     public static void setCache(String domain, Class<Table<?>> clazz, Condition condition, Object result) {
         cache.setCache(domain, clazz, condition, result);
     }
 
     /**
-     * clear cache by domain
+     * Clears the cache for the specified domain.
      *
-     * @param domain
+     * @param domain the domain for which the cache should be cleared
      */
     public static void clearCache(String domain) {
         cache.clearCache(domain);
     }
 
     /**
-     * clear cache by domain and class and node
+     * Clears the cache for the specified domain, class, and node.
      *
-     * @param domain
-     * @param clazz
-     * @param node
+     * @param domain the domain of cache
+     * @param clazz  the class for which the cache should be cleared
+     * @param node   the node for which the cache should be cleared
      */
     public static void clearCache(String domain, Class<?> clazz, String node) {
         cache.clearCache(domain, clazz, node);

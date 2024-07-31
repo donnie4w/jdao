@@ -18,10 +18,16 @@
 package io.github.donnie4w.jdao.base;
 
 /**
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-1-10
- * @verion 1.0
+ * Interface for a field in a database result set.
+ *
+ * @param <T> the type of the field value
  */
 public interface Field<T> {
+
+    /**
+     * Returns the name of the field.
+     *
+     * @return the field name
+     */
     String getFieldName();
 }

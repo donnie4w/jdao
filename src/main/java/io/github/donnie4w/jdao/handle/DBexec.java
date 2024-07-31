@@ -30,22 +30,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Class for executing database operations.
+ */
 public class DBexec {
 
     private DBexec() {
     }
 
-    /**
-     * @param classType
-     * @param con
-     * @param sql
-     * @param values
-     * @param <T>
-     * @return
-     * @throws JdaoException
-     * @throws SQLException
-     * @throws JdaoClassException
-     */
     static <T> List<T> executeQueryList(Class<T> classType, Connection con, String sql, Object... values) throws JdaoException, SQLException, JdaoClassException {
         List<T> retList = new ArrayList<T>();
         ResultSet rs = null;
@@ -82,17 +74,6 @@ public class DBexec {
         }
     }
 
-    /**
-     * @param classType
-     * @param con
-     * @param sql
-     * @param values
-     * @param <T>
-     * @return
-     * @throws SQLException
-     * @throws JdaoClassException
-     * @throws JdaoException
-     */
     static <T> T executeQuery(Class<T> classType, Connection con, String sql, Object[] values) throws SQLException, JdaoClassException, JdaoException {
         ResultSet rs = null;
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -127,14 +108,6 @@ public class DBexec {
         }
     }
 
-
-    /**
-     * @param con
-     * @param sql
-     * @param values
-     * @return
-     * @throws SQLException
-     */
     static List<DataBean> executequeryBeans(Connection con, String sql, Object... values) throws SQLException {
         List<DataBean> retList = new ArrayList<DataBean>();
         ResultSet rs = null;
@@ -162,13 +135,6 @@ public class DBexec {
         }
     }
 
-    /**
-     * @param con
-     * @param sql
-     * @param values
-     * @return
-     * @throws SQLException
-     */
     static DataBean executequeryBean(Connection con, String sql, Object[] values) throws SQLException {
         ResultSet rs = null;
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -195,13 +161,6 @@ public class DBexec {
         }
     }
 
-    /**
-     * @param con
-     * @param sql
-     * @param values
-     * @return
-     * @throws SQLException
-     */
     static int[] executeBatch(Connection con, String sql, List<Object[]> values) throws SQLException {
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             if (values != null) {
@@ -216,13 +175,6 @@ public class DBexec {
         }
     }
 
-    /**
-     * @param con
-     * @param sql
-     * @param values
-     * @return
-     * @throws SQLException
-     */
     static int executeUpdate(Connection con, String sql, Object... values) throws SQLException {
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             if (values != null) {

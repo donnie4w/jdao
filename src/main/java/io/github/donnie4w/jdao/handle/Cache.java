@@ -21,6 +21,9 @@ package io.github.donnie4w.jdao.handle;
 import io.github.donnie4w.jdao.base.Condition;
 import io.github.donnie4w.jdao.base.Table;
 
+/**
+ * Represents a caching mechanism for database operations.
+ */
 public abstract class Cache {
 
     static Cache newInstance(){

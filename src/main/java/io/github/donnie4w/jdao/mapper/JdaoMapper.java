@@ -25,41 +25,59 @@ import io.github.donnie4w.jdao.handle.JdaoException;
 import javax.sql.DataSource;
 
 /**
- *  author: donnie4w <donnie4w@gmail.com>
  *  JdaoMapper serves as the central access point within the Jdao framework for mapping SQL configurations defined in XML files to Java objects.
  *  This class facilitates the execution of Create, Read, Update, and Delete (CRUD) operations based on the identifiers (MapperId) specified in these configurations
  */
 public abstract class JdaoMapper implements Mapper{
 
+    /**
+     * Default constructor for JdaoMapper.
+     */
     protected JdaoMapper() {
     }
 
+    /**
+     * Builds the JDAO mapper using the specified XML path.
+     *
+     * @param xmlpath the path to the XML configuration file
+     * @throws JdaoException if there is an error building the mapper
+     */
     public static void build(String xmlpath) throws JdaoException {
         MapperParser.Mapper(xmlpath);
     }
 
-
+    /**
+     * Creates a new instance of JdaoMapper.
+     *
+     * @return a new instance of JdaoMapper
+     */
     public static JdaoMapper newInstance() {
         return new MapperHandler();
     }
 
     /**
-     * @param dBhandle
+     * Uses the specified DB handle.
+     *
+     * @param dBhandle the DB handle to use
+     * @return the JdaoMapper instance
      */
     public abstract JdaoMapper useDBhandle(DBhandle dBhandle);
 
     /**
-     * @param dataSource
-     * @param dbType
+     * Uses the specified DataSource and DB type.
+     *
+     * @param dataSource the DataSource to use
+     * @param dbType the type of the database
+     * @return the JdaoMapper instance
      */
     public abstract JdaoMapper useDBhandle(DataSource dataSource, DBType dbType);
 
     /**
      * the sql configure the mapping to the specified interface
      *
-     * @param clazz
-     * @param <T>
-     * @return
+     * @param <T> the type of the mapper
+     * @param clazz the class of the mapper
+     * @return the mapper instance
      */
     public abstract <T> T getMapper(Class<T> clazz);
 }

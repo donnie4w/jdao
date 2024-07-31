@@ -32,31 +32,53 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 /**
- * donnie4w <donnie4w@gmail.com>
- *
  * Encapsulated class for database query results ,
- * supports conversion to custom Javabeans.  e.g. dataBean.scan(Hstest.class)
- *
+ * supports conversion to custom Javabeans.
  */
 public class DataBean implements Iterable<String> {
 
     private final Map<String, FieldBean> fieldNameMap = new HashMap<>();
     private final Map<Integer, FieldBean> fieldIndexMap = new HashMap<>();
 
+    /**
+     * Adds a field to the DataBean.
+     *
+     * @param fieldName the name of the field.
+     * @param fieldIndex the index of the field.
+     * @param fieldValue the value of the field.
+     */
     public void put(String fieldName, int fieldIndex, Object fieldValue) {
         FieldBean fb = new FieldBean(fieldName, fieldIndex, fieldValue);
         this.fieldNameMap.put(fieldName, fb);
         this.fieldIndexMap.put(fieldIndex, fb);
     }
 
+    /**
+     * Finds a field by its name.
+     *
+     * @param fieldName the name of the field.
+     * @return the FieldBean with the specified name.
+     */
     public FieldBean findField(String fieldName) {
         return this.fieldNameMap.get(fieldName);
     }
 
+    /**
+     * Finds a field by its index.
+     *
+     * @param index the index of the field.
+     * @return the FieldBean at the specified index.
+     */
     public FieldBean findField(int index) {
         return this.fieldIndexMap.get(index);
     }
 
+    /**
+     * Gets the value of a field by its name.
+     *
+     * @param name the name of the field.
+     * @return the value of the field.
+     */
     public Object getValue(String name) {
         FieldBean fb = fieldNameMap.get(name);
         if (fb != null) {
@@ -65,6 +87,12 @@ public class DataBean implements Iterable<String> {
         return null;
     }
 
+    /**
+     * Gets the value of a field by its index.
+     *
+     * @param index the index of the field.
+     * @return the value of the field.
+     */
     public Object getValue(int index) {
         FieldBean fb = fieldIndexMap.get(index);
         if (fb != null) {
@@ -73,10 +101,20 @@ public class DataBean implements Iterable<String> {
         return null;
     }
 
+    /**
+     * Returns the number of fields in the DataBean.
+     *
+     * @return the number of fields.
+     */
     public int size() {
         return this.fieldNameMap.size();
     }
 
+    /**
+     * Converts the DataBean to a Map.
+     *
+     * @return A Map representation of the DataBean.
+     */
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         for (String name : this) {
@@ -85,6 +123,11 @@ public class DataBean implements Iterable<String> {
         return map;
     }
 
+    /**
+     * Converts the DataBean to a list of objects.
+     *
+     * @return a list of objects representing the fields.
+     */
     public List<Object> toList() {
         List<Object> list = new ArrayList<>();
         for (String name : this) {
@@ -93,12 +136,25 @@ public class DataBean implements Iterable<String> {
         return list;
     }
 
+    /**
+     * Converts the DataBean to a Set.
+     *
+     * @return A Set representation of the DataBean.
+     */
     public Set<Object> toSet() {
         Set<Object> set = new LinkedHashSet<>();
         set.addAll(toList());
         return set;
     }
 
+    /**
+     * Scans the DataBean into a specific bean class.
+     *
+     * @param <T> the type of the bean class.
+     * @param beanClass the bean class to scan into.
+     * @return the scanned bean instance.
+     * @throws JdaoException if a JDAO related exception occurs.
+     */
     public <T> T scan(Class<T> beanClass) throws JdaoException {
         try {
             T targetBean = beanClass.getDeclaredConstructor().newInstance();
@@ -251,9 +307,6 @@ public class DataBean implements Iterable<String> {
         return Util.asBytes(value);
     }
 
-    /**
-     * @return
-     */
     @Override
     public Iterator<String> iterator() {
         return fieldNameMap.keySet().iterator();

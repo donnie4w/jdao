@@ -27,10 +27,6 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.*;
 
-/**
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-1-10
- */
 public abstract class Table<T extends Table<?>> implements JStruct<T> {
     private static final long serialVersionUID = 6118092300004961000L;
 
@@ -79,8 +75,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
 
     /**
      * Set up transactions and enable transactions
-     *
-     * @param transaction
      */
     public T useTransaction(Transaction transaction) {
         this.transaction = transaction;
@@ -89,9 +83,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
 
     /**
      * Set the dataSource for this operation
-     *
-     * @param dataSource
-     * @param dbType
      */
     public T useDataSource(DataSource dataSource, DBType dbType) {
         this.dbhandle = Jdao.newDBhandle(dataSource, dbType);
@@ -99,10 +90,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
     }
 
 
-    /**
-     * @param dbhandle
-     * @return
-     */
     public T useDBhandle(DBhandle dbhandle) {
         this.dbhandle = dbhandle;
         return (T) this;
@@ -157,7 +144,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
      *<p>
      * Example:
      *<p> Assuming Hstest is a table class and ID is a column in that table
-     *<p> sql in MySql : select * from hstest where id &gt=? and id &lt= ? or id=? group by id having  count(id) &lt? order by id asc LIMIT ?, ? [3, 0, 10, 2, 0, 5]
      *   <blockquote><pre>
      *   Hstest hs = new Hstest().where(Hstest.ID.LE(3), Hstest.ID.GE(0).OR(Hstest.ID.EQ(10))).groupBy(Hstest.ID).having(Hstest.ID.count().LT(2)).orderBy(Hstest.ID.asc()).limit(0, 5);
      *   </pre></blockquote>
@@ -174,8 +160,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
     /**
      * order by
      * The function is the same as order by in sql
-     *
-     * @param sorts
      */
     public T orderBy(Sort<T>... sorts) {
         for (Sort s : sorts) {
@@ -190,8 +174,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
     /**
      * group by
      * The function is the same as group by in sql
-     *
-     * @param fields
      */
     public T groupBy(Fields<T>... fields) {
         for (Fields<T> f : fields) {
@@ -204,8 +186,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
     /**
      * having
      * The function is the same as having in sql
-     *
-     * @param wheres
      */
     public T having(Where<T>... wheres) {
         for (Where<T> w : wheres) {
@@ -226,8 +206,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
      * limit ?
      * <p>
      * The function is the same as limit in sql
-     *
-     * @param limit
      */
     public T limit(int limit) {
         limitArg = new int[]{limit};
@@ -246,9 +224,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
      * limit ?,?
      * <p>
      * The function is the same as limit in sql
-     *
-     * @param offset
-     * @param limit
      */
     public T limit(int offset, int limit) {
         limitArg = new int[]{offset, limit};
@@ -405,10 +380,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
 
     /**
      * Query and return list, used in the case of returning multiple database data
-     *
-     * @param fs
-     * @return
-     * @throws JdaoException
      */
     public List<T> selects(Field<T>... fs) throws JdaoException, JdaoClassException, SQLException {
         isinit();
@@ -442,10 +413,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
     /**
      * Query and return data objects, generally used in the case of returning a database data,
      * if there are multiple query results, return the first
-     *
-     * @param fs
-     * @return
-     * @throws JdaoException
      */
     public T select(Fields<T>... fs) throws JdaoException, JdaoClassException, SQLException {
         isinit();
@@ -477,9 +444,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
 
     /**
      * Execute insert
-     *
-     * @return
-     * @throws JdaoException
      */
     public int insert() throws JdaoException, SQLException {
         isinit();
@@ -542,9 +506,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
 
     /**
      * Execute batch processing
-     *
-     * @return
-     * @throws JdaoException
      */
     public int[] executeBatch() throws JdaoException, SQLException {
         isinit();
@@ -593,9 +554,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
 
     /**
      * Execute update
-     *
-     * @return
-     * @throws JdaoException
      */
     public int update() throws JdaoException, SQLException {
         isinit();
@@ -653,9 +611,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
 
     /**
      * Execute delete
-     *
-     * @return
-     * @throws JdaoException
      */
     public int delete() throws JdaoException, SQLException {
         isinit();
@@ -720,8 +675,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
 
     /**
      * This operation enables caching
-     *
-     * @return
      */
     public T useCache() {
         return useCache(true);
@@ -730,9 +683,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
 
     /**
      * Set whether this table object uses cache
-     *
-     * @param use
-     * @return
      */
     public T useCache(boolean use) {
         isinit();
@@ -746,8 +696,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
 
     /**
      * Set annotations for Sql
-     *
-     * @param commentLine
      */
     public T useCommentLine(String commentLine) {
         isinit();
@@ -755,10 +703,6 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
         return (T) this;
     }
 
-    /**
-     * @param list
-     * @param a
-     */
     private static void parseArray(List<Object> list, Array a) {
         for (Object o : a.getArray()) {
             if (o instanceof Array) {

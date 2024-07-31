@@ -18,24 +18,51 @@
 package io.github.donnie4w.jdao.handle;
 
 /**
- * @File:jdao: com.jdao.base :JdaoException.java
- * @Date:2017年10月23日
- * @Copyright (c) 2017, donnie4w@gmail.com All Rights Reserved.
- * @Author: dong
- * @Desc:
+ * This runtime exception is thrown when there is a general error in JDAO.
  */
 public class JdaoRuntimeException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
+    /** Constructs a new runtime exception with the specified detail message.
+     * The cause is not initialized, and may subsequently be initialized by a
+     * call to {@link #initCause}.
+     *
+     * @param   message   the detail message. The detail message is saved for
+     *          later retrieval by the {@link #getMessage()} method.
+     */
     public JdaoRuntimeException(String message) {
         super(message);
     }
 
+    /** Constructs a new runtime exception with the specified cause and a
+     * detail message of {@code (cause==null ? null : cause.toString())}
+     * (which typically contains the class and detail message of
+     * {@code cause}).  This constructor is useful for runtime exceptions
+     * that are little more than wrappers for other throwables.
+     *
+     * @param  cause the cause (which is saved for later retrieval by the
+     *         {@link #getCause()} method).  (A {@code null} value is
+     *         permitted, and indicates that the cause is nonexistent or
+     *         unknown.)
+     */
     public JdaoRuntimeException(Throwable cause) {
         super(cause);
     }
 
+    /**
+     * Constructs a new runtime exception with the specified detail message and
+     * cause.  <p>Note that the detail message associated with
+     * {@code cause} is <i>not</i> automatically incorporated in
+     * this runtime exception's detail message.
+     *
+     * @param  message the detail message (which is saved for later retrieval
+     *         by the {@link #getMessage()} method).
+     * @param  cause the cause (which is saved for later retrieval by the
+     *         {@link #getCause()} method).  (A {@code null} value is
+     *         permitted, and indicates that the cause is nonexistent or
+     *         unknown.)
+     */
     public JdaoRuntimeException(String message, Throwable cause) {
         super(message, cause);
     }

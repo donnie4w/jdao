@@ -6,11 +6,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.stream.Collectors;
 
-/**
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-1-10
- * @verion 1.0
- */
 public class Utils {
     @Deprecated
     public static String delUnderline(String str) {

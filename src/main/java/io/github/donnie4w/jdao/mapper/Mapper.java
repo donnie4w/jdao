@@ -25,21 +25,12 @@ import io.github.donnie4w.jdao.handle.Transaction;
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- * @author donnie4w <donnie4w@gmail.com>
- */
 public interface Mapper {
 
     boolean isAutocommit();
-    /**
-     * @param on
-     * @throws JdaoException
-     */
+
     void setAutocommit(boolean on) throws SQLException;
-    /**
-     *
-     * @param transaction
-     */
+
     void useTransaction(Transaction transaction);
 
     void rollback() throws SQLException;
@@ -68,7 +59,7 @@ public interface Mapper {
      * <p> Assuming "com.example.mappers.users" is the namespace in the XML mapping files
      * <p> And "getUserById" is the select id of the mapper within the namespace
      * <blockquote><pre>
-     *   User user = jdaoMapper.selectOne("com.example.mappers.users.getUserById", userId);
+     *   jdaoMapper.selectOne("com.example.mappers.users.getUserById", userId);
      * </pre></blockquote>
      */
     <T> T selectOne(String mapperId, Object... param) throws JdaoException, JdaoClassException, SQLException;
@@ -101,7 +92,7 @@ public interface Mapper {
      *</pre></blockquote>
      * <p> Using a Map as the parameter
      * <blockquote><pre>
-     *   Map<String, Object> params = new HashMap<>();
+     *   Map params = new HashMap();
      *   params.put("name", "John Doe");
      *   params.put("age", 30);
      *   User userByParams = jdaoMapper.selectOne("com.example.mappers.users.getUserByNameAndAge", params);
@@ -132,7 +123,7 @@ public interface Mapper {
      * <p> Assuming "com.example.mappers.users" is the namespace in the XML mapping files
      * <p> And "getUsersByNameAndAge" is the ID of the mapper within the namespace
      * <blockquote><pre>
-     *   User[] users = jdaoMapper.selectArray("com.example.mappers.users.getUsersByNameAndAge", "John Doe",30);
+     *   jdaoMapper.selectArray("com.example.mappers.users.getUsersByNameAndAge", "John Doe",30);
      * </pre></blockquote>
      */
     <T> T[] selectArray(String mapperId, Object... param) throws JdaoException, JdaoClassException, SQLException;
@@ -160,14 +151,14 @@ public interface Mapper {
      *<p> Assuming "com.example.mappers.users" is the namespace in the XML mapping files
      *<p> And "getUsersByName" is the ID of the mapper within the namespace
      * <blockquote><pre>
-     *   User[] users = jdaoMapper.selectArray("com.example.mappers.users.getUsersByName", "John Doe");
+     *   jdaoMapper.selectArray("com.example.mappers.users.getUsersByName", "John Doe");
      *</pre></blockquote>
      * <p> Using a Map as the parameter
      *<blockquote><pre>
-     *   Map<String, Object> params = new HashMap<>();
+     *   Map params = new HashMap();
      *   params.put("name", "John Doe");
      *   params.put("age", 30);
-     *   User[] usersByParams = jdaoMapper.selectArray("com.example.mappers.users.getUsersByNameAndAge", params);
+     *   jdaoMapper.selectArray("com.example.mappers.users.getUsersByNameAndAge", params);
      * </pre></blockquote>
      */
     <T> T[] selectArray(String mapperId, Object param) throws JdaoException, JdaoClassException, SQLException;
@@ -194,7 +185,7 @@ public interface Mapper {
      * <p> Assuming "com.example.mappers.users" is the namespace in the XML mapping files
      * <p> And "getUsersByNameAndAge" is the ID of the mapper within the namespace
      *  <blockquote><pre>
-     *   List<User> users = jdaoMapper.selectList("com.example.mappers.users.getUsersByNameAndAge", "John Doe",30);
+     *   List users = jdaoMapper.selectList("com.example.mappers.users.getUsersByNameAndAge", "John Doe",30);
      * </pre></blockquote>
      */
     <T> List<T> selectList(String mapperId, Object... param) throws JdaoException, JdaoClassException, SQLException;
@@ -222,14 +213,14 @@ public interface Mapper {
      *<p> Assuming "com.example.mappers.users" is the namespace in the XML mapping files
      *<p> And "getUsersByName" is the ID of the mapper within the namespace
      * <blockquote><pre>
-     *   List<User> users = jdaoMapper.selectList("com.example.mappers.users.getUsersByName", "John Doe");
+     *   List users = jdaoMapper.selectList("com.example.mappers.users.getUsersByName", "John Doe");
      *</pre></blockquote>
      *<p> Using a Map as the parameter
      * <blockquote><pre>
-     *   Map<String, Object> params = new HashMap<>();
+     *   Map params = new HashMap();
      *   params.put("name", "John Doe");
      *   params.put("age", 30);
-     *   List<User> usersByParams = jdaoMapper.selectList("com.example.mappers.users.getUsersByNameAndAge", params);
+     *   List usersByParams = jdaoMapper.selectList("com.example.mappers.users.getUsersByNameAndAge", params);
      * </pre></blockquote>
      */
     <T> List<T> selectList(String mapperId, Object param) throws JdaoException, JdaoClassException, SQLException;
@@ -286,7 +277,7 @@ public interface Mapper {
      *</pre></blockquote>
      *<p> Using a Map as the parameter
      * <blockquote><pre>
-     *   Map<String, Object> params = new HashMap<>();
+     *   Map params = new HashMap();
      *   params.put("name", "Jane Smith");
      *   params.put("age", 25);
      *   int rowsAffected = jdaoMapper.insert("com.example.mappers.users.insertUser", params);
@@ -346,7 +337,7 @@ public interface Mapper {
      *</pre></blockquote>
      * <p> Using a Map as the parameter
      * <blockquote><pre>
-     *   Map<String, Object> params = new HashMap<>();
+     *   Map params = new HashMap();
      *   params.put("name", "Jane Smith");
      *   params.put("age", 25);
      *   params.put("id", 2L);
@@ -402,12 +393,11 @@ public interface Mapper {
      * <p> Assuming "com.example.mappers.users" is the namespace in the XML mapping files
      * <p> And "deleteUserById" is the delete ID of the mapper within the namespace
      * <blockquote><pre>
-     *   long userId = 1L;
-     *   int rowsAffected = jdaoMapper.delete("com.example.mappers.users.deleteUserById", userId);
+     *   int rowsAffected = jdaoMapper.delete("com.example.mappers.users.deleteUserById", 1);
      *</pre></blockquote>
      * <p> Using a Map as the parameter
      *   <blockquote><pre>
-     *   Map<String, Object> params = new HashMap<>();
+     *   Map params = new HashMap();
      *   params.put("id", 2L);
      *   int rowsAffectedByParams = jdaoMapper.delete("com.example.mappers.users.deleteUserById", params);
      *   </pre></blockquote>

@@ -19,27 +19,56 @@
 
 package io.github.donnie4w.jdao.handle;
 
+/**
+ * Represents a cached item with a timestamp and value.
+ */
 public class CacheBean {
     private long timestamp;
     private Object value;
 
+    /**
+     * Constructs a new CacheBean instance.
+     *
+     * @param timestamp the timestamp when the item was cached.
+     * @param value the value being cached.
+     */
     public CacheBean(long timestamp, Object value) {
         this.timestamp = timestamp;
         this.value = value;
     }
 
+    /**
+     * Gets the timestamp of the cached item.
+     *
+     * @return the timestamp.
+     */
     public long getTimestamp() {
         return timestamp;
     }
 
+    /**
+     * Sets the timestamp of the cached item.
+     *
+     * @param timestamp the new timestamp.
+     */
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
+    /**
+     * Gets the value of the cached item.
+     *
+     * @return the value.
+     */
     public Object getValue() {
         return value;
     }
 
+    /**
+     * Sets the value of the cached item.
+     *
+     * @param value the new value.
+     */
     public void setValue(Object value) {
         this.value = value;
     }

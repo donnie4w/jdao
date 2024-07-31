@@ -24,9 +24,9 @@ import io.github.donnie4w.jdao.handle.JdaoRuntimeException;
 import java.util.Objects;
 
 /**
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-1-10
- * @verion 1.0
+ * Represents a field in a database query.
+ *
+ * @param <T> the type of the field
  */
 public class Fields<T> implements Field<T> {
 
@@ -38,14 +38,29 @@ public class Fields<T> implements Field<T> {
     static final String LT = "<";
     static final String NEQ = "<>";
 
+    /**
+     * The name of the field.
+     */
     public String fieldName;
 
+    /**
+     * Constructs a new Fields instance.
+     *
+     * @param name the name of the field
+     */
     public Fields(String name) {
         if (name == null)
             throw new JdaoRuntimeException("field name can't be null!");
         fieldName = name;
     }
 
+    /**
+     * Parses the given value into a Where clause based on the specified operator.
+     *
+     * @param value the value to parse
+     * @param _OPER the operator to use
+     * @return a Where object representing the parsed condition
+     */
     public Where<T> parse(Object value, String _OPER) {
         String f = "?";
         Object v = value;
@@ -57,77 +72,111 @@ public class Fields<T> implements Field<T> {
     }
 
     /**
-     * = 等于
+     * Creates a WHERE clause with an equality condition.
+     *
+     * @param value the value to compare the field against
+     * @return a new Where object for further conditions
      */
     public Where<T> EQ(Object value) {
         return parse(value, EQ);
     }
 
     /**
-     * >= 大于等于
+     * Creates a WHERE clause with a greater than condition.
+     *
+     * @param value the value to compare the field against
+     * @return a new Where object for further conditions
      */
     public Where<T> GT(Object value) {
         return parse(value, GT);
     }
 
     /**
-     * <= 大于等于
+     * Creates a WHERE clause with a greater than or equal to condition.
+     *
+     * @param value the value to compare the field against
+     * @return a new Where object for further conditions
      */
     public Where<T> GE(Object value) {
         return parse(value, GE);
     }
 
     /**
-     * < 小于等于
+     * Creates a WHERE clause with a less than or equal to condition.
+     *
+     * @param value the value to compare the field against
+     * @return a new Where object for further conditions
      */
     public Where<T> LE(Object value) {
         return parse(value, LE);
     }
 
     /**
-     * > 小于
+     * Creates a WHERE clause with a less than condition.
+     *
+     * @param value the value to compare the field against
+     * @return a new Where object for further conditions
      */
     public Where<T> LT(Object value) {
         return parse(value, LT);
     }
 
     /**
-     * <> 不等于
+     * Creates a WHERE clause with a not equal condition.
+     *
+     * @param value the value to compare the field against
+     * @return a new Where object for further conditions
      */
     public Where<T> NEQ(Object value) {
         return parse(value, NEQ);
     }
 
     /**
-     * like %value%
+     * Creates a WHERE clause with a LIKE condition.
+     *
+     * @param value the value to compare the field against
+     * @return a new Where object for further conditions
      */
     public Where<T> LIKE(Object value) {
         return new Where<T>(AND + fieldName + " like ? ", "%" + value + "%");
     }
 
     /**
-     * like value%
+     * Creates a WHERE clause with a left LIKE condition.
+     *
+     * @param value the value to compare the field against
+     * @return a new Where object for further conditions
      */
     public Where<T> LLIKE(Object value) {
         return new Where<T>(AND + fieldName + " like ? ", value + "%");
     }
 
     /**
-     * like %value
+     * Creates a WHERE clause with a right LIKE condition.
+     *
+     * @param value the value to compare the field against
+     * @return a new Where object for further conditions
      */
     public Where<T> RLIKE(Object value) {
         return new Where<T>(AND + fieldName + " like  ? ", "%" + value);
     }
 
     /**
-     * between ? and ?
+     * Creates a WHERE clause with a BETWEEN condition.
+     *
+     * @param from the lower bound of the range
+     * @param to the upper bound of the range
+     * @return a new Where object for further conditions
      */
     public Where<T> BETWEEN(Object from, Object to) {
         return new Where<T>(AND + fieldName + " between ? and ? ", new Array(from, to));
     }
 
     /**
-     * in (?...)
+     * Creates a WHERE clause with an IN condition.
+     *
+     * @param objects the values to include in the IN condition
+     * @return a new Where object for further conditions
      */
     public Where<T> IN(Object... objects) {
         StringBuilder sb = new StringBuilder();
@@ -140,7 +189,10 @@ public class Fields<T> implements Field<T> {
     }
 
     /**
-     * not in (?...)
+     * Creates a WHERE clause with a NOT IN condition.
+     *
+     * @param objects the values to exclude in the NOT IN condition
+     * @return a new Where object for further conditions
      */
     public Where<T> NOTIN(Object... objects) {
         StringBuilder sb = new StringBuilder();
@@ -153,98 +205,131 @@ public class Fields<T> implements Field<T> {
     }
 
     /**
-     * is null
+     * Creates a WHERE clause with an IS NULL condition.
+     *
+     * @return a new Where object for further conditions
      */
     public Where<T> ISNULL() {
         return new Where<T>(AND + fieldName + " is null ");
     }
 
     /**
-     * is not null
+     * Creates a WHERE clause with an IS NOT NULL condition.
+     *
+     * @return a new Where object for further conditions
      */
     public Where<T> ISNONULL() {
         return new Where<T>(AND + fieldName + " is not null ");
     }
 
     /**
-     * order by ? asc 升序
+     * Creates a SORT clause with an ascending order.
+     * order by ? asc
+     *
+     * @return a new Sort object for further sorting
      */
     public Sort<T> asc() {
         return new Sort<T>(fieldName + " asc");
     }
 
     /**
-     * order by ? desc 降序
+     * Creates a SORT clause with a descending order.
+     * order by ? desc
+     *
+     * @return a new Sort object for further sorting
      */
     public Sort<T> desc() {
         return new Sort<T>(fieldName + " desc");
     }
 
     /**
+     * Creates a functional aggregation with a COUNT operation.
      * count(?)
+     *
+     * @return a new Func object for further operations
      */
     public Func<T> count() {
         return new Func<T>(" count(" + fieldName + ") ");
     }
 
     /**
+     * Creates a functional aggregation with a SUM operation.
      * sum(?)
+     *
+     * @return a new Func object for further operations
      */
     public Func<T> sum() {
         return new Func<T>(" sum(" + fieldName + ") ");
     }
 
     /**
-     * distinct
+     * Creates a functional aggregation with a DISTINCT operation.
+     *
+     * @return a new Func object for further operations
      */
     public Func<T> distinct() {
         return new Func<T>(" distinct " + fieldName + " ");
     }
 
     /**
-     * avg
+     * Creates a functional aggregation with an AVG operation.
+     *
+     * @return a new Func object for further operations
      */
     public Func<T> avg() {
         return new Func<T>(" avg(" + fieldName + ") ");
     }
 
     /**
-     * max
+     * Creates a functional aggregation with a MAX operation.
+     *
+     * @return a new Func object for further operations
      */
     public Func<T> max() {
         return new Func<T>(" max(" + fieldName + ") ");
     }
 
     /**
-     * min
+     * Creates a functional aggregation with a MIN operation.
+     *
+     * @return a new Func object for further operations
      */
     public Func<T> min() {
         return new Func<T>(" min(" + fieldName + ") ");
     }
 
     /**
-     * ucase 转换为大写
+     * Creates a functional aggregation with an UCASE (uppercase) operation.
+     *
+     * @return a new Func object for further operations
      */
     public Func<T> ucase() {
         return new Func<T>(" ucase(" + fieldName + ") ");
     }
 
     /**
-     * lcase 转换为小写
+     * Creates a functional aggregation with an LCASE (uppercase) operation.
+     *
+     * @return a Func object representing the lowercase transformation
      */
     public Func<T> lcase() {
         return new Func<T>(" lcase(" + fieldName + ") ");
     }
 
     /**
-     * len 长度
+     * Creates a functional aggregation with an LEN (uppercase) operation.
+     *
+     * @return a Func object representing the len transformation
      */
     public Func<T> len() {
         return new Func<T>(" len(" + fieldName + ") ");
     }
 
     /**
-     * round(fieldName,0) round函数
+     * Rounds the field value to the specified number of decimal places.
+     * round(fieldName,0)
+     * @param decimals the number of decimal places
+     * @return a Func object representing the rounding operation
      */
     public Func<T> round(int decimals) {
         return new Func<T>(" round(" + fieldName + " ," + decimals + ") ");
@@ -254,8 +339,8 @@ public class Fields<T> implements Field<T> {
      * Implementation function wrapping
      * e.g.  ID.FnWarp("max")  mean:  max(`id`)
      *
-     * @param function
-     * @return
+     * @param function the function to apply
+     * @return the result of applying the function
      */
     public Func<T> FnWarp(String function) {
         return new Func<T>(" " + function + "(" + fieldName + ") ");

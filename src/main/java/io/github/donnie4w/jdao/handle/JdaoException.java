@@ -17,25 +17,41 @@
  */
 package io.github.donnie4w.jdao.handle;
 
+
 /**
- * @File:jdao: com.jdao.base :JdaoException.java
- * @Date:2017年10月23日
- * @Copyright (c) 2017, donnie4w@gmail.com All Rights Reserved.
- * @Author: dong
- * @Desc:
+ * This exception is thrown when there is a general error in JDAO.
  */
 public class JdaoException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
+
+    /**
+     * Constructs a new JdaoException with the specified detail message.
+     *
+     * @param message the detail message
+     */
     public JdaoException(String message) {
         super(message);
     }
 
+
+    /**
+     * Constructs a new JdaoException with the specified cause.
+     *
+     * @param cause the cause of the exception
+     */
     public JdaoException(Throwable cause) {
         super(cause);
     }
 
+
+    /**
+     * Constructs a new JdaoException with the specified detail message and cause.
+     *
+     * @param message the detail message
+     * @param cause   the cause of the exception
+     */
     public JdaoException(String message, Throwable cause) {
         super(message, cause);
     }

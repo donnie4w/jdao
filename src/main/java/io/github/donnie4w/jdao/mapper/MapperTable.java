@@ -26,44 +26,25 @@ public class MapperTable extends Table {
     protected MapperTable(String tablename) {
         super(tablename, MapperTable.class);
     }
-    /**
-     *
-     */
+
     @Override
     public void toJdao() {
     }
 
-    /**
-     * @param h
-     * @return
-     */
     @Override
     public MapperTable copy(Object h) {
         return this;
     }
 
-    /**
-     * @param fieldname
-     * @param obj
-     * @throws JdaoException
-     */
     @Override
     public void scan(String fieldname, Object obj) throws JdaoException {
     }
 
-    /**
-     * @return
-     */
     @Override
     public byte[] encode() {
         return new byte[0];
     }
 
-    /**
-     * @param bs
-     * @return
-     * @throws JdaoException
-     */
     @Override
     public MapperTable decode(byte[] bs) throws JdaoException {
         return this;

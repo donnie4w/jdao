@@ -53,21 +53,11 @@ public class JdbcHandler implements JdbcHandle {
         return this.dataSource;
     }
 
-    /**
-     * @return
-     * @throws SQLException
-     */
     @Override
     public Tx newTransaction() throws SQLException {
         return new Tx(dataSource);
     }
 
-    /**
-     * @param sql
-     * @param values
-     * @return
-     * @throws SQLException
-     */
     @Override
     public DataBean executeQueryBean(String sql, Object... values) throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
@@ -75,12 +65,6 @@ public class JdbcHandler implements JdbcHandle {
         }
     }
 
-    /**
-     * @param sql
-     * @param values
-     * @return
-     * @throws SQLException
-     */
     @Override
     public List<DataBean> executeQueryBeans(String sql, Object... values) throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
@@ -88,17 +72,6 @@ public class JdbcHandler implements JdbcHandle {
         }
     }
 
-
-    /**
-     * @param claz
-     * @param sql
-     * @param values
-     * @param <T>
-     * @return
-     * @throws JdaoException
-     * @throws JdaoClassException
-     * @throws SQLException
-     */
     @Override
     public <T> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         try (Connection conn = dataSource.getConnection()) {
@@ -106,16 +79,6 @@ public class JdbcHandler implements JdbcHandle {
         }
     }
 
-    /**
-     * @param claz
-     * @param sql
-     * @param values
-     * @param <T>
-     * @return
-     * @throws JdaoException
-     * @throws JdaoClassException
-     * @throws SQLException
-     */
     @Override
     public <T> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         try (Connection conn = dataSource.getConnection()) {
@@ -123,13 +86,6 @@ public class JdbcHandler implements JdbcHandle {
         }
     }
 
-    /**
-     * @param sql
-     * @param values
-     * @return
-     * @throws JdaoException
-     * @throws SQLException
-     */
     @Override
     public int executeUpdate(String sql, Object... values) throws JdaoException, SQLException {
         try (Connection conn = dataSource.getConnection()) {
@@ -137,12 +93,6 @@ public class JdbcHandler implements JdbcHandle {
         }
     }
 
-    /**
-     * @param sql
-     * @param values
-     * @return
-     * @throws SQLException
-     */
     @Override
     public int[] executeBatch(String sql, List<Object[]> values) throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
@@ -150,13 +100,6 @@ public class JdbcHandler implements JdbcHandle {
         }
     }
 
-
-    /**
-     * @param procedureName
-     * @param params
-     * @return
-     * @throws SQLException
-     */
     public Map<Integer, Object> executeCall(String procedureCallMethod, Params... params) throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
             return DBexec.executeCall(conn, procedureCallMethod, params);

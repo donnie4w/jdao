@@ -25,17 +25,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * author donnie4w <donnie4w@gmail.com>
  * Database transaction interface for transactional manipulation of data
  */
+
 public interface Transaction extends Basehandle{
-    /**
-     * @throws SQLException
-     */
+
     void commit() throws SQLException;
-    /**
-     * @throws SQLException
-     */
+
     void rollback() throws SQLException;
 
     DataSource getDataSource();

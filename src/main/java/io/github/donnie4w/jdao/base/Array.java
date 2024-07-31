@@ -17,18 +17,25 @@
  */
 package io.github.donnie4w.jdao.base;
 /**
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-1-10
- * @verion 1.0
  * sql parameter value array
  */
 public class Array {
     Object[] array;
 
+    /**
+     * Constructs a new Array object. parameter of sql
+     *
+     * @param objects the array of objects to contain in this Array.
+     */
     public Array(Object... objects) {
         array = objects;
     }
 
+    /**
+     * Gets the original array of objects contained in this Array.
+     *
+     * @return the original array of objects.
+     */
     public Object[] getArray() {
         return array;
     }

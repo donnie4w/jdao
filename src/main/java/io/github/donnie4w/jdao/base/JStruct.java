@@ -24,10 +24,6 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- * @author  donnie4w<donnie4w@gmail.com>
- * @param <T>
- */
 public interface JStruct<T> extends Scanner<T>, JdaoSerializa, Serializable {
 
     T useMaster(boolean useMaster);

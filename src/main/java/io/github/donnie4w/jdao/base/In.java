@@ -19,14 +19,15 @@ package io.github.donnie4w.jdao.base;
 
 /**
  * Input parameters to the stored procedure
- *
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-2-2
- * @verion 1.0.1
  */
 public class In extends Params {
-    private Object o;
+    private final Object o;
 
+    /**
+     * Constructs a new In instance.
+     *
+     * @param o input parameter
+     */
     public In(Object o) {
         this.o = o;
     }

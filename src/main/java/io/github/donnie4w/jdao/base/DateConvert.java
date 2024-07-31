@@ -24,8 +24,18 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
+/**
+ * Provides utilities for converting dates between different formats.
+ */
 public class DateConvert {
 
+    /**
+     * Converts a string to a date object.
+     *
+     * @param dateStr the string representation of the date
+     * @return the converted date object
+     * @throws JdaoException if the conversion fails
+     */
     public static Date convertToDate(String dateStr) throws JdaoException {
         Instant instant = convertToInstant(dateStr);
         if (instant != null) {
@@ -38,6 +48,13 @@ public class DateConvert {
         return null;
     }
 
+    /**
+     * Converts a string to an Instant.
+     *
+     * @param dateStr the string representation of the date
+     * @return the converted Instant
+     * @throws JdaoException if the conversion fails
+     */
     public static Instant convertToInstant(String dateStr) throws JdaoException {
         if (dateStr == null || dateStr.length() == 0) {
             return null;

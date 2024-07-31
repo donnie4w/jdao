@@ -32,6 +32,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Represents a container for cache items.
+ */
 public class CacheContainer {
 
     private final String MAPPER_PRE = String.valueOf(System.nanoTime());
@@ -42,6 +45,11 @@ public class CacheContainer {
 
     private final CacheHandle cacheHandle;
 
+    /**
+     * Constructs a new CacheContainer instance with the given CacheHandle.
+     *
+     * @param cacheHandle the CacheHandle to use for this container.
+     */
     public CacheContainer(CacheHandle cacheHandle) {
         this.cacheHandle = cacheHandle;
         new ClearThread().start();

@@ -26,6 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Container for database-related objects.
+ */
 public class DBContainer {
 
     private final String MAPPER_PRE =  String.valueOf(System.nanoTime());;

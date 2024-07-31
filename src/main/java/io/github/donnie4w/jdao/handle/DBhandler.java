@@ -26,10 +26,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Implementation of the DBhandle interface for performing database operations.
+ */
 public class DBhandler implements DBhandle {
     private final DBType dbType;
     private final JdbcHandle jdbcHandle;
 
+    /**
+     * Constructs a new DBhandler instance.
+     *
+     * @param dataSource the DataSource used to obtain connections
+     * @param dbType the type of the database
+     */
     public DBhandler(DataSource dataSource, DBType dbType) {
         this.dbType = dbType;
         this.jdbcHandle = JdbcHandler.getInstance(dataSource);
@@ -48,23 +57,6 @@ public class DBhandler implements DBhandle {
         return jdbcHandle;
     }
 
-    public <T> List<T> executeQueryScanList(Transaction transaction, Class<T> clz, String sql, Object... values) throws JdaoException, SQLException {
-        List<DataBean> list = executeQueryBeans(transaction, sql, values);
-        if (list != null) {
-            List<T> results = new ArrayList<>();
-            for (DataBean dataBean : list) {
-                results.add(dataBean.scan(clz));
-            }
-            return results;
-        }
-        return null;
-    }
-
-    /**
-     * @param sql
-     * @param values
-     * @return
-     */
     public DataBean executeQueryBean(Transaction transaction, String sql, Object... values) throws JdaoException, SQLException {
         if (transaction != null) {
             return transaction.executeQueryBean(sql, values);
@@ -72,22 +64,11 @@ public class DBhandler implements DBhandle {
         return jdbcHandle.executeQueryBean(sql, values);
     }
 
-    /**
-     * @param sql
-     * @param values
-     * @return
-     * @throws JdaoException
-     */
     @Override
     public DataBean executeQueryBean(String sql, Object... values) throws JdaoException, SQLException {
         return executeQueryBean(null, sql, values);
     }
 
-    /**
-     * @param sql
-     * @param values
-     * @return
-     */
     public List<DataBean> executeQueryBeans(Transaction transaction, String sql, Object... values) throws JdaoException, SQLException {
         if (transaction != null) {
             return transaction.executeQueryBeans(sql, values);
@@ -95,26 +76,11 @@ public class DBhandler implements DBhandle {
         return jdbcHandle.executeQueryBeans(sql, values);
     }
 
-    /**
-     * @param sql
-     * @param values
-     * @return
-     * @throws JdaoException
-     */
     @Override
     public List<DataBean> executeQueryBeans(String sql, Object... values) throws JdaoException, SQLException {
         return executeQueryBeans(null, sql, values);
     }
 
-
-    /**
-     * auther donnie wu
-     *
-     * @param <T>
-     * @param claz
-     * @param sql
-     * @param values
-     */
     public <T> List<T> executeQueryList(Transaction transaction, Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         if (transaction != null) {
             return transaction.executeQueryList(claz, sql, values);
@@ -122,27 +88,11 @@ public class DBhandler implements DBhandle {
         return jdbcHandle.executeQueryList(claz, sql, values);
     }
 
-    /**
-     * @param claz
-     * @param sql
-     * @param values
-     * @param <T>
-     * @return
-     * @throws JdaoException
-     */
     @Override
     public <T> List<T> executeQueryList(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         return executeQueryList(null, claz, sql, values);
     }
 
-    /**
-     * auther donnie wu
-     *
-     * @param <T>
-     * @param claz
-     * @param sql
-     * @param values
-     */
     public <T> T executeQuery(Transaction transaction, Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         if (transaction != null) {
             return transaction.executeQuery(claz, sql, values);
@@ -150,25 +100,11 @@ public class DBhandler implements DBhandle {
         return jdbcHandle.executeQuery(claz, sql, values);
     }
 
-    /**
-     * @param claz
-     * @param sql
-     * @param values
-     * @param <T>
-     * @return
-     * @throws JdaoException
-     */
     @Override
     public <T> T executeQuery(Class<T> claz, String sql, Object... values) throws JdaoException, JdaoClassException, SQLException {
         return jdbcHandle.executeQuery(claz, sql, values);
     }
 
-    /**
-     * auther donnie wu
-     *
-     * @param sql
-     * @param values
-     */
     public int executeUpdate(Transaction transaction, String sql, Object... values) throws JdaoException, SQLException {
         if (transaction != null) {
             return transaction.executeUpdate(sql, values);
@@ -176,23 +112,11 @@ public class DBhandler implements DBhandle {
         return jdbcHandle.executeUpdate(sql, values);
     }
 
-    /**
-     * @param sql
-     * @param values
-     * @return
-     * @throws JdaoException
-     */
     @Override
     public int executeUpdate(String sql, Object... values) throws JdaoException, SQLException {
         return jdbcHandle.executeUpdate(sql, values);
     }
 
-    /**
-     * auther donnie wu
-     *
-     * @param sql
-     * @param values
-     */
     public int[] executeBatch(Transaction transaction, String sql, List<Object[]> values) throws JdaoException, SQLException {
         if (transaction != null) {
             return transaction.executeBatch(sql, values);
@@ -200,35 +124,17 @@ public class DBhandler implements DBhandle {
         return jdbcHandle.executeBatch(sql, values);
     }
 
-    /**
-     * @param sql
-     * @param values
-     * @return
-     * @throws JdaoException
-     */
     @Override
     public int[] executeBatch(String sql, List<Object[]> values) throws JdaoException, SQLException {
         return jdbcHandle.executeBatch(sql, values);
     }
 
-
-    /**
-     * @param procedureName
-     * @param params
-     * @return
-     * @throws SQLException
-     */
     public Map<Integer, Object> executeCall(String procedureCallMethod, Params... params) throws SQLException {
         return jdbcHandle.executeCall(procedureCallMethod, params);
     }
 
     /**
      * Store Procedure operations
-     *
-     * @param procedureName StoreProcedure Name
-     * @param params
-     * @return
-     * @throws SQLException
      */
     public Map<Integer, Object> executeCall(Transaction transaction, String procedureName, Params... params) throws SQLException {
         if (transaction != null) {

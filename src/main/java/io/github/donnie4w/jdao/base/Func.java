@@ -19,14 +19,22 @@
 package io.github.donnie4w.jdao.base;
 
 /**
- * @Copyright 2012-2013 donnie(donnie4w@gmail.com)
- * @date 2013-1-10
- * @verion 1.0
+ * Represents a function applied to a field in a database query.
+ *
+ * @param <T> the type of the field
  */
 public class Func<T> implements Field<T> {
     private static final long serialVersionUID = 1L;
+    /**
+     * The name of the field.
+     */
     public String fieldName;
 
+    /**
+     * Constructs a new Func instance.
+     *
+     * @param field the name of the field
+     */
     public Func(String field) {
         this.fieldName = field;
     }
@@ -36,77 +44,110 @@ public class Func<T> implements Field<T> {
     }
 
     /**
-     * = 等于
+     * Compares this field with the given value for equality.
+     *
+     * @param value the value to compare against
+     * @return a Where object representing the comparison
      */
     public Where<T> EQ(Object value) {
         return new Where<T>(fieldName + "=?", value);
     }
 
     /**
-     * > 大于
+     * Creates a WHERE clause with a greater than condition.
+     *
+     * @param value the value to compare the field against
+     * @return a new Where object for further conditions
      */
     public Where<T> GT(Object value) {
         return new Where<T>(fieldName + ">?", value);
     }
 
     /**
-     * >= 大于等于
+     * Creates a WHERE clause with a greater than or equal to condition.
+     *
+     * @param value the value to compare the field against
+     * @return a new Where object for further conditions
      */
     public Where<T> GE(Object value) {
         return new Where<T>(fieldName + ">=?", value);
     }
 
     /**
-     * <= 小于等于
+     * Creates a WHERE clause with a less than or equal to condition.
+     *
+     * @param value the value to compare the field against
+     * @return a new Where object for further conditions
      */
     public Where<T> LE(Object value) {
         return new Where<T>(fieldName + "<=?", value);
     }
 
     /**
-     * < 小于
+     * Creates a WHERE clause with a less than condition.
+     *
+     * @param value the value to compare the field against
+     * @return a new Where object for further conditions
      */
     public Where<T> LT(Object value) {
         return new Where<T>(fieldName + "<?", value);
     }
 
     /**
-     * <> 不等于
+     * Creates a WHERE clause with a not equal condition.
+     *
+     * @param value the value to compare the field against
+     * @return a new Where object for further conditions
      */
     public Where<T> NEQ(Object value) {
         return new Where<T>(fieldName + "<>?", value);
     }
 
     /**
-     * like %value%
+     * Creates a WHERE clause with a LIKE condition.
+     *
+     * @param value the value to compare the field against
+     * @return a new Where object for further conditions
      */
     public Where<T> LIKE(Object value) {
         return new Where<T>(fieldName + " like %?%", value);
     }
 
     /**
-     * like value%
+     * Creates a WHERE clause with a left LIKE condition.
+     *
+     * @param value the value to compare the field against
+     * @return a new Where object for further conditions
      */
     public Where<T> lLIKE(Object value) {
         return new Where<T>(fieldName + " like %?", value);
     }
 
     /**
-     * like %value
+     * Creates a WHERE clause with a right LIKE condition.
+     *
+     * @param value the value to compare the field against
+     * @return a new Where object for further conditions
      */
     public Where<T> rLIKE(Object value) {
         return new Where<T>(fieldName + " like ?%", value);
     }
 
     /**
-     * between ? and ?
+     * Creates a WHERE clause with a BETWEEN condition.
+     *
+     * @param from the lower bound of the range
+     * @param to the upper bound of the range
+     * @return a new Where object for further conditions
      */
     public Where<T> BETWEEN(Object from, Object to) {
         return new Where<T>(fieldName + " between ? and ? ", new Array(from, to));
     }
 
     /**
-     * fieldName as alias name
+     *  fieldName as alias name
+     * @param alias alias name
+     * @return a Func object representing the as operation
      */
     public Func<T> AS(Field<T> alias) {
         this.fieldName = fieldName + " as " + alias.getFieldName();
