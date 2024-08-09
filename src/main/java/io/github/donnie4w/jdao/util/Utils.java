@@ -8,17 +8,16 @@ import java.util.stream.Collectors;
 
 public class Utils {
     @Deprecated
-    public static String delUnderline(String str) {
-        String[] parts = str.split("_");
-        if (parts.length == 1) {
-            return str;
-        }
-        return Arrays.stream(parts, 1, parts.length)
-                .map(Utils::upperFirstChar)
-                .collect(Collectors.joining("", parts[0], ""));
-    }
+//    public static String delUnderline(String str) {
+//        String[] parts = str.split("_");
+//        if (parts.length == 1) {
+//            return str;
+//        }
+//        return Arrays.stream(parts, 1, parts.length)
+//                .map(Utils::upperFirstChar)
+//                .collect(Collectors.joining("", parts[0], ""));
+//    }
 
-    @Deprecated
     public static String upperFirstChar(String word) {
         if (word == null || word.isEmpty()) {
             return word;
