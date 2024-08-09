@@ -30,7 +30,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ParamBean {
+class ParamBean {
     private final String namespace;
     private final String id;
     private final SqlType sqlType;
