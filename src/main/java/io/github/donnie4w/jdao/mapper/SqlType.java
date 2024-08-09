@@ -18,6 +18,6 @@
 
 package io.github.donnie4w.jdao.mapper;
 
-public enum SqlType {
+enum SqlType {
     SELECT, UPDATE, INSERT, DELETE
 }
