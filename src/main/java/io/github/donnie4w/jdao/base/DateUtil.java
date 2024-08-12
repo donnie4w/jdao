@@ -30,7 +30,7 @@ import java.util.Date;
 /**
  * Utility class for date manipulation.
  */
-public class DateUtil {
+class DateUtil {
 
     private static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
 
