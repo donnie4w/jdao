@@ -18,6 +18,7 @@
 
 package io.github.donnie4w.jdao.base;
 
+import io.github.donnie4w.jdao.handle.DBType;
 import io.github.donnie4w.jdao.handle.JdaoException;
 
 import java.math.BigDecimal;
@@ -25,7 +26,10 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Util {
 
@@ -387,7 +391,7 @@ public class Util {
         return name;
     }
 
-    public static boolean isKey(String keyName) {
+    protected static boolean isKey(String keyName) {
         switch (keyName) {
             case "public":
             case "protected":
