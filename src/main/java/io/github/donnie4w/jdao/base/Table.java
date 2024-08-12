@@ -23,7 +23,6 @@ import io.github.donnie4w.jdao.util.Logger;
 import io.github.donnie4w.jdao.util.Utils;
 
 import javax.sql.DataSource;
-import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -134,20 +133,18 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
      * Adds one or more WHERE conditions to the query builder.
      *
      * @param wheres One or more Where objects representing conditions to be added to the WHERE clause.
-     *
      * @return The current query builder object to allow method chaining.
-     *<p>
+     * <p>
      * Description:
-     *   This method allows you to add one or more WHERE conditions to the query builder. Each condition is represented by a Where object,
-     *   which can be combined using logical operators (AND, OR) to form complex conditions. The method returns the current query builder
-     *   object to support method chaining for building more complex queries.
-     *<p>
+     * This method allows you to add one or more WHERE conditions to the query builder. Each condition is represented by a Where object,
+     * which can be combined using logical operators (AND, OR) to form complex conditions. The method returns the current query builder
+     * object to support method chaining for building more complex queries.
+     * <p>
      * Example:
-     *<p> Assuming Hstest is a table class and ID is a column in that table
-     *   <blockquote><pre>
+     * <p> Assuming Hstest is a table class and ID is a column in that table
+     * <blockquote><pre>
      *   Hstest hs = new Hstest().where(Hstest.ID.LE(3), Hstest.ID.GE(0).OR(Hstest.ID.EQ(10))).groupBy(Hstest.ID).having(Hstest.ID.count().LT(2)).orderBy(Hstest.ID.asc()).limit(0, 5);
      *   </pre></blockquote>
-     *
      */
     public T where(Where<T>... wheres) {
         isinit();
@@ -321,14 +318,19 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
             case ORACLE:
             case DB2:
             case DERBY:
+            case INFORMIX:
                 return " FETCH FIRST ? ROWS ONLY ";
             case GREENPLUM:
             case NETEZZA:
             case POSTGRESQL:
+            case OPENGAUSS:
+            case ENTERPRISEDB:
+            case COCKROACHDB:
                 return " LIMIT ? OFFSET 0 ";
             case TERADATA:
             case FIREBIRD:
             case SYBASE:
+            case SAPHANA:
                 limitArg = null;
                 return "";
             case INGRES:
@@ -337,6 +339,9 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
             case MYSQL:
             case MARIADB:
             case SQLITE:
+            case TIDB:
+            case OCEANBASE:
+            case HSQLDB:
             default:
                 return " LIMIT ? ";
         }
@@ -346,15 +351,20 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
         switch (getDBhandle(true).getDBType()) {
             case POSTGRESQL:
             case GREENPLUM:
+            case OPENGAUSS:
                 return " OFFSET ? LIMIT ? ";
             case ORACLE:
             case SQLSERVER:
+            case INFORMIX:
                 return " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ";
             case SQLITE:
             case NETEZZA:
             case INGRES:
             case H2:
             case VERTICA:
+            case HSQLDB:
+            case ENTERPRISEDB:
+            case COCKROACHDB:
                 int offset = limitArg[0];
                 limitArg[0] = limitArg[1];
                 limitArg[1] = offset;
@@ -368,10 +378,13 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
             case SYBASE:
             case TERADATA:
             case FIREBIRD:
+            case SAPHANA:
                 limitArg = null;
                 return "";
             case MYSQL:
             case MARIADB:
+            case TIDB:
+            case OCEANBASE:
             default:
                 return " LIMIT ?,? ";
         }
@@ -393,8 +406,10 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
         String domain = JdaoCache.getDomain(Utils.getPackageName(clazz), clazz);
         boolean iscache = (isCache == 1 || domain != null) && isCache != 2;
         Object o = null;
+        Condition condition = null;
         if (iscache) {
-            o = JdaoCache.getCache(domain, clazz, Condition.newInstance(skv, "list"));
+            condition = Condition.newInstance(skv, "List" + clazz.getSimpleName());
+            o = JdaoCache.getCache(domain, clazz, condition);
             if (o != null) {
                 if (Logger.isVaild())
                     Logger.info("[GET CACHE]:" + skv);
@@ -403,7 +418,7 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
         }
         o = getDBhandle(true).executeQueryList(transaction, clazz, skv.getSql(), skv.getArgs());
         if (iscache) {
-            JdaoCache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv, "list"), o);
+            JdaoCache.setCache(domain, (Class<Table<?>>) clazz, condition, o);
             if (Logger.isVaild())
                 Logger.info("[SET CACHE]:" + skv);
         }
@@ -425,8 +440,10 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
         Object o = null;
         String domain = JdaoCache.getDomain(Utils.getPackageName(clazz), clazz);
         boolean iscache = (isCache == 1 || domain != null) && isCache != 2;
+        Condition condition = null;
         if (iscache) {
-            o = JdaoCache.getCache(domain, clazz, Condition.newInstance(skv, "one"));
+            condition = Condition.newInstance(skv, clazz.getSimpleName());
+            o = JdaoCache.getCache(domain, clazz, condition);
             if (o != null) {
                 if (Logger.isVaild())
                     Logger.info("[GET CACHE]:" + skv);
@@ -435,7 +452,7 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
         }
         o = getDBhandle(true).executeQuery(transaction, clazz, skv.getSql(), skv.getArgs());
         if (iscache) {
-            JdaoCache.setCache(domain, (Class<Table<?>>) clazz, Condition.newInstance(skv, "one"), o);
+            JdaoCache.setCache(domain, (Class<Table<?>>) clazz, condition, o);
             if (Logger.isVaild())
                 Logger.info("[SET CACHE]:" + skv);
         }
