@@ -35,8 +35,6 @@ import java.util.Map;
  */
 public class Jdao {
 
-    final static String VERTION = "2.0.1";
-
     private final static String err_noinit = "the jdao DataSource was not initialized(Hint: jdao.init(dataSource, dbtype)) ";
 
     private Jdao() {
