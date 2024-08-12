@@ -17,89 +17,106 @@
  */
 
 package io.github.donnie4w.jdao.handle;
-
 /**
  * Enum representing the types of databases supported.
  */
 public enum DBType {
-
     /**
      * IBM DB2 database.
      */
     DB2,
-
     /**
      * Apache Derby database.
      */
     DERBY,
-
     /**
      * Firebird database.
      */
     FIREBIRD,
-
     /**
      * Greenplum database.
      */
     GREENPLUM,
-
     /**
      * H2 database.
      */
     H2,
-
     /**
      * Ingres database.
      */
     INGRES,
-
     /**
      * MariaDB database.
      */
     MARIADB,
-
     /**
      * MySQL database.
      */
     MYSQL,
-
     /**
      * Netezza database.
      */
     NETEZZA,
-
     /**
      * Oracle database.
      */
     ORACLE,
-
     /**
      * PostgreSQL database.
      */
     POSTGRESQL,
-
     /**
      * SQLite database.
      */
     SQLITE,
-
     /**
      * SQL Server database.
      */
     SQLSERVER,
-
     /**
      * Sybase database.
      */
     SYBASE,
-
     /**
      * Teradata database.
      */
     TERADATA,
-
     /**
      * Vertica database.
      */
-    VERTICA
+    VERTICA,
+    /**
+     * opengauss
+     */
+    OPENGAUSS,
+    /**
+     * oceanbase  database.
+     */
+    OCEANBASE,
+    /**
+     * Tidb database.
+     */
+    TIDB,
+    /**
+     * hsqldb  database.
+     */
+    HSQLDB,
+    /**
+     * EnterpriseDB  database.
+     */
+    ENTERPRISEDB,
+    /**
+     * sap hana  database.
+     */
+    SAPHANA,
+    /**
+     * CockroachDB  database.
+     */
+    COCKROACHDB,
+    /**
+     * Informix  database.
+     */
+    INFORMIX;
+
 }
+
