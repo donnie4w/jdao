@@ -312,7 +312,8 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
     }
 
     private String limitAdapt() {
-        switch (getDBhandle(true).getDBType()) {
+        DBhandle dbhandle = getDBhandle(true);
+        switch (dbhandle.getDBType()) {
             case SQLSERVER:
                 return " OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY ";
             case ORACLE:
@@ -331,8 +332,9 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
             case FIREBIRD:
             case SYBASE:
             case SAPHANA:
-                limitArg = null;
-                return "";
+                //limitArg = null;
+                //return "";
+                throw new JdaoRuntimeException("Unsupport limit DBType: " + dbhandle.getDBType());
             case INGRES:
             case H2:
             case VERTICA:
@@ -379,8 +381,9 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
             case TERADATA:
             case FIREBIRD:
             case SAPHANA:
-                limitArg = null;
-                return "";
+                //limitArg = null;
+                //return "";
+                throw new JdaoRuntimeException("Unsupport limit DBType: " + dbhandle.getDBType());
             case MYSQL:
             case MARIADB:
             case TIDB:
@@ -403,7 +406,7 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
         if (Logger.isVaild())
             Logger.info("[SELETE SQL][" + skv.getSql() + "]" + Arrays.toString(skv.getArgs()));
 
-        String domain = JdaoCache.getDomain(Utils.getPackageName(clazz), clazz);
+        String domain = JdaoCache.getDomain(clazz);
         boolean iscache = (isCache == 1 || domain != null) && isCache != 2;
         Object o = null;
         Condition condition = null;
@@ -438,7 +441,7 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
         if (Logger.isVaild())
             Logger.info("[SELETE SQL][" + skv.getSql() + "]" + Arrays.toString(skv.getArgs()));
         Object o = null;
-        String domain = JdaoCache.getDomain(Utils.getPackageName(clazz), clazz);
+        String domain = JdaoCache.getDomain(clazz);
         boolean iscache = (isCache == 1 || domain != null) && isCache != 2;
         Condition condition = null;
         if (iscache) {
@@ -736,7 +739,7 @@ public abstract class Table<T extends Table<?>> implements JStruct<T> {
         }
     }
 
-    public String TABLENAME() {
+    public String TableName() {
         return TABLENAME;
     }
 }
