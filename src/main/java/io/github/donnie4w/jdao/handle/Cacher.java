@@ -97,30 +97,36 @@ public class Cacher extends Cache {
         container.unbindMapper(namespace, id);
     }
 
-
-    public String getDomain(String packageName, Class<?> clazz) {
-        return container.getDomain(packageName,clazz);
+    public String getDomain(Class<?> clazz) {
+        return container.getDomain(clazz);
     }
 
     public String getDomain(String namespace, String id) {
-        return container.getDomain(namespace,id);
+        return container.getDomain(namespace, id);
     }
 
+    public Object getCache(String domain, String namespace, String id, Condition condition) {
+        return container.getCache(domain, namespace, id, condition);
+    }
 
     public Object getCache(String domain, Class<?> clazz, Condition condition) {
-        return container.getCache(domain,clazz,condition);
+        return container.getCache(domain, clazz, condition);
     }
 
     public void setCache(String domain, Class<Table<?>> clazz, Condition condition, Object result) {
-        container.setCache(domain,clazz,condition,result);
+        container.setCache(domain, clazz, condition, result);
     }
 
-    public void clearCache(String domain) {
-        container.clearCache(domain);
+    public void setCache(String domain, String namespace,String id, Condition condition, Object result) {
+        container.setCache(domain, namespace,id, condition, result);
     }
 
-    public void clearCache(String domain, Class<?> clazz, String node) {
-        container.clearCache(domain,clazz,node);
+    public boolean clearCache(Class<? extends Table> clazz) {
+        return container.clearCache(getDomain(clazz), clazz, null);
+    }
+
+    public boolean clearCache(String namespace, String id) {
+        return container.clearCache(getDomain(namespace,id), namespace, id,null);
     }
 
 }
