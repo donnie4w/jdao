@@ -23,13 +23,7 @@ import io.github.donnie4w.jdao.base.Util;
 import io.github.donnie4w.jdao.util.Logger;
 
 import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Iterator;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.*;
 
 /**
  * Encapsulated class for database query results ,
@@ -43,7 +37,7 @@ public class DataBean implements Iterable<String> {
     /**
      * Adds a field to the DataBean.
      *
-     * @param fieldName the name of the field.
+     * @param fieldName  the name of the field.
      * @param fieldIndex the index of the field.
      * @param fieldValue the value of the field.
      */
@@ -101,6 +95,43 @@ public class DataBean implements Iterable<String> {
         return null;
     }
 
+
+    public int valueInt() {
+        if (this.size() > 0) {
+            return this.findField(0).valueInt();
+        }
+        return 0;
+    }
+
+    public long valueLong() {
+        if (this.size() > 0) {
+            return this.findField(0).valueLong();
+        }
+        return 0;
+    }
+
+    public String valueString() {
+        if (this.size() > 0) {
+            return this.findField(0).valueString();
+        }
+        return null;
+    }
+
+    public byte[] valueBytes() {
+        if (this.size() > 0) {
+            return this.findField(0).valueBytes();
+        }
+        return null;
+    }
+
+    public double valueDouble() {
+        if (this.size() > 0) {
+            return this.findField(0).valueDouble();
+        }
+        return 0;
+    }
+
+
     /**
      * Returns the number of fields in the DataBean.
      *
@@ -150,7 +181,7 @@ public class DataBean implements Iterable<String> {
     /**
      * Scans the DataBean into a specific bean class.
      *
-     * @param <T> the type of the bean class.
+     * @param <T>       the type of the bean class.
      * @param beanClass the bean class to scan into.
      * @return the scanned bean instance.
      * @throws JdaoException if a JDAO related exception occurs.
