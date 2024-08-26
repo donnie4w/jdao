@@ -38,11 +38,11 @@ public class DBexec {
     private DBexec() {
     }
 
-    static <T> List<T> executeQueryList(Class<T> classType, Connection con, String sql, Object... values) throws JdaoException, SQLException, JdaoClassException {
+    static <T> List<T> executeQueryList(Class<T> classType, Connection conn, String sql, Object... values) throws JdaoException, SQLException, JdaoClassException {
         List<T> retList = new ArrayList<T>();
         ResultSet rs = null;
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            if (values != null) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (values != null && values.length > 0) {
                 for (int i = 1; i <= values.length; i++) {
                     ps.setObject(i, values[i - 1]);
                 }
@@ -74,11 +74,11 @@ public class DBexec {
         }
     }
 
-    static <T> T executeQuery(Class<T> classType, Connection con, String sql, Object[] values) throws SQLException, JdaoClassException, JdaoException {
+    static <T> T executeQuery(Class<T> classType, Connection conn, String sql, Object[] values) throws SQLException, JdaoClassException, JdaoException {
         ResultSet rs = null;
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             T targetBean = classType.getDeclaredConstructor().newInstance();
-            if (values != null) {
+            if (values != null && values.length > 0) {
                 for (int i = 1; i <= values.length; i++) {
                     ps.setObject(i, values[i - 1]);
                 }
@@ -108,11 +108,11 @@ public class DBexec {
         }
     }
 
-    static List<DataBean> executequeryBeans(Connection con, String sql, Object... values) throws SQLException {
+    static List<DataBean> executequeryBeans(Connection conn, String sql, Object... values) throws SQLException {
         List<DataBean> retList = new ArrayList<DataBean>();
         ResultSet rs = null;
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            if (values != null) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (values != null && values.length > 0) {
                 for (int i = 1; i <= values.length; i++) {
                     ps.setObject(i, values[i - 1]);
                 }
@@ -135,10 +135,10 @@ public class DBexec {
         }
     }
 
-    static DataBean executequeryBean(Connection con, String sql, Object[] values) throws SQLException {
+    static DataBean executequeryBean(Connection conn, String sql, Object[] values) throws SQLException {
         ResultSet rs = null;
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            if (values != null) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (values != null && values.length > 0) {
                 for (int i = 1; i <= values.length; i++) {
                     ps.setObject(i, values[i - 1]);
                 }
@@ -161,8 +161,8 @@ public class DBexec {
         }
     }
 
-    static int[] executeBatch(Connection con, String sql, List<Object[]> values) throws SQLException {
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
+    static int[] executeBatch(Connection conn, String sql, List<Object[]> values) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             if (values != null) {
                 for (Object[] args : values) {
                     for (int i = 1; i <= args.length; i++) {
@@ -175,9 +175,9 @@ public class DBexec {
         }
     }
 
-    static int executeUpdate(Connection con, String sql, Object... values) throws SQLException {
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            if (values != null) {
+    static int executeUpdate(Connection conn, String sql, Object... values) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (values != null && values.length > 0) {
                 for (int i = 1; i <= values.length; i++) {
                     ps.setObject(i, values[i - 1]);
                 }
@@ -186,8 +186,8 @@ public class DBexec {
         }
     }
 
-    static Map<Integer, Object> executeCall(Connection con, String procedureCallMethod, Params... params) throws SQLException {
-        try (CallableStatement stmt = con.prepareCall(procedureCallMethod)) {
+    static Map<Integer, Object> executeCall(Connection conn, String procedureCallMethod, Params... params) throws SQLException {
+        try (CallableStatement stmt = conn.prepareCall(procedureCallMethod)) {
             List<Integer> indexList = new ArrayList();
             for (int i = 0; i < params.length; i++) {
                 if (params[i] instanceof Out) {
