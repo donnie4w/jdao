@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class CacheHandle {
     private final static AtomicLong al = new AtomicLong(1);
 
-    Map<Class<Table<?>>, Map<Condition, CacheBean>> map = new ConcurrentHashMap<>();
+    Map<Object, Map<Condition, CacheBean>> map = new ConcurrentHashMap<>();
 
     private String domain = newDomain();
     private int expire = 5 * 60 * 1000;
