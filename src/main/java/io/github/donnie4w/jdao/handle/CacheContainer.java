@@ -20,7 +20,6 @@
 package io.github.donnie4w.jdao.handle;
 
 import io.github.donnie4w.jdao.base.Condition;
-import io.github.donnie4w.jdao.base.Table;
 import io.github.donnie4w.jdao.mapper.MapperParser;
 import io.github.donnie4w.jdao.util.Logger;
 import io.github.donnie4w.jdao.util.Utils;
@@ -37,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CacheContainer {
 
-    private final String MAPPER_PRE = String.valueOf(System.nanoTime());
+    private final static String MAPPER_PRE = String.valueOf(System.nanoTime());
 
     private final Map<String, CacheHandle> cacheMap = new ConcurrentHashMap();
 
@@ -107,8 +106,8 @@ public class CacheContainer {
     boolean bindMapper(String namespace) {
         List<String> list = MapperParser.getMapperIds(namespace);
         if (list != null) {
-            for (String name : list) {
-                bind(MAPPER_PRE.concat(namespace).concat(".").concat(name));
+            for (String id : list) {
+                bind(mapperId(namespace, id));
             }
             return true;
         }
@@ -118,8 +117,8 @@ public class CacheContainer {
     boolean bindMapper(String namespace, CacheHandle handle) {
         List<String> list = MapperParser.getMapperIds(namespace);
         if (list != null) {
-            for (String name : list) {
-                bind(MAPPER_PRE.concat(namespace).concat(".").concat(name), handle);
+            for (String id : list) {
+                bind(mapperId(namespace, id), handle);
             }
             return true;
         }
@@ -129,8 +128,8 @@ public class CacheContainer {
     void unbindMapper(String namespace) {
         List<String> list = MapperParser.getMapperIds(namespace);
         if (list != null) {
-            for (String name : list) {
-                unbind(MAPPER_PRE.concat(namespace).concat(".").concat(name));
+            for (String id : list) {
+                unbind(mapperId(namespace, id));
             }
         }
     }
@@ -140,7 +139,7 @@ public class CacheContainer {
         if (list != null) {
             for (String name : list) {
                 if (id.equals(name)) {
-                    bind(MAPPER_PRE.concat(namespace).concat(".").concat(name));
+                    bind(mapperId(namespace, id));
                     return true;
                 }
             }
@@ -153,7 +152,7 @@ public class CacheContainer {
         if (list != null) {
             for (String name : list) {
                 if (id.equals(name)) {
-                    bind(MAPPER_PRE.concat(namespace).concat(".").concat(name), handle);
+                    bind(mapperId(namespace, id), handle);
                     return true;
                 }
             }
@@ -162,14 +161,14 @@ public class CacheContainer {
     }
 
     void unbindMapper(String namespace, String id) {
-        unbind(MAPPER_PRE.concat(namespace).concat(".").concat(id));
+        unbind(mapperId(namespace, id));
     }
 
     boolean bindMapper(Class<?> mapperface) {
         if (mapperface.isInterface()) {
             String namespace = mapperface.getName();
             for (Method m : mapperface.getMethods()) {
-                bind(MAPPER_PRE.concat(namespace).concat(".").concat(m.getName()));
+                bind(mapperId(namespace, m.getName()));
             }
             return true;
         }
@@ -180,7 +179,7 @@ public class CacheContainer {
         if (mapperface.isInterface()) {
             String namespace = mapperface.getName();
             for (Method m : mapperface.getMethods()) {
-                bind(MAPPER_PRE.concat(namespace).concat(".").concat(m.getName()), handle);
+                bind(mapperId(namespace, m.getName()), handle);
             }
             return true;
         }
@@ -192,32 +191,36 @@ public class CacheContainer {
             String namespace = mapperface.getName();
             List<String> list = MapperParser.getMapperIds(namespace);
             if (list != null) {
-                for (String name : list) {
-                    unbind(MAPPER_PRE.concat(namespace).concat(".").concat(name));
+                for (String id : list) {
+                    unbind(mapperId(namespace, id));
                 }
             }
         }
     }
 
-    String getDomain(String packageName, Class<?> clazz) {
+    String getDomain(Class<?> clazz) {
         String domain = null;
         if (clazz != null) {
             domain = rmap.get(clazz);
         }
         if (domain == null) {
-            return rmap.get(packageName);
+            return rmap.get(Utils.getPackageName(clazz));
         }
         return domain;
     }
 
     String getDomain(String namespace, String id) {
-        if (Utils.stringValid(namespace)&&Utils.stringValid(id)) {
-            return rmap.get(MAPPER_PRE.concat(namespace).concat(".").concat(id));
+        if (Utils.stringValid(namespace) && Utils.stringValid(id)) {
+            return rmap.get(mapperId(namespace, id));
         }
         return null;
     }
 
-    Object getCache(String domain, Class<?> clazz, Condition condition) {
+    Object getCache(String domain, String namespace, String id, Condition condition) {
+        return getCache(domain, mapperId(namespace, id), condition);
+    }
+
+    Object getCache(String domain, Object object, Condition condition) {
         if (!Utils.stringValid(domain)) {
             domain = cacheHandle.getDomain();
         }
@@ -225,7 +228,7 @@ public class CacheContainer {
         if (ch == null || condition == null) {
             return null;
         }
-        Map<Condition, CacheBean> map = ch.map.get(clazz);
+        Map<Condition, CacheBean> map = ch.map.get(object);
         if (map != null) {
             CacheBean cb = map.get(condition);
             if (cb == null) {
@@ -255,7 +258,11 @@ public class CacheContainer {
         return null;
     }
 
-    void setCache(String domain, Class<Table<?>> clazz, Condition condition, Object result) {
+    void setCache(String domain, String namespace, String id, Condition condition, Object result) {
+        setCache(domain, mapperId(namespace, id), condition, result);
+    }
+
+    void setCache(String domain, Object cacheId, Condition condition, Object result) {
         CacheHandle ch = null;
         if (!Utils.stringValid(domain)) {
             ch = cacheHandle;
@@ -281,36 +288,43 @@ public class CacheContainer {
             default:
                 break;
         }
-        if (ch.map.containsKey(clazz)) {
-            ch.map.get(clazz).put(condition, new CacheBean(t, o));
+        if (ch.map.containsKey(cacheId)) {
+            ch.map.get(cacheId).put(condition, new CacheBean(t, o));
         } else {
             Map<Condition, CacheBean> map = new ConcurrentHashMap();
             map.put(condition, new CacheBean(t, o));
-            ch.map.put(clazz, map);
+            ch.map.put(cacheId, map);
         }
     }
 
-    void clearCache(String domain) {
-        CacheHandle cb = cacheMap.get(domain);
-        if (cb != null)
-            cb.map.clear();
+//    void clearCache(String domain) {
+//        CacheHandle cb = cacheMap.get(domain);
+//        if (cb != null)
+//            cb.map.clear();
+//    }
+
+    boolean clearCache(String domain, String namespace, String id, String node) {
+        return clearCache(domain, mapperId(namespace, id), node);
     }
 
-    void clearCache(String domain, Class<?> clazz, String node) {
+    boolean clearCache(String domain, Object object, String node) {
         if (!Utils.stringValid(domain)) domain = cacheHandle.getDomain();
         CacheHandle cb = cacheMap.get(domain);
-        if (cb != null && cb.map.containsKey(clazz)) {
-            Map<Condition, CacheBean> cbm = cb.map.get(clazz);
+        if (cb != null && cb.map.containsKey(object)) {
+            Map<Condition, CacheBean> cbm = cb.map.get(object);
             if (node == null) {
                 cbm.clear();
+                return true;
             } else {
                 for (Condition o : cbm.keySet()) {
                     if (node.equals(o.getNode())) {
                         cbm.remove(o);
                     }
                 }
+                return true;
             }
         }
+        return false;
     }
 
 
@@ -346,6 +360,10 @@ public class CacheContainer {
                 Logger.severe("Error occurred during cache cleanup.", e.toString());
             }
         }
+    }
+
+    static String mapperId(String namespace, String id) {
+        return MAPPER_PRE.concat(namespace).concat(".").concat(id);
     }
 
 }
