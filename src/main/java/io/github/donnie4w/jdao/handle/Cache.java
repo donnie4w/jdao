@@ -232,15 +232,19 @@ public abstract class Cache {
 
     abstract void unbindMapper(String namespace, String id);
 
-    abstract String getDomain(String packageName, Class<?> clazz);
+    abstract String getDomain(Class<?> clazz);
 
     abstract String getDomain(String namespace, String id);
 
     abstract Object getCache(String domain, Class<?> clazz, Condition condition);
 
+    abstract Object getCache(String domain, String namespace,String id, Condition condition);
+
     abstract void setCache(String domain, Class<Table<?>> clazz, Condition condition, Object result);
 
-    abstract void clearCache(String domain);
+    abstract void setCache(String domain, String namespace,String id, Condition condition, Object result);
 
-    abstract void clearCache(String domain, Class<?> clazz, String node);
+    abstract boolean clearCache(Class<? extends Table> clazz);
+
+    abstract boolean clearCache(String namespace,String id);
 }
