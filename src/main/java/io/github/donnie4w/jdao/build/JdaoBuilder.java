@@ -19,9 +19,11 @@
 
 package io.github.donnie4w.jdao.build;
 
+import io.github.donnie4w.jdao.util.Logger;
 import io.github.donnie4w.jdao.util.Utils;
 
 import javax.sql.DataSource;
+import java.io.File;
 import java.sql.Connection;
 
 /**
@@ -32,10 +34,10 @@ public class JdaoBuilder {
     /**
      * Builds a standardized Java DAO entity class based on the provided parameters.
      *
-     * @param tableName The name of the database table to generate the entity for.
-     * @param dbType The type of the database (e.g., MySQL, PostgreSQL).
+     * @param tableName   The name of the database table to generate the entity for.
+     * @param dbType      The type of the database (e.g., MySQL, PostgreSQL).
      * @param packageName The package name for the generated Java class.
-     * @param dataSource An active JDBC DataSource to the database.
+     * @param dataSource  An active JDBC DataSource to the database.
      */
     public static void build(String tableName, String dbType, String packageName, DataSource dataSource) {
         try (Connection connection = dataSource.getConnection()) {
@@ -48,11 +50,11 @@ public class JdaoBuilder {
     /**
      * Builds a standardized Java DAO entity class based on the provided parameters.
      *
-     * @param dir The directory where the generated Java file will be saved.
-     * @param tableName The name of the database table to generate the entity for.
-     * @param dbType The type of the database (e.g., MySQL, PostgreSQL).
+     * @param dir         The directory where the generated Java file will be saved.
+     * @param tableName   The name of the database table to generate the entity for.
+     * @param dbType      The type of the database (e.g., MySQL, PostgreSQL).
      * @param packageName The package name for the generated Java class.
-     * @param dataSource An active JDBC DataSource to the database.
+     * @param dataSource  An active JDBC DataSource to the database.
      */
     public static void build(String dir, String tableName, String dbType, String packageName, DataSource dataSource) {
         try (Connection connection = dataSource.getConnection()) {
@@ -66,10 +68,10 @@ public class JdaoBuilder {
     /**
      * Builds a standardized Java DAO entity class based on the provided parameters.
      *
-     * @param tableName The name of the database table to generate the entity for.
-     * @param dbType The type of the database (e.g., MySQL, PostgreSQL).
+     * @param tableName   The name of the database table to generate the entity for.
+     * @param dbType      The type of the database (e.g., MySQL, PostgreSQL).
      * @param packageName The package name for the generated Java class.
-     * @param connection An active JDBC connection to the database.
+     * @param connection  An active JDBC connection to the database.
      */
     public static void build(String tableName, String dbType, String packageName, Connection connection) {
         build(tableName, tableName, dbType, packageName, connection);
@@ -78,11 +80,11 @@ public class JdaoBuilder {
     /**
      * Builds a standardized Java DAO entity class based on the provided parameters.
      *
-     * @param dir The directory where the generated Java file will be saved.
-     * @param tableName The name of the database table to generate the entity for.
-     * @param dbType The type of the database (e.g., MySQL, PostgreSQL).
+     * @param dir         The directory where the generated Java file will be saved.
+     * @param tableName   The name of the database table to generate the entity for.
+     * @param dbType      The type of the database (e.g., MySQL, PostgreSQL).
      * @param packageName The package name for the generated Java class.
-     * @param connection An active JDBC connection to the database.
+     * @param connection  An active JDBC connection to the database.
      */
     public static void build(String dir, String tableName, String dbType, String packageName, Connection connection) {
         try {
@@ -97,12 +99,12 @@ public class JdaoBuilder {
     /**
      * Builds a standardized Java DAO entity class based on the provided parameters.
      *
-     * @param dir The directory where the generated Java file will be saved.
-     * @param tableName The name of the database table to generate the entity for.
-     * @param tableAlias An alias for the table name, used in the generated code.
-     * @param dbType The type of the database (e.g., MySQL, PostgreSQL).
+     * @param dir         The directory where the generated Java file will be saved.
+     * @param tableName   The name of the database table to generate the entity for.
+     * @param tableAlias  An alias for the table name, used in the generated code.
+     * @param dbType      The type of the database (e.g., MySQL, PostgreSQL).
      * @param packageName The package name for the generated Java class.
-     * @param connection An active JDBC connection to the database.
+     * @param connection  An active JDBC connection to the database.
      */
     public static void build(String dir, String tableName, String tableAlias, String dbType, String packageName, Connection connection) {
         if (!Utils.stringValid(tableAlias)) {
@@ -111,10 +113,9 @@ public class JdaoBuilder {
         try {
             String structBody = StructBuilder.build(dbType, packageName, tableName, tableAlias, connection);
             StructBuilder.createFileAndWriteBytes(dir, packageName, Utils.upperFirstChar(tableAlias), structBody);
+            Logger.log("[Dao Builder][table:", tableName, "][dir:", (dir + File.separator + packageName).replaceAll("[\\.|\\\\|\\/]", File.separator.equals("\\") ? "\\\\" : File.separator) + File.separator + Utils.upperFirstChar(tableAlias) + ".java", "]");
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
-
-
 }
