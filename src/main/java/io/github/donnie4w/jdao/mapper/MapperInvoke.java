@@ -50,7 +50,7 @@ public class MapperInvoke implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         String mapperId = method.getDeclaringClass().getName() + "." + method.getName();
         ParamBean pb = MapperParser.getParamBean(mapperId);
-        if (args != null && args.length ==1) {
+        if (args != null && args.length == 1) {
             switch (pb.getSqlType()) {
                 case SELECT:
                     if (List.class.isAssignableFrom(method.getReturnType())) {
@@ -69,7 +69,7 @@ public class MapperInvoke implements InvocationHandler {
                 default:
                     return null;
             }
-        }else{
+        } else {
             switch (pb.getSqlType()) {
                 case SELECT:
                     if (List.class.isAssignableFrom(method.getReturnType())) {
