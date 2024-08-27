@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2024, donnie <donnie4w@gmail.com> All rights reserved.
  *
@@ -21,7 +20,6 @@ package io.github.donnie4w.jdao.mapper;
 
 import io.github.donnie4w.jdao.base.Condition;
 import io.github.donnie4w.jdao.base.SqlKV;
-import io.github.donnie4w.jdao.base.Table;
 import io.github.donnie4w.jdao.handle.*;
 import io.github.donnie4w.jdao.util.Logger;
 import io.github.donnie4w.jdao.util.Utils;
@@ -36,7 +34,6 @@ import java.util.List;
 
 public class MapperHandler extends JdaoMapper {
 
-    private final static Table mapperTable = new MapperTable("");
     private Transaction transaction;
     private DBhandle dBhandle;
 
@@ -122,6 +119,12 @@ public class MapperHandler extends JdaoMapper {
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
         }
+
+        if (pb.hasSqlNode()) {
+            pb = pb.parseSqlNode(args);
+            args = pb.getParams();
+        }
+
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nSELECTONE SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
@@ -133,7 +136,14 @@ public class MapperHandler extends JdaoMapper {
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
         }
-        Object[] args = pb.setParameter(param);
+
+        Object[] args;
+        if (pb.hasSqlNode()) {
+            pb = pb.parseSqlNode(param);
+            args = pb.getParams();
+        } else {
+            args = pb.setParameter(param);
+        }
 
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nSELECTONE SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
@@ -141,9 +151,8 @@ public class MapperHandler extends JdaoMapper {
         return _selectOne(mapperId, pb, args);
     }
 
-
     private <T> T _selectOne(String mapperId, ParamBean pb, Object... args) throws JdaoException, JdaoClassException, SQLException {
-        String domain = JdaoCache.getDomain(pb.getNamespace(),pb.getId());
+        String domain = JdaoCache.getDomain(pb.getNamespace(), pb.getId());
         SqlKV skv = null;
         Object result = null;
         Class resultclass = pb.getResultClass();
@@ -152,7 +161,7 @@ public class MapperHandler extends JdaoMapper {
 
         if (domain != null) {
             skv = new SqlKV(sql, args);
-            result = JdaoCache.getCache(domain, mapperTable.getClass(), Condition.newInstance(skv, mapperId));
+            result = JdaoCache.getCache(domain, pb.getNamespace(), pb.getId(), Condition.newInstance(skv, mapperId));
             if (result != null) {
                 if (Logger.isVaild())
                     Logger.info("[GET CACHE]:" + skv);
@@ -173,7 +182,7 @@ public class MapperHandler extends JdaoMapper {
             if (Logger.isVaild())
                 Logger.info("[SET CACHE]:" + skv);
 
-            JdaoCache.setCache(domain, (Class<Table<?>>) mapperTable.getClass(), Condition.newInstance(skv, mapperId), result);
+            JdaoCache.setCache(domain, pb.getNamespace(), pb.getId(), Condition.newInstance(skv, mapperId), result);
         }
         return (T) result;
     }
@@ -203,6 +212,11 @@ public class MapperHandler extends JdaoMapper {
         if (pb == null)
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
 
+        if (pb.hasSqlNode()) {
+            pb = pb.parseSqlNode(args);
+            args = pb.getParams();
+        }
+
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nSELECTLIST SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
@@ -214,7 +228,15 @@ public class MapperHandler extends JdaoMapper {
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
         }
-        Object[] args = pb.setParameter(param);
+
+        Object[] args;
+        if (pb.hasSqlNode()) {
+            pb = pb.parseSqlNode(param);
+            args = pb.getParams();
+        } else {
+            args = pb.setParameter(param);
+        }
+
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nSELECTLIST SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
@@ -222,12 +244,13 @@ public class MapperHandler extends JdaoMapper {
     }
 
     private <T> List<T> _selectList(String mapperId, ParamBean pb, Object... args) throws JdaoException, JdaoClassException, SQLException {
-        String domain = JdaoCache.getDomain(pb.getNamespace(),pb.getId());
+        String domain = JdaoCache.getDomain(pb.getNamespace(), pb.getId());
         Object result = null;
         SqlKV skv = null;
+
         if (domain != null) {
             skv = new SqlKV(pb.getSql(), args);
-            result = JdaoCache.getCache(domain, mapperTable.getClass(), Condition.newInstance(skv, mapperId));
+            result = JdaoCache.getCache(domain, pb.getNamespace(), pb.getId(), Condition.newInstance(skv, mapperId));
             if (result != null) {
                 if (Logger.isVaild())
                     Logger.info("[GET CACHE]:" + skv);
@@ -256,7 +279,7 @@ public class MapperHandler extends JdaoMapper {
             if (Logger.isVaild())
                 Logger.info("[SET CACHE]:" + skv);
 
-            JdaoCache.setCache(domain, (Class<Table<?>>) mapperTable.getClass(), Condition.newInstance(skv, mapperId), result);
+            JdaoCache.setCache(domain, pb.getNamespace(), pb.getId(), Condition.newInstance(skv, mapperId), result);
         }
 
         return (List<T>) result;
@@ -268,6 +291,16 @@ public class MapperHandler extends JdaoMapper {
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
         }
+
+        if (pb.getSqlType()!=SqlType.INSERT){
+            throw new JdaoException("Mapper Id: " + mapperId + " is not insert sql type,but "+pb.getSqlType());
+        }
+
+        if (pb.hasSqlNode()) {
+            pb = pb.parseSqlNode(args);
+            args = pb.getParams();
+        }
+
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nINSERT SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
@@ -279,7 +312,19 @@ public class MapperHandler extends JdaoMapper {
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
         }
-        Object[] args = pb.setParameter(param);
+
+        if (pb.getSqlType()!=SqlType.INSERT){
+            throw new JdaoException("Mapper Id: " + mapperId + " is not insert sql type,but "+pb.getSqlType());
+        }
+
+        Object[] args;
+        if (pb.hasSqlNode()) {
+            pb = pb.parseSqlNode(param);
+            args = pb.getParams();
+        } else {
+            args = pb.setParameter(param);
+        }
+
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nINSERT SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
@@ -291,6 +336,16 @@ public class MapperHandler extends JdaoMapper {
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
         }
+
+        if (pb.getSqlType()!=SqlType.UPDATE){
+            throw new JdaoException("Mapper Id: " + mapperId + " is not update sql type,but "+pb.getSqlType());
+        }
+
+        if (pb.hasSqlNode()) {
+            pb = pb.parseSqlNode(args);
+            args = pb.getParams();
+        }
+
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nUPDATE SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
@@ -302,7 +357,19 @@ public class MapperHandler extends JdaoMapper {
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
         }
-        Object[] args = pb.setParameter(param);
+
+        if (pb.getSqlType()!=SqlType.UPDATE){
+            throw new JdaoException("Mapper Id: " + mapperId + " is not update sql type,but "+pb.getSqlType());
+        }
+
+        Object[] args;
+        if (pb.hasSqlNode()) {
+            pb = pb.parseSqlNode(param);
+            args = pb.getParams();
+        } else {
+            args = pb.setParameter(param);
+        }
+
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nUPDATE SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
@@ -314,6 +381,16 @@ public class MapperHandler extends JdaoMapper {
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
         }
+
+        if (pb.getSqlType()!=SqlType.DELETE){
+            throw new JdaoException("Mapper Id: " + mapperId + " is not delete sql type,but "+pb.getSqlType());
+        }
+
+        if (pb.hasSqlNode()) {
+            pb = pb.parseSqlNode(args);
+            args = pb.getParams();
+        }
+
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nDELETE SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
@@ -325,7 +402,19 @@ public class MapperHandler extends JdaoMapper {
         if (pb == null) {
             throw new JdaoException("Mapper Id: " + mapperId + " not found");
         }
-        Object[] args = pb.setParameter(param);
+
+        if (pb.getSqlType()!=SqlType.DELETE){
+            throw new JdaoException("Mapper Id: " + mapperId + " is not delete sql type,but "+pb.getSqlType());
+        }
+
+        Object[] args;
+        if (pb.hasSqlNode()) {
+            pb = pb.parseSqlNode(param);
+            args = pb.getParams();
+        } else {
+            args = pb.setParameter(param);
+        }
+
         if (Logger.isVaild())
             Logger.info("[Mapper Id] " + mapperId + " \nDELETE SQL[" + pb.getSql() + "]ARGS" + (args == null ? "[]" : Arrays.toString(args)));
 
