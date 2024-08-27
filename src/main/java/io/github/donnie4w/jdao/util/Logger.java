@@ -60,10 +60,7 @@ public class Logger {
     private static String convertToString(Object... args) {
         StringBuilder sb = new StringBuilder();
         for (Object arg : args) {
-            sb.append(arg).append(",");
-        }
-        if (sb.length() > 0) {
-            sb.setLength(sb.length() - 1);
+            sb.append(arg);
         }
         return sb.toString();
     }
