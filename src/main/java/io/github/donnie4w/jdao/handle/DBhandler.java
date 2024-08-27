@@ -18,11 +18,13 @@
 
 package io.github.donnie4w.jdao.handle;
 
+import io.github.donnie4w.jdao.base.JStruct;
 import io.github.donnie4w.jdao.base.Params;
 
 import javax.sql.DataSource;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Parameter;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +39,7 @@ public class DBhandler implements DBhandle {
      * Constructs a new DBhandler instance.
      *
      * @param dataSource the DataSource used to obtain connections
-     * @param dbType the type of the database
+     * @param dbType     the type of the database
      */
     public DBhandler(DataSource dataSource, DBType dbType) {
         this.dbType = dbType;
@@ -141,6 +143,40 @@ public class DBhandler implements DBhandle {
             return transaction.executeCall(procedureName, params);
         }
         return jdbcHandle.executeCall(procedureName, params);
+    }
+
+
+    public <T extends JStruct<T>> T newStruct(Class<T> clazz) {
+        try {
+            T t = clazz.getConstructor().newInstance();
+            t.useDBhandle(this);
+            return t;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public <T extends JStruct<T>> T newStruct(Class<T> clazz, String tablename) {
+        try {
+            Constructor<T> constructor = findConstructorWithSingleStringParameter(clazz);
+            if (constructor == null) {
+                throw new NoSuchMethodException("No constructor with a single String parameter found in " + clazz.getName());
+            }
+            T t = constructor.newInstance(tablename);
+            t.useDBhandle(this);
+            return t;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private <T> Constructor<T> findConstructorWithSingleStringParameter(Class<T> clazz) {
+        try {
+            return clazz.getConstructor(String.class);
+        } catch (NoSuchMethodException e) {
+            return null;
+        }
     }
 
 }
