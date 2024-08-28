@@ -19,6 +19,7 @@
 package io.github.donnie4w.jdao.mapper;
 
 import io.github.donnie4w.jdao.handle.JdaoException;
+import io.github.donnie4w.jdao.handle.JdaoRuntimeException;
 import io.github.donnie4w.jdao.util.Logger;
 import io.github.donnie4w.jdao.util.Utils;
 import org.w3c.dom.Document;
@@ -43,7 +44,7 @@ public class MapperParser {
     }
 
     public static ParamBean getParamBean(String namespace, String id) {
-        if (Utils.stringValid(namespace)&&Utils.stringValid(id)) {
+        if (Utils.stringValid(namespace) && Utils.stringValid(id)) {
             return mapper.get(namespace.concat(".").concat(id));
         }
         return null;
@@ -119,12 +120,16 @@ public class MapperParser {
                             String id = element.getAttribute("id");
                             String inputType = element.getAttribute("parameterType");
                             String resultType = element.getAttribute("resultType");
-                            String sql = element.getTextContent().trim();
+                            String sql = getTextContent(element);
                             String sqlType = element.getTagName().toLowerCase();
                             if (sqlType == "select") {
                                 namespaceMapperAdd(namespace, id);
                             }
                             ParamBean paramBean = new ParamBean(namespace, id, sqlType, sql, inputType, resultType);
+                            SqlNode node = sqlNode(element);
+                            if (node != null) {
+                                paramBean.sqlnode = node;
+                            }
                             String mapkey = namespace == null ? id : namespace + "." + id;
                             if (mapper.containsKey(mapkey)) {
                                 String s = String.format("namespace and id are defined repeatedly: [namespace:%s][id:%s]", mapkey, id);
@@ -140,4 +145,119 @@ public class MapperParser {
             throw new JdaoException(e);
         }
     }
+
+    static String getTextContent(Element selectElement) {
+        StringBuilder content = new StringBuilder();
+        NodeList childNodes = selectElement.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            Node node = childNodes.item(i);
+            if (node.getNodeType() == Node.TEXT_NODE) {
+                content.append(node.getTextContent().trim()).append(" ");
+            }
+        }
+        return content.toString().trim();
+    }
+
+
+    static SqlNode sqlNode(Element element) {
+        StringBuilder content = new StringBuilder();
+        NodeList childNodes = element.getChildNodes();
+
+        List<Element> elementList = new ArrayList<>();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            Node node = childNodes.item(i);
+            if (node.getNodeType() == Node.TEXT_NODE) {
+                content.append(node.getTextContent().trim()).append(" ");
+            }
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                elementList.add((Element) node);
+            }
+        }
+
+        if (elementList.size() == 0) {
+            return null;
+        }
+
+        content.toString().trim();
+        SqlNode sqlNode;
+        switch (element.getTagName().toLowerCase()) {
+            case "select":
+                sqlNode = new Select(content.toString().trim());
+                break;
+            case "update":
+                sqlNode = new Update(content.toString().trim());
+                break;
+            case "insert":
+                sqlNode = new Insert(content.toString().trim());
+                break;
+            case "delete":
+                sqlNode = new Delete(content.toString().trim());
+                break;
+            default:
+                if (Logger.isVaild()) {
+                    Logger.severe("Unsupport tag: " + element.getTagName());
+                }
+                throw new JdaoRuntimeException("Unsupport tag: " + element.getTagName());
+        }
+        for (Element elem : elementList) {
+            SqlNode node = getSqlNode(elem);
+            if (node != null) {
+                sqlNode.addSqlNode(node);
+            }
+        }
+        return sqlNode;
+    }
+
+    static SqlNode getSqlNode(Element element) {
+        StringBuilder content = new StringBuilder();
+        NodeList childNodes = element.getChildNodes();
+        List<Element> elementList = new ArrayList<>();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            Node node = childNodes.item(i);
+            if (node.getNodeType() == Node.TEXT_NODE) {
+                content.append(node.getTextContent().trim()).append(" ");
+            }
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                elementList.add((Element) node);
+            }
+        }
+        SqlNode node = null;
+        switch (element.getTagName().toLowerCase()) {
+            case "where":
+                node = new WhereNode(content.toString().trim());
+                break;
+            case "trim":
+                node = new TrimNode(element.getAttribute("prefix"), element.getAttribute("suffix"), element.getAttribute("prefixOverrides"), element.getAttribute("suffixOverrides"));
+                break;
+            case "set":
+                node = new SetNode();
+                break;
+            case "foreach":
+                node = new Foreach(content.toString().trim(), element.getAttribute("collection"), element.getAttribute("item"), element.getAttribute("index"), element.getAttribute("open"), element.getAttribute("close"), element.getAttribute("separator"));
+                break;
+            case "choose":
+                node = new ChooseNode(content.toString().trim(), element.getAttribute("test"));
+                break;
+            case "when":
+                node = new WhenNode(content.toString().trim(), element.getAttribute("test"));
+                break;
+            case "otherwise":
+                node = new OtherWise(content.toString().trim(), element.getAttribute("test"));
+                break;
+            case "if":
+                node = new IfNode(content.toString().trim(), element.getAttribute("test"));
+                break;
+            default:
+                if (Logger.isVaild()) {
+                    Logger.severe("Unsupport tag: " + element.getTagName());
+                }
+                throw new JdaoRuntimeException("Unsupport tag: " + element.getTagName());
+        }
+        for (Element elem : elementList) {
+            node.addSqlNode(getSqlNode(elem));
+        }
+        return node;
+    }
+
+
 }
