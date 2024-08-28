@@ -31,9 +31,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class ParamBean {
-    private final String namespace;
-    private final String id;
-    private final SqlType sqlType;
+    private String namespace;
+    private String id;
+    private SqlType sqlType;
     private String sql;
     private String[] parameterNames;
     private String inputType = "";
@@ -41,9 +41,14 @@ class ParamBean {
     private boolean inputIsClass = false;
     private Class<?> inputClass;
     private Class<?> resultClass;
+    SqlNode sqlnode;
 
     public String getSql() {
         return sql;
+    }
+
+    public boolean hasSqlNode() {
+        return sqlnode != null;
     }
 
     public SqlType getSqlType() {
@@ -64,6 +69,13 @@ class ParamBean {
 
     public String getId() {
         return id;
+    }
+
+    public Object[] getParams() {
+        return null;
+    }
+
+    public ParamBean() {
     }
 
     public ParamBean(String namespace, String id, String sqlType, String sql, String inputType, String outputType) {
@@ -168,7 +180,7 @@ class ParamBean {
                 rlist.add(parameter);
             }
         }
-        return rlist.toArray(new Object[rlist.size()]);
+        return rlist.toArray();
     }
 
     private Object[] setParameterByMap(Object parameter) throws JdaoException {
@@ -179,8 +191,7 @@ class ParamBean {
         } else if (parameter.getClass().isArray()) {
             Object element = Array.get(parameter, 0);
             if (java.util.List.class.isAssignableFrom(element.getClass())) {
-                rlist = (List) element;
-                return rlist.toArray(new Object[rlist.size()]);
+                return ((List) element).toArray();
             } else if (element instanceof Map) {
                 args = (Map) element;
             } else if (Array.getLength(element) == parameterNames.length) {
@@ -200,7 +211,7 @@ class ParamBean {
                 throw new JdaoException(String.format("The key [%s] is not found on the map [namespace:%s][mapper id:%s]", parameterName, namespace, id));
             }
         }
-        return rlist.toArray(new Object[rlist.size()]);
+        return rlist.toArray();
     }
 
     private Object[] setParameterByList(Object parameter) throws JdaoException {
@@ -221,7 +232,7 @@ class ParamBean {
             throw_invalid_parameter(parameter.getClass().getSimpleName());
         }
         if (args.size() == parameterNames.length) {
-            return args.toArray(new Object[args.size()]);
+            return args.toArray();
         } else {
             throw_num_no_match(parameterNames.length, args.size());
         }
@@ -234,9 +245,8 @@ class ParamBean {
             args = (Set) parameter;
         } else if (parameter.getClass().isArray()) {
             Object element = Array.get(parameter, 0);
-            if (java.util.List.class.isAssignableFrom(element.getClass())) {
-                List rlist = (List) element;
-                return rlist.toArray(new Object[rlist.size()]);
+            if (java.util.Set.class.isAssignableFrom(element.getClass())) {
+                return ((Set) element).toArray();
             } else if (element instanceof Set) {
                 args = (Set) element;
             } else if (Array.getLength(element) == parameterNames.length) {
@@ -250,7 +260,7 @@ class ParamBean {
         }
 
         if (args.size() == parameterNames.length) {
-            return args.toArray(new Object[args.size()]);
+            return args.toArray();
         } else {
             throw_num_no_match(parameterNames.length, args.size());
         }
@@ -274,6 +284,7 @@ class ParamBean {
     }
 
     public Object[] setParameter(Object parameter) throws JdaoException {
+
         if (!Utils.stringValid(inputType) || parameter == null) {
             return null;
         }
@@ -331,8 +342,7 @@ class ParamBean {
             }
             Object element = Array.get(parameter, 0);
             if (java.util.List.class.isAssignableFrom(element.getClass())) {
-                rlist = (List) element;
-                return rlist.toArray(new Object[rlist.size()]);
+                return ((List) element).toArray();
             } else if (element.getClass().isArray()) {
                 if (Array.getLength(element) == parameterNames.length) {
                     return convertToArray(element);
@@ -342,7 +352,7 @@ class ParamBean {
             }
             throw_invalid_parameter(parameter.getClass().getSimpleName());
         }
-        return rlist.toArray(new Object[rlist.size()]);
+        return rlist.toArray();
     }
 
     private static final Set<String> dbTypes = new HashSet<>(Arrays.asList(
@@ -387,21 +397,50 @@ class ParamBean {
                 throw new JdaoException(String.format("parameter name [%s] could not be found in class[%s]", parameterName, clazz.getName()));
             }
         }
-        return rlist.toArray(new Object[rlist.size()]);
+        return rlist.toArray();
     }
 
     public static Object[] convertToArray(Object array) throws JdaoException {
         if (array == null || !array.getClass().isArray()) {
             throw new JdaoException("Provided argument is not an array");
         }
-
         int length = Array.getLength(array);
         Object[] objectArray = new Object[length];
-
         for (int i = 0; i < length; i++) {
             objectArray[i] = Array.get(array, i);
         }
-
         return objectArray;
     }
+
+
+    private static ParamContext toParamContext(Object parameter) {
+        return new ParamContext(parameter);
+    }
+
+    private static ParamContext toParamContext(Object... parameter) {
+        return new ParamContext(parameter);
+    }
+
+    ParamBean parseSqlNode(Object... args) {
+        AckContext ac = sqlnode.apply(toParamContext(args));
+        Object[] params;
+        if (ac.params != null) {
+            params = ac.params.toArray();
+        } else {
+            params = new Object[]{};
+        }
+        return new ParamBeanSubset(this.namespace, this.id, this.sqlType, ac.getSql(), this.inputType, this.outputType, this.inputIsClass, this.inputClass, this.resultClass, params);
+    }
+
+    ParamBean parseSqlNode(Object parameter) {
+        AckContext ac = sqlnode.apply(toParamContext(parameter));
+        Object[] params;
+        if (ac.params != null) {
+            params = ac.params.toArray();
+        } else {
+            params = new Object[]{};
+        }
+        return new ParamBeanSubset(this.namespace, this.id, this.sqlType, ac.getSql(), this.inputType, this.outputType, this.inputIsClass, this.inputClass, this.resultClass, params);
+    }
+
 }
