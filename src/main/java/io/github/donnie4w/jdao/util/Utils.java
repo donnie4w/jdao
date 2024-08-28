@@ -1,22 +1,15 @@
-
 package io.github.donnie4w.jdao.util;
 
+import io.github.donnie4w.jdao.mapper.ForeachContext;
+import io.github.donnie4w.jdao.mapper.ParamContext;
+
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class Utils {
-    @Deprecated
-//    public static String delUnderline(String str) {
-//        String[] parts = str.split("_");
-//        if (parts.length == 1) {
-//            return str;
-//        }
-//        return Arrays.stream(parts, 1, parts.length)
-//                .map(Utils::upperFirstChar)
-//                .collect(Collectors.joining("", parts[0], ""));
-//    }
 
     public static String upperFirstChar(String word) {
         if (word == null || word.isEmpty()) {
@@ -63,5 +56,119 @@ public class Utils {
 
     public static boolean stringValid(String str) {
         return str != null && str.trim().length() > 0;
+    }
+
+    public static List<String> extractVariables(String expression) {
+        List<String> variables = new ArrayList<>();
+        StringBuilder currentVariable = new StringBuilder();
+        boolean insideQuotes = false;
+
+        for (int i = 0; i < expression.length(); i++) {
+            char c = expression.charAt(i);
+            if (c == '\'' || c == '\"') {
+                insideQuotes = !insideQuotes;
+            }
+            if (insideQuotes) {
+                continue;
+            }
+            if (Character.isLetterOrDigit(c) || c == '_' || c == '.' || c == '[' || c == ']') {
+                currentVariable.append(c);
+            } else {
+                if (currentVariable.length() > 0) {
+                    String s = currentVariable.toString();
+                    if (!s.equals("null") && !s.matches("^\\d+$")) {
+                        variables.add(s);
+                    }
+                    currentVariable.setLength(0);
+                }
+            }
+        }
+        if (currentVariable.length() > 0) {
+            String s = currentVariable.toString();
+            if (!s.equals("null") && !s.matches("^\\d+$")) {
+                variables.add(s);
+            }
+        }
+        return variables;
+    }
+
+    public static Map<String, Object> toMap(Object arg) {
+        Map<String, Object> map = new HashMap();
+        Field[] field = arg.getClass().getDeclaredFields();
+        for (Field f : field) {
+            try {
+                f.setAccessible(true);
+                map.put(f.getName(), f.get(arg));
+            } catch (Exception e) {
+                if (Logger.isVaild()) {
+                    Logger.severe("Field " + f.getName() + " is not accessible");
+                }
+            }
+        }
+        Method[] methods = arg.getClass().getMethods();
+        for (Method m : methods) {
+            try {
+                if (m.getName().toLowerCase().startsWith("get")) {
+                    String name = m.getName().substring("get".length()).toLowerCase();
+                    if (!map.containsKey(name)) {
+                        map.put(name, m.invoke(arg));
+                    }
+                }
+            } catch (Exception e) {
+            }
+        }
+        return map;
+    }
+
+    public static Object resolveVariableValue(String variable, ParamContext paramContext) {
+        Object value = null;
+        if (variable.contains(".")) {
+            String[] parts = variable.split("\\.");
+            if (parts.length > 1) {
+                String objectName = parts[0];
+                String fieldName = parts[1];
+                value = getObjectFromContext(objectName, paramContext);
+                if (value != null) {
+                    value = ReflectionUtil.getFieldValue(value, fieldName);
+                }
+            }
+        } else if (variable.contains("[")) {
+            int startIndex = variable.indexOf("[");
+            int endIndex = variable.indexOf("]");
+            if (startIndex > 0 && endIndex > startIndex) {
+                String objectName = variable.substring(0, startIndex);
+                String indexStr = variable.substring(startIndex + 1, endIndex);
+
+                int index = 0;
+                if (indexStr.matches("^\\d+$")) {
+                    index = Integer.parseInt(indexStr);
+                } else if (paramContext instanceof ForeachContext) {
+                    index = ((ForeachContext) paramContext).getIndex(indexStr);
+                }
+                value = getObjectFromContext(objectName, paramContext);
+                if (value != null && value.getClass().isArray()) {
+                    int length = Array.getLength(value);
+                    if (index >= 0 && index < length) {
+                        value = Array.get(value, index);
+                    } else {
+                        value = null;
+                    }
+                }
+            }
+        } else {
+            value = getObjectFromContext(variable, paramContext);
+        }
+        return value;
+    }
+
+    private static Object getObjectFromContext(String key, ParamContext paramContext) {
+        Object value = null;
+        if (paramContext instanceof ForeachContext) {
+            value = ((ForeachContext) paramContext).getItem(key);
+        }
+        if (value == null) {
+            value = paramContext.get(key);
+        }
+        return value;
     }
 }
