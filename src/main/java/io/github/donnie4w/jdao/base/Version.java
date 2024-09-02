@@ -19,5 +19,5 @@
 package io.github.donnie4w.jdao.base;
 
 public class Version {
-   public final static String VERTIONCODE = "2.0.1";
+   public final static String VERTIONCODE = "2.1.0";
 }
