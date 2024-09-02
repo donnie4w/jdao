@@ -122,7 +122,7 @@ public class MapperParser {
                             String resultType = element.getAttribute("resultType");
                             String sql = getTextContent(element);
                             String sqlType = element.getTagName().toLowerCase();
-                            if (sqlType == "select") {
+                            if (sqlType.equals("select")) {
                                 namespaceMapperAdd(namespace, id);
                             }
                             ParamBean paramBean = new ParamBean(namespace, id, sqlType, sql, inputType, resultType);
@@ -182,16 +182,10 @@ public class MapperParser {
         SqlNode sqlNode;
         switch (element.getTagName().toLowerCase()) {
             case "select":
-                sqlNode = new Select(content.toString().trim());
-                break;
             case "update":
-                sqlNode = new Update(content.toString().trim());
-                break;
             case "insert":
-                sqlNode = new Insert(content.toString().trim());
-                break;
             case "delete":
-                sqlNode = new Delete(content.toString().trim());
+                sqlNode = new CrudNode(content.toString().trim());
                 break;
             default:
                 if (Logger.isVaild()) {
