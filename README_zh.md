@@ -7,20 +7,30 @@ Jdao是一种创新的持久层解决方案。主要目的在于 减少编程量
 * 即使你从未接触过Jdao，看到Jdao持久层代码，也能马上知道它的代码表达的意思和相关的数据行为。
 * 即使你从未接触过Jdao，也可以在几分钟内，掌握它的用法，这是它的简洁带来的优势。
 
-### [官网](https://tlnet.top/jdao)
+## [使用文档](https://tlnet.top/jdaodoc)
 
-### [使用文档](https://tlnet.top/jdaodoc)
+## [示例程序](https://github.com/donnie4w/jdaodemo)
 
-### [Demo](https://github.com/donnie4w/jdaodemo)
+------
 
 ### 主要特点
 
-1. **生成代码**：运行jdao代码生成工具，创建数据库表的标准化实体类。类似thrift/protobuf。
-2. **高效序列化**：表的标准化实体类实现了高效的序列化与反序列化。比标准库序列化方法高3-12倍，而序列化体积只有其20%左右。
-3. **支持数据读写分离**：jdao支持绑定多数据源，并支持数据源绑定表，类，映射接口等属性。并支持数据读写分离
-4. **支持数据缓存**：jdao支持数据缓存，并支持对缓存数据时效，与数据回收等特性进行细致控制
-5. **广泛兼容性**：jdao理论上支持所有实现JDBC接口的数据库
-6. **高级特性**：支持事务，存储过程，批处理等数据库操作
+1. 轻量：Jdao没有任何依赖，所有特性均为Jdao本身实现，不会由于其他项目的更新或功能修改而受到影响，可以轻松融入各类项目中。
+2. 高效：Jdao功能均自身实现最重要目的就是实现高效性，没有多余的包袱。性能与直接JDBC调用极为接近，ORM封装的性能损耗非常小。
+3. 灵活：Jdao支持丰富的动态SQL构建功能，包括原生动态SQL，映射动态SQL，实体类动态SQL。
+4. 安全：Jdao没有SQL注入的风险。Jdao提供了Mybatis相同的映射功能，并去掉了sql注入的潜在隐患。
+5. 全面：Jdao结合了Hibernate的抽象性和MyBatis的灵活性，提供规范且高效的ORM运用方案。
+
+
+### 主要功能
+
+1. 生成代码：运行jdao代码生成工具，创建数据库表的标准化实体类。类似thrift/protobuf。
+2. 高效序列化：表的标准化实体类实现了高效的序列化与反序列化。比标准库序列化方法高3-12倍，而序列化体积只有其20%左右。
+3. 支持数据读写分离：jdao支持绑定多数据源，并支持数据源绑定表，类，映射接口等属性。并支持数据读写分离
+4. 支持数据缓存：jdao支持数据缓存，并支持对缓存数据时效，与数据回收等特性进行细致控制
+5. 广泛兼容性：jdao理论上支持所有实现JDBC接口的数据库
+6. 高级特性：支持事务，存储过程，批处理等数据库操作
+7. 支持动态SQL：jdao实现了mybatis的动态sql功能，去掉了安全隐患及无实用特性。同时为原生SQL提供了编写动态SQL的特性。
 
 ### 解决Hibernate与MyBatis痛点的新方案
 
@@ -38,8 +48,8 @@ Jdao是一种创新的持久层解决方案。主要目的在于 减少编程量
 
 #### JDAO 的创新解决方案
 
-**融合优势**
 JDAO框架结合了Hibernate的抽象层次和MyBatis的灵活性，旨在提供一个既强大又直观的持久层解决方案。
+
 1. **标准化映射实体类，处理单表CRUD操作**：90%以上的数据库单表操作，可用通过实体类操作完成。这些对单表的增删改查操作，一般不涉及复杂的SQL优化，由实体类封装生成，可以减少错误率，更易于维护。
    利用缓存，读写分离等机制，在优化持久层上，更为高效和方便
    标准化实体类的数据操作格式并非简单的java对象函数的拼接，而是更类似SQL操作的对象化，使得操作上更加易于理解。
@@ -51,207 +61,150 @@ JDAO框架结合了Hibernate的抽象层次和MyBatis的灵活性，旨在提供
    jdao的SQL配置文件参考mybatis配置文件格式，实现自己新的解析器，使得配置参数在类型的容忍度上更高，更灵活。（可以参考文档）
 
 
-### 核心组件
+### Jdao的强大之处
 
-JDAO 框架在接口定义与实现上非常接近标准 JDBC 接口，具有直观的名称定义。
+Jdao通过提供多样化的解决方案来适应不同项目的需求；而同一个项目中，不同业务模块的持久层复杂度同样有区别，需要分而治之。比如项目中有大量简单的单表增删改查操作，如果都使用SQL映射，将出现大量类似的重复SQL与大量的XML配置文件。此时，用Jdao标准化实体类是最好的解决方案。反之，Jdao提供了SqlBuilder，Mapper等方式，来解决更为复杂数据场景。
+dao的强大之处在于，它考虑的项目中出现的各种情况，并分别给出了合适的解决方案，不同场景采用不同的方式解决问题，而不是用同一套方案解决所有问题，用同一套方案解决所有问题将又出现hibernate或mybatis出现的问题。 因此Jdao即适合小型项目，同时也适合大型项目，即适合小团队，也适合大团队。
 
-#### 1. Jdao
+![](https://tlnet.top/statics/tlnet/5165.png)
 
-主要核心入口，提供以下功能：
-- 设置数据源
-- SQL CRUD 函数
+------
 
-#### 2. JdaoCache
+# Jdao 快速使用
 
-缓存入口，支持以下功能：
-- 绑定或移除包、类等属性，开启或移除它们的查询缓存
+#### 安装 jdao依赖包
 
-#### 3. JdaoSlave
-
-读写分离操作入口，支持以下功能：
-- 绑定或移除包、类等属性，开启或移除它们的读写分离操作
-
-#### 4. JdaoMapper
-
-映射 SQL 与接口，支持以下功能：
-- 直接调用 Jdao 接口操作 SQL
-- 通过 XML 文件进行 SQL 映射
-
-## 快速入门
-
-### 1.  安装
-
-```bash
-# 使用 Maven 安装
+```xml
+<!--使用 Maven 安装-->
 <dependency>
 	<groupId>io.github.donnie4w</groupId>
 	<artifactId>jdao</artifactId>
-	<version>2.0.1</version>
-	<scope>compile</scope>
+	<version>2.1.0</version>
 </dependency>
-
 ```
 
-### 2. 配置数据源
+### [Jdao 普通使用示例](https://github.com/donnie4w/jdaodemo)
+
+#### 数据源初始化
 
 ```java
-Jdao.init(dataSource,Jdao.MYSQL);
-// dataSource 为数据源
-// Jdao.MYSQL 为数据库类型
-```
-
-### 3. 生成表实体类
-
-使用 Jdao 代码生成工具生成数据库表的标准化实体类。
-
-### 4. 实体类操作
-
-```java
-//  数据源设置
-Jdao.init(dataSource,Jdao.MYSQL);
-
-// 读取
-Hstest t = new Hstest();
-t.where(Hstest1.ID.GT(1));
-t.limit(20,10);
-List<Hstest> list = t.selects(Hstest.Id);
-for (Hstest hstest : list) {
-	System.out.println(hstest);
+static {
+    Jdao.init(DataSourceFactory.getDataSourceBySqlite(), DBType.SQLITE);  //初始化数据源，第一个参数是DataSource，第二是参数是数据库类型
+    Jdao.setLogger(true);  // 测试环境打开Jdao日志打印，将输出执行的SQL即参数等信息
 }
-// [SELECT SQL] select  id from hstest where id> 1 limit 20,10 
+```
 
+#### 标准化实体类增删改查
+
+```java
+// 查询
+Hstest t = new Hstest();
+t.where(Hstest.ID.GT(1));
+t.limit(20,10);
+Hstest rs = t.select();
+```
+```java
 // 更新
 Hstest t = new Hstest();
 t.SetValue("hello world")
 t.where(Hstest.ID.EQ(1));
 t.update()
-//[UPDATE SQL] update hstest set value="hello world" where id=1
-
+```
+```java
 // 删除
 Hstest t = new Hstest();
 t.where(Hstest.ID.EQ(1));
 t.delete()
-//[DELETE SQL]delete from hstest where id = 1
-
+```
+```java
 //新增
 Hstest hs = new Hstest();
 hs.setRowname("hello world");
 hs.setValue("123456789");
 hs.insert();
-//[INSERT SQL] insert to hstest (rowname,value) values("hello world","123456789")
 ```
 
-### 5. Jdao api
-
-###### CRUD操作
+#### 原生SQL操作
 
 ```java
-//查询，返回单条
-Hstest hs =  Jdao.executeQuery(Hstest.class,"select * from Hstest  order by id desc limit 1");
+//查询
+Hstest hs =  Jdao.executeQuery(Hstest.class,"select * from Hstest order by id desc limit ?",1);
 System.out.println(hs);
-
-//insert
+```
+```java
+//新增
 int  i = Jdao.executeUpdate("insert into hstest2(rowname,value) values(?,?)", "helloWorld", "123456789");
-
-//update
-int  i = Jdao.executeUpdate("update hstest set value=? where id=1", "hello");
-
-//delete
+```
+```java
+//更新
+int  i = Jdao.executeUpdate("update hstest set value=? where id=?", "hello",1);
+```
+```java
+//插入
 int  i = Jdao.executeUpdate("delete from hstest where id = ?", 1);
 ```
 
-### 6. JdaoCache 
-
-###### 配置缓存
+#### 缓存操作
 
 ```java
-//绑定Hstest.class  启用缓存, 缓存时效为 100毫秒
-JdaoCache.bindClass(Hstest.class,new CacheHandle(100));
-Hstest t = new Hstest();
-t.where(Hstest.ID.EQ(3));
-Hstest hs = t.select();
-System.out.println(hs);
-
-//返回缓存数据结果
-Hstest t2 = new Hstest();
-t2.where(Hstest.ID.EQ(3));
-Hstest hs2 = t2.select();
-System.out.println(hs2);
-
+// 绑定Hstest.class  启用缓存
+JdaoCache.bindClass(Hstest.class);
 ```
 
-### 7. JdaoSlave 
-
-###### 读写分离
+#### 读写分离
 
 ```java
+//读写分离绑定
 JdaoSlave.bindClass(Hstest.class, DataSourceFactory.getDataSourceByPostgreSql(), DBType.POSTGRESQL);
-//这里主数据库为mysql，备数据库为postgreSql，Hstest读取数据源为postgreSql
-Hstest t = new Hstest();
-t.where(Hstest.ID.EQ(3));
-Hstest hs = t.select();
-System.out.println(hs);
 ```
 
-### 8. JdaoMapper
-
-使用 XML 映射 SQL
+#### SQL映射操作
 
 ```xml
-<!-- MyBatis 风格的 XML 配置文件 -->
-<mapper namespace="io.github.donnie4w.jdao.action.Mapperface">
-    <select id="selectHstestById" parameterType="int" resultType="io.github.donnie4w.jdao.dao.Hstest">
-        SELECT * FROM hstest  WHERE id &lt; #{id} and age &lt; #{age}
-    </select>
-</mapper>
+ <select id="selectHstestById" resultType="io.github.donnie4w.jdao.dao.Hstest">
+      SELECT * FROM hstest WHERE id &lt; #{id}  and age &lt; #{age}
+ </select>
 ```
-```java
-//数据源
-Jdao.init(DataSourceFactory.getDataSourceBySqlite(), DBType.SQLITE);
-//读取解析xml配置
-JdaoMapper.build("mapper.xml");
-
-JdaoMapper jdaoMapper = JdaoMapper.newInstance();
-Hstest hs = jdaoMapper.selectOne("io.github.donnie4w.jdao.action.Mapperface.selectHstestById", 2, 26);
-
-System.out.println(hs);
-```
-##### mapper映射为java接口
 
 ```java
-public interface Mapperface {
-    List<Hstest> selectAllHstest();
-    List<Hstest> selectHstest(int id, int age);
-    Hstest selectHstestByMap(Map map);
-    List<Hstest> selectHstestByList(int id, int age);
-    Hstest[] selectHstestByList(List list);
-    Hstest selectHstestById(int id, int age);
-    List<Hstest> selectHstestById(Integer id, Integer age);
-    Hstest1 selectHstest1(int limit);
-    List<Hstest1> selectHstest1(long limit);
-    int insertHstest1(Hstest1 hs);
-    int updateHstest1(Hstest1 hs);
-    int deleteHstest1(Hstest1 hs);
-}
+ @Test
+ public void selectOne() throws JdaoException, JdaoClassException, SQLException {
+     Hstest hs = jdaoMapper.selectOne("io.github.donnie4w.jdao.action.Mapperface.selectHstestById", 2, 26);
+     System.out.println(hs);
+ }
+```
 
+##### 动态SQL映射操作
 
-@Test
-public void selectMapperFace() throws JdaoException, JdaoClassException, SQLException {
-    JdaoMapper jdaoMapper = JdaoMapper.newInstance();
-    Mapperface mapper = jdaoMapper.getMapper(Mapperface.class);
+```xml
+ <select id="demo1" resultType="io.github.donnie4w.jdao.dao.Hstest">
+     SELECT * FROM hstest
+     <where>
+         <if test="rowname!= 'hello'">
+             and rowname = #{rowname}
+         </if>
+         <if test="id >0">
+             AND id = #{id}
+         </if>
+     </where>
+ </select>
+```
 
-    List<Hstest> list = mapper.selectHstestById(Integer.valueOf(5), Integer.valueOf(20));
-    for (Hstest hs : list) {
-        System.out.println(hs);
-    }
-
-    Hstest hstest = mapper.selectHstestById(5, 20);
-    System.out.println(hstest);
-}
+```java
+ @Test
+ public void demo1() throws JdaoException, JdaoClassException, SQLException {
+     Hstest hs = new Hstest();
+     hs.setId(31);
+     hs.setRowname("hello");
+     List<Hstest> listSlave = jdaoMapper.selectList("io.github.donnie4w.jdao.action.Dynamic.demo1", hs);
+     for (Hstest hstest : listSlave) {
+         System.out.println(hstest);
+     }
+ }
 ```
 
 ------------
 
-#### Jdao 使用文档界面
+#### [Jdao 使用文档界面](https://tlnet.top/jdaodoc)
 
 ![jdao](https://tlnet.top/statics/tlnet/21691.jpg)
