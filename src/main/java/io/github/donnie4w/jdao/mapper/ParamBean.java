@@ -422,25 +422,34 @@ class ParamBean {
     }
 
     ParamBean parseSqlNode(Object... args) {
-        AckContext ac = sqlnode.apply(toParamContext(args));
-        Object[] params;
-        if (ac.params != null) {
-            params = ac.params.toArray();
-        } else {
-            params = new Object[]{};
+        try {
+            AckContext ac = sqlnode.apply(toParamContext(args));
+            Object[] params;
+            if (ac.params != null) {
+                params = ac.params.toArray();
+            } else {
+                params = new Object[]{};
+            }
+            return new ParamBeanSubset(this.namespace, this.id, this.sqlType, ac.getSql(), this.inputType, this.outputType, this.inputIsClass, this.inputClass, this.resultClass, params);
+        } catch (RuntimeException e) {
+            throw new JdaoRuntimeException("Error parsing SQL statement:" + e.getMessage());
         }
-        return new ParamBeanSubset(this.namespace, this.id, this.sqlType, ac.getSql(), this.inputType, this.outputType, this.inputIsClass, this.inputClass, this.resultClass, params);
     }
 
     ParamBean parseSqlNode(Object parameter) {
-        AckContext ac = sqlnode.apply(toParamContext(parameter));
-        Object[] params;
-        if (ac.params != null) {
-            params = ac.params.toArray();
-        } else {
-            params = new Object[]{};
+        try {
+            AckContext ac = sqlnode.apply(toParamContext(parameter));
+            Object[] params;
+            if (ac.params != null) {
+                params = ac.params.toArray();
+            } else {
+                params = new Object[]{};
+            }
+            return new ParamBeanSubset(this.namespace, this.id, this.sqlType, ac.getSql(), this.inputType, this.outputType, this.inputIsClass, this.inputClass, this.resultClass, params);
+
+        } catch (RuntimeException e) {
+            throw new JdaoRuntimeException("Error parsing SQL statement:" + e.getMessage());
         }
-        return new ParamBeanSubset(this.namespace, this.id, this.sqlType, ac.getSql(), this.inputType, this.outputType, this.inputIsClass, this.inputClass, this.resultClass, params);
     }
 
 }
