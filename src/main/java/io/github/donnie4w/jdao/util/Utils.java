@@ -1,13 +1,35 @@
+/*
+ * Copyright (c) 2024, donnie <donnie4w@gmail.com> All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * github.com/donnie4w/jdao
+ */
+
 package io.github.donnie4w.jdao.util;
 
+import io.github.donnie4w.jdao.handle.JdaoRuntimeException;
 import io.github.donnie4w.jdao.mapper.ForeachContext;
 import io.github.donnie4w.jdao.mapper.ParamContext;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Utils {
 
@@ -58,17 +80,17 @@ public class Utils {
         return str != null && str.trim().length() > 0;
     }
 
-    public static List<String> extractVariables(String expression) {
-        List<String> variables = new ArrayList<>();
+    public static String extractVariables(String expression, ParamContext paramContext) {
         StringBuilder currentVariable = new StringBuilder();
         boolean insideQuotes = false;
-
+        StringBuilder result = new StringBuilder();
         for (int i = 0; i < expression.length(); i++) {
             char c = expression.charAt(i);
             if (c == '\'' || c == '\"') {
                 insideQuotes = !insideQuotes;
             }
             if (insideQuotes) {
+                result.append(c);
                 continue;
             }
             if (Character.isLetterOrDigit(c) || c == '_' || c == '.' || c == '[' || c == ']') {
@@ -76,69 +98,97 @@ public class Utils {
             } else {
                 if (currentVariable.length() > 0) {
                     String s = currentVariable.toString();
-                    if (!s.equals("null") && !s.matches("^\\d+$")) {
-                        variables.add(s);
+                    if (isVariable(s)) {
+                        Object value = Utils.resolveVariableValue(s, paramContext);
+                        if (value != null) {
+                            if (value instanceof String) {
+                                result.append("'" + value + "'");
+                            } else {
+                                result.append(value);
+                            }
+                        } else {
+                            result.append("null");
+                        }
+                    } else {
+                        result.append(currentVariable);
                     }
                     currentVariable.setLength(0);
                 }
+                result.append(c);
             }
         }
         if (currentVariable.length() > 0) {
             String s = currentVariable.toString();
-            if (!s.equals("null") && !s.matches("^\\d+$")) {
-                variables.add(s);
+            if (isVariable(s)) {
+                Object value = Utils.resolveVariableValue(s, paramContext);
+                if (value != null) {
+                    if (value instanceof String) {
+                        result.append("'" + value + "'");
+                    } else {
+                        result.append(value);
+                    }
+                } else {
+                    result.append("null");
+                }
+            } else {
+                result.append(currentVariable);
             }
         }
-        return variables;
+        return result.toString();
+    }
+
+    public static boolean isVariable(String s) {
+        return !s.equals("null") && !s.matches("^\\d+$") && !s.equals("true") && !s.equals("false");
     }
 
     public static Map<String, Object> toMap(Object arg) {
-        Map<String, Object> map = new HashMap();
-        Field[] field = arg.getClass().getDeclaredFields();
-        for (Field f : field) {
-            try {
-                f.setAccessible(true);
-                map.put(f.getName(), f.get(arg));
-            } catch (Exception e) {
-                if (Logger.isVaild()) {
-                    Logger.severe("Field " + f.getName() + " is not accessible");
-                }
-            }
-        }
-        Method[] methods = arg.getClass().getMethods();
-        for (Method m : methods) {
-            try {
-                if (m.getName().toLowerCase().startsWith("get")) {
-                    String name = m.getName().substring("get".length()).toLowerCase();
-                    if (!map.containsKey(name)) {
-                        map.put(name, m.invoke(arg));
+        Map<String, Object> map = new HashMap<>();
+        Field[] fields = arg.getClass().getDeclaredFields();
+        for (Field f : fields) {
+            if (!Modifier.isStatic(f.getModifiers())) {
+                try {
+                    f.setAccessible(true);
+                    Object value = f.get(arg);
+                    if (value != null) {
+                        map.put(f.getName(), value);
+                    }
+                } catch (Exception e) {
+                    if (Logger.isVaild()) {
+                        Logger.severe("Field [", f.getName(), "] is not accessible for Object [", arg.getClass().getName(), "]", e);
                     }
                 }
-            } catch (Exception e) {
             }
         }
+
+        Method[] methods = arg.getClass().getDeclaredMethods();
+        for (Method m : methods) {
+            if (m.getName().toLowerCase().startsWith("get") && !Modifier.isStatic(m.getModifiers())) {
+                try {
+                    String name = m.getName().substring(3).toLowerCase();
+                    if (!map.containsKey(name)) {
+                        Object value = m.invoke(arg);
+                        if (value != null) {
+                            map.put(name, value);
+                        }
+                    }
+                } catch (Exception e) {
+                }
+            }
+        }
+
         return map;
     }
 
     public static Object resolveVariableValue(String variable, ParamContext paramContext) {
         Object value = null;
         if (variable.contains(".")) {
-            String[] parts = variable.split("\\.");
-            if (parts.length > 1) {
-                String objectName = parts[0];
-                String fieldName = parts[1];
-                value = getObjectFromContext(objectName, paramContext);
-                if (value != null) {
-                    value = ReflectionUtil.getFieldValue(value, fieldName);
-                }
-            }
+            return getValueByPath(variable, paramContext);
         } else if (variable.contains("[")) {
             int startIndex = variable.indexOf("[");
             int endIndex = variable.indexOf("]");
             if (startIndex > 0 && endIndex > startIndex) {
                 String objectName = variable.substring(0, startIndex);
                 String indexStr = variable.substring(startIndex + 1, endIndex);
-
                 int index = 0;
                 if (indexStr.matches("^\\d+$")) {
                     index = Integer.parseInt(indexStr);
@@ -161,14 +211,46 @@ public class Utils {
         return value;
     }
 
+
+    public static Object getValueByPath(String path, Object obj) {
+        if (obj == null || path == null || path.isEmpty()) {
+            return null;
+        }
+        String[] parts = path.split("\\.");
+        Object currentObj = obj;
+        String part = null;
+        for (int i = 0; i < parts.length; i++) {
+            if (currentObj == null) {
+                break;
+            }
+            part = parts[i];
+            if (currentObj instanceof ParamContext) {
+                currentObj = getObjectFromContext(part, (ParamContext) currentObj);
+            } else if (currentObj instanceof Map) {
+                Map<?, ?> map = (Map<?, ?>) currentObj;
+                currentObj = map.get(part);
+            } else {
+                currentObj = ReflectionUtil.getFieldValue(currentObj, part);
+            }
+        }
+        if (currentObj == null) {
+            throw new JdaoRuntimeException("Can't find object or value [" + part + "] in " + path);
+        }
+        return currentObj;
+    }
+
     private static Object getObjectFromContext(String key, ParamContext paramContext) {
         Object value = null;
         if (paramContext instanceof ForeachContext) {
             value = ((ForeachContext) paramContext).getItem(key);
+            if (value == null) {
+                value = ((ForeachContext) paramContext).getIndex(key);
+            }
         }
         if (value == null) {
             value = paramContext.get(key);
         }
         return value;
     }
+
 }
